@@ -1,0 +1,27 @@
+{% load static %}
+{% block content %}
+<section id="add-review" class="py-5 bg-dark text-light">
+  <div class="container">
+    <h2 class="text-center mb-4">Add Your Review</h2>
+
+    <div class="card bg-secondary p-4">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="rating" class="form-label">Rating (1–5 Stars):</label>
+          {{ form.rating }}
+        </div>
+
+        <div class="mb-3">
+          <label for="comment" class="form-label">Your Comment:</label>
+          {{ form.comment }}
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-danger">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
