@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-&^+b4d*q$w_*ew%xoa7ip8*5xun9kf-(#bb99sgqwi$o0y&&ce
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -71,6 +71,8 @@ TEMPLATES = [
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 WSGI_APPLICATION = 'gym_project.wsgi.application'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 
 # Database
