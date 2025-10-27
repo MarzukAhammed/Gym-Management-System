@@ -308,53 +308,53 @@
 
    <!-- Team Part End -->
  <!-- info Slide Part Start -->
-    <div class="heading_two text-center">
-        <h2>What Our Members Achieve</h2>
-        <img src="{% static 'images/icon.png' %}" alt="">
-    </div>
-    <section id="info_slide">
-        <div class="overlay">
-            <div class="container">
-                <div class="main_info">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-10">
-                            <div class="swiper mySwiper">
-                                <div class="swiper-wrapper">
-    {% for story in success_stories %}
-    <div class="swiper-slide">
-        <div class="info_main testimonial-card">
-            <div class="info_one">
-                {% if story.photo %}
-                    <img src="{{ story.photo.url }}" alt="{{ story.title }}">
-                {% else %}
-                    <img src="{% static 'images/default-user.png' %}" alt="{{ story.title }}">
-                {% endif %}
-                <div class="side">
-                    <h2>{{ story.title }}</h2>
-                    <div class="info_two">
-                        <p>{{ story.story|truncatewords:10 }}</p>
-                    </div>
-                    <a href="{% url 'success_detail' story.id %}" class="btn btn-outline-primary mt-2">Read More</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="swiper-slide">
-        <p class="text-center text-light">No success stories yet!</p>
-    </div>
-    {% endfor %}
+   <div class="heading_two text-center">
+    <h2>What Our Members Achieve</h2>
+    <img src="{% static 'images/icon.png' %}" alt="">
 </div>
-                                <div class="swiper-pagination"></div>
-                                <div class="swiper-button-prev"></div>
-                                <div class="swiper-button-next"></div>
+<section id="info_slide">
+    <div class="overlay">
+        <div class="container">
+            <div class="main_info">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="swiper mySwiper">
+                            <div class="swiper-wrapper">
+                                {% for story in success_stories %}
+                                <div class="swiper-slide">
+                                    <div class="info_main testimonial-card">
+                                        <div class="info_one">
+                                            {% if story.photo %}
+                                                <img src="{{ story.photo.url }}" alt="{{ story.title }}">
+                                            {% else %}
+                                                <img src="{% static 'images/default-user.png' %}" alt="{{ story.title }}">
+                                            {% endif %}
+                                            <div class="side">
+                                                <h2>{{ story.title }}</h2>
+                                                <div class="info_two">
+                                                    <p>{{ story.story|truncatewords:10 }}</p>
+                                                </div>
+                                                <a href="{% url 'success_detail' story.id %}" class="btn btn-outline-primary mt-2">Read More</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="swiper-slide">
+                                    <p class="text-center text-light">No success stories yet!</p>
+                                </div>
+                                {% endfor %}
                             </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
     <!-- info Slide Part End -->
   <!-- MemberShip Part Start -->
 <section id="membership">

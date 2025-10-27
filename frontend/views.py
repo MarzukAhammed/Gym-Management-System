@@ -1,19 +1,20 @@
-from django.shortcuts import render, redirect
-from .models import Plan, Trainer, Member, Review
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Plan, Trainer, Member, Review, SuccessStory
 from .forms import MemberForm, SignupForm, JoinForm, ContactForm, ReviewForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import SuccessStory
-from django.shortcuts import render, get_object_or_404
- 
-# Home Page
+
+# Home Page (use this as the main index view)
 def home(request):
     plans = Plan.objects.all()
     trainers = Trainer.objects.all()
     reviews = Review.objects.select_related("user").order_by("-created_at")[:5]
     for review in reviews:
         review.member = getattr(review.user, "member", None)
+    success_stories = SuccessStory.objects.order_by("-created_at")[:6]  # Fetch 6 latest stories
+    print(f"Number of success stories fetched: {len(success_stories)}")  # Debug output
+    print(f"Success stories titles: {[s.title for s in success_stories]}")  # Debug titles
     return render(request, "index.html", {"plans": plans, "trainers": trainers, "reviews": reviews, "success_stories": success_stories})
 
 # Signup
@@ -34,7 +35,7 @@ def join_now(request):
     print(f"Request method: {request.method}")
     print(f"POST data: {request.POST}")
     print(f"FILES data: {request.FILES}")
-    print(f"Available plans: {list(Plan.objects.all().values('title'))}")  # Debug plan data
+    print(f"Available plans: {list(Plan.objects.all().values('title'))}")
     
     if request.method == 'POST':
         form = JoinForm(request.POST, request.FILES)
@@ -54,7 +55,7 @@ def join_now(request):
             messages.error(request, "Please correct the errors in the form.")
     else:
         form = JoinForm()
-        form.fields['plan'].queryset = Plan.objects.all()  # Set queryset here
+        form.fields['plan'].queryset = Plan.objects.all()
     
     return render(request, 'join_now.html', {'form': form})
 
@@ -101,11 +102,6 @@ def contact(request):
         form = ContactForm()
     return render(request, "contact.html", {"form": form})
 
-# Index
-def index(request):
-    reviews = Review.objects.select_related("user").order_by("-created_at")
-    return render(request, "index.html", {"reviews": reviews})
-
 # Add Review
 @login_required
 def add_review(request):
@@ -118,15 +114,17 @@ def add_review(request):
                 review.rating = 5
             review.save()
             messages.success(request, "✅ Your review has been added successfully!")
-            return redirect("home")  # Change from "index" to "home"
+            return redirect("home")
     else:
         form = ReviewForm()
     return render(request, "add_review.html", {"form": form})
 
-def index(request):
-    success_stories = SuccessStory.objects.all()
-    return render(request, "index.html", {"success_stories": success_stories})
-
+# Success Stories Page (optional separate view)
 def success_stories(request):
     stories = SuccessStory.objects.all()
     return render(request, "success_stories.html", {"stories": stories})
+
+# Detail View for Success Story
+def success_detail(request, pk):
+    story = get_object_or_404(SuccessStory, pk=pk)
+    return render(request, "success_detail.html", {"story": story})
