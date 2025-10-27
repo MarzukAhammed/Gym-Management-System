@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plans</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2>Our Plans</h2>
+    <div class="row">
+      {% for plan in plans %}
+        <div class="col-md-4 mb-3">
+          <div class="card p-3 shadow">
+            {% if plan.image %}
+              <img src="{{ plan.image.url }}" class="card-img-top" alt="{{ plan.title }}">
+            {% endif %}
+            <div class="card-body">
+              <h4>{{ plan.title }}</h4>
+              <p>{{ plan.description }}</p>
+              <strong>${{ plan.price }}</strong> / {{ plan.duration }}
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No plans available right now.</p>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

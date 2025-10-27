@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gymnasioum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+   {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/venobox.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+</head>
+<body>
+  {% if messages %}
+    <div class="container">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} text-center">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+<div aria-live="polite" aria-atomic="true"
+     class="position-fixed top-0 end-0 p-3"
+     style="z-index: 9999; margin-top: 60px;">
+  <div id="toast-container"></div>
+</div>
+
+
+
+      <!-- Preloader Part Start -->
+      <div class="preloader">
+        <div id="loader-wrapper">
+          <div id="loader"></div>
+          <div class="loader-section section-left"></div>
+          <div class="loader-section section-right"></div>
+      </div>
+      </div>
+  <!-- Preloader Part End -->
+  <!-- Back to top start -->
+  <div class="back_to_top">
+    <a id="button"></a>
+  </div>
+  <!-- Back to top end -->
+   <!-- Navbar Part Start -->
+   <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
+    <div class="container main">
+      <a class="navbar-brand" href="#"><img src="{% static 'images/logo.png' %}" alt=""></a>
+      <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 main_menu">
+<li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'plans' %}">Plans</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'team' %}">Team</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'gallery' %}">Gallery</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'testimonial' %}">Testimonial</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
+
+
+  {% if user.is_authenticated %}
+  <li class="nav-item d-flex align-items-center">
+    {% if user.member and user.member.photo %}
+      <!-- Show profile photo if user has joined -->
+      <a href="{% url 'profile' %}">
+        <img src="{{ user.member.photo.url }}" class="rounded-circle" width="30" height="30" style="object-fit: cover; margin-right: 5px;">
+      </a>
+    {% else %}
+      <!-- Show initials if no photo -->
+      <a href="{% url 'profile' %}">
+        <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" 
+             style="width: 30px; height: 30px; font-size: 14px; margin-right: 5px;">
+          {{ user.username|slice:":2"|upper }}
+        </div>
+      </a>
+    {% endif %}
+
+    <span class="nav-link">{{ user.username }}</span>
+
+    <!-- Logout -->
+    <form method="post" action="{% url 'logout' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-link nav-link text-danger" style="padding:0; margin:0;">
+        Logout
+      </button>
+    </form>
+  </li>
+{% else %}
+  <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+  <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Sign Up</a></li>
+{% endif %}
+</ul>
+      </div>
+    </div>
+  </nav>
+
+   <!-- Navbar Part End -->
+
+   <!-- Banner PArt start -->
+   {% load static %}
+<section id="banner">
+  <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+
+      <!-- Slide 1 -->
+      <div class="carousel-item active">
+        <div class="slide_banner banner1">
+          <div class="overlay"></div>
+          <div class="container h-100 d-flex justify-content-center align-items-center">
+            <div class="banner_text text-center text-white">
+              <h2 class="fw-bold">TIME TO START</h2>
+              <h1 class="display-3 fw-bold text-gradient">Gymnasioum</h1>
+              <p class="mt-3">Achieve your dream body with premium training, expert trainers & modern facilities.</p>
+              <div class="link mt-4">
+                <a href="{% url 'join' %}" class="btn btn-gradient btn-lg me-2">Join Now</a>
+                <a href="{% url 'plans' %}" class="btn btn-outline-light btn-lg">View Plans</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="carousel-item">
+        <div class="slide_banner banner2">
+          <div class="overlay"></div>
+          <div class="container h-100 d-flex justify-content-center align-items-center">
+            <div class="banner_text text-center text-white">
+              <h2 class="fw-bold">TRANSFORM YOURSELF</h2>
+              <h1 class="display-3 fw-bold text-gradient">Push Beyond Limits</h1>
+              <p class="mt-3">Your fitness journey starts today. Build strength, confidence, and discipline with us.</p>
+              <div class="link mt-4">
+                <a href="{% url 'signup' %}" class="btn btn-gradient btn-lg me-2">Get Started</a>
+                <a href="{% url 'team' %}" class="btn btn-outline-light btn-lg">Meet Trainers</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="carousel-item">
+        <div class="slide_banner banner3">
+          <div class="overlay"></div>
+          <div class="container h-100 d-flex justify-content-center align-items-center">
+            <div class="banner_text text-center text-white">
+              <h2 class="fw-bold">BE STRONGER EVERY DAY</h2>
+              <h1 class="display-3 fw-bold text-gradient">Your Gym, Your Family</h1>
+              <p class="mt-3">Join a community that motivates you to stay fit and live healthy.</p>
+              <div class="link mt-4">
+                <a href="{% url 'contact' %}" class="btn btn-gradient btn-lg me-2">Contact Us</a>
+                <a href="{% url 'gallery' %}" class="btn btn-outline-light btn-lg">View Gallery</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+</section>
+
+   <!-- Banner PArt End -->
+   <!-- Video Part Start -->
+   <section id="video">
+     <div class="container">
+       <div class="row">
+         <div class="col-lg-6">
+           <div class="image_part">
+            <img class="img-fluid w-100" src="{% static 'images/video-image.jpg' %}" alt="">
+             <div class="overlay">
+              <a class="venobox" data-vbtype="video" href="https://www.youtube.com/watch?v=eaRQF-7hhmo"><i class="fa-solid fa-play"></i></a>
+             </div>
+           </div>
+         </div>
+         <div class="col-lg-6">
+           <div class="video_text text-center">
+             <h2>About Us</h2>
+             <img src="{% static 'images/icon.png' %}" alt="">
+             <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting.
+            </p>
+            <p>Remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software my name is of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+           </div>
+         </div>
+       </div>
+     </div>
+
+   </section>
+   <!-- Video Part End -->
+   <!-- Gallery Part Start -->
+   <section id="gallery">
+     <div class="overlay">
+       <div class="container">
+         <div class="row">
+           <div class="col-lg-4">
+            <div class="gallery_img">
+             <div class="one">
+              <img class="img-fluid w-100" src="{% static 'images/gallery-1.jpg' %}" alt="">
+              <div class="overlay">
+                <a href="#"><i class="fa-solid fa-magnifying-glass-plus"></i></a>
+              </div>
+             </div>
+              <div class="two">
+                <img class="img-fluid w-100" src="{% static 'images/gallery-4.jpg' %}" alt="">
+              <div class="overlay">
+                <a href="#"><i class="fa-solid fa-magnifying-glass-plus"></i></a>
+              </div>
+              </div>
+            </div>
+           </div>
+           <div class="col-lg-4">
+            <div class="gallery_img">
+             <div class="one">
+              <img class="img-fluid w-100" src="{% static 'images/gallery-2.jpg' %}" alt="">
+              <div class="overlay">
+                <a href="#"><i class="fa-solid fa-magnifying-glass-plus"></i></a>
+              </div>
+             </div>
+              <div class="two">
+                <img class="img-fluid w-100" src="{% static 'images/gallery-5.jpg' %}" alt="">
+              <div class="overlay">
+                <a href="#"><i class="fa-solid fa-magnifying-glass-plus"></i></a>
+              </div>
+              </div>
+            </div>
+           </div>
+           <div class="col-lg-4">
+            <div class="gallery_img">
+             <div class="one">
+              <img class="img-fluid w-100" src="{% static 'images/gallery-3.jpg' %}" alt="">
+              <div class="overlay">
+                <a href="#"><i class="fa-solid fa-magnifying-glass-plus"></i></a>
+              </div>
+             </div>
+              <div class="two">
+                <img class="img-fluid w-100" src="{% static 'images/gallery-6.jpg' %}" alt="">
+              <div class="overlay">
+                <a href="#"><i class="fa-solid fa-magnifying-glass-plus"></i></a>
+              </div>
+              </div>
+            </div>
+           </div>
+         </div>
+       </div>
+     </div>
+
+   </section>
+   <!-- Gallery Part End -->
+   <!-- Team Part Start -->
+   <section id="team">
+  <div class="container">
+    <div class="heading text-center">
+      <h2>Our Team</h2>
+      <img src="{% static 'images/icon.png' %}" alt="">
+    </div>
+    <div class="row">
+      {% for trainer in trainers %}
+      <div class="col-lg-3 col-6 col-sm-6">
+        <div class="team_item">
+          <div class="image">
+            {% if trainer.photo %}
+              <img class="img-fluid w-100" src="{{ trainer.photo.url }}" alt="{{ trainer.name }}">
+            {% else %}
+              <img class="img-fluid w-100" src="{% static 'images/team-1.jpg' %}" alt="{{ trainer.name }}">
+            {% endif %}
+            <div class="overlay">
+              {% if trainer.facebook %}
+                <a href="{{ trainer.facebook }}"><i class="fa-brands fa-facebook-f"></i></a>
+              {% endif %}
+              {% if trainer.twitter %}
+                <a href="{{ trainer.twitter }}"><i class="fa-brands fa-twitter"></i></a>
+              {% endif %}
+              {% if trainer.linkedin %}
+                <a href="{{ trainer.linkedin }}"><i class="fa-brands fa-linkedin-in"></i></a>
+              {% endif %}
+            </div>
+          </div>
+          <div class="text text-center">
+            <h3>{{ trainer.name }}</h3>
+            <h4>{{ trainer.specialty }}</h4>
+            <div class="new_p">
+              <p>{{ trainer.bio }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+   <!-- Team Part End -->
+ <!-- info Slide Part Start -->
+    <div class="heading_two text-center">
+        <h2>What Our Members Achieve</h2>
+        <img src="{% static 'images/icon.png' %}" alt="">
+    </div>
+    <section id="info_slide">
+        <div class="overlay">
+            <div class="container">
+                <div class="main_info">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="swiper mySwiper">
+                                <div class="swiper-wrapper">
+    {% for story in success_stories %}
+    <div class="swiper-slide">
+        <div class="info_main testimonial-card">
+            <div class="info_one">
+                {% if story.photo %}
+                    <img src="{{ story.photo.url }}" alt="{{ story.title }}">
+                {% else %}
+                    <img src="{% static 'images/default-user.png' %}" alt="{{ story.title }}">
+                {% endif %}
+                <div class="side">
+                    <h2>{{ story.title }}</h2>
+                    <div class="info_two">
+                        <p>{{ story.story|truncatewords:10 }}</p>
+                    </div>
+                    <a href="{% url 'success_detail' story.id %}" class="btn btn-outline-primary mt-2">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="swiper-slide">
+        <p class="text-center text-light">No success stories yet!</p>
+    </div>
+    {% endfor %}
+</div>
+                                <div class="swiper-pagination"></div>
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-button-next"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- info Slide Part End -->
+  <!-- MemberShip Part Start -->
+<section id="membership">
+  <div class="heading text-center">
+    <h2>MemberShip</h2>
+    <img src="{% static 'images/icon.png' %}" alt="">
+  </div>
+  <div class="container">
+    <div class="row">
+      {% for plan in plans %}
+      <div class="col-lg-4">
+        <div class="mem_item text-center">
+          <div class="up">
+            <h3>{{ plan.title }}</h3>
+          </div>
+          <div class="img">
+            {% if plan.image %}
+              <img class="img-fluid w-100" src="{{ plan.image.url }}" alt="{{ plan.title }}">
+            {% else %}
+              <img class="img-fluid w-100" src="{% static 'images/membership-1.jpg' %}" alt="{{ plan.title }}">
+            {% endif %}
+            <div class="overlay">
+              <h3>$ {{ plan.price }}<span>/{{ plan.duration }}</span></h3>
+            </div>
+          </div>
+          <div class="center">
+            {{ plan.description|linebreaks }}
+          </div>
+          <div class="down">
+             <a href="{% url 'join' %}">JOIN NOW</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+  <!-- MemberShip Part End -->
+<!-- Counter Part Start -->
+<section id="counter">
+  <div class="overlay">
+    <div class="container">
+     <div class="count">
+      <div class="counter_main text-center">
+        <h2 class="counter">261</h2>
+            <p>Cup Of Tea</p>
+      </div>
+      <div class="counter_main text-center">
+        <h2 class="counter">518</h2>
+            <p>Award Win</p>
+      </div>
+      <div class="counter_main text-center">
+        <h2 class="counter">999</h2>
+            <p>Happy Clients</p>
+      </div>
+      <div class="counter_main text-center">
+        <h2 class="counter">369</h2>
+            <p>Course Complete</p>
+      </div>
+      <div class="counter_main text-center">
+        <h2 class="counter">209</h2>
+            <p>Partner Gym</p>
+      </div>
+     </div>
+    </div>
+  </div>
+
+</section>
+<!-- Counter Part End -->
+
+<!-- Class Part Start -->
+<section id="class">
+  <div class="heading_class text-center">
+    <h2>Our Classes</h2>
+    <img src="{% static 'images/icon.png' %}" alt="">
+  </div>
+  <div class="container">
+    <div class="class_main">
+     <div class="row">
+     <div class="col-lg-11">
+      <div class="class_up d-flex text-center">
+        <button type="button" data-filter=".Monday">Monday</button>
+        <button type="button" data-filter=".Tuesday">Tuesday</button>
+        <button type="button" data-filter=".Wednesday">Wednesday</button>
+        <button type="button" data-filter=".Thursday">Thursday</button>
+        <button type="button" data-filter=".Friday">Friday</button>
+        <button type="button" data-filter=".Saturday">Saturday</button>
+      </div>
+     </div>
+     </div>
+      <div class="class_down">
+        <div class="class_item  mix Monday Wednesday Thursday text-center">
+          <h3>Yoga</h3>
+          <i class="fa-solid fa-child fa-beat"></i>
+          <p>09:00 a.m - 11:00 a.m.</p>
+        </div>
+        <div class="class_item mix Wednesday Monday Saturday Friday text-center">
+          <h3>Skipping</h3>
+          <i class="fa-solid fa-dumbbell"></i>
+          <p>11:00 a.m - 1:00 p.m.</p>
+        </div>
+        <div class="class_item mix Friday Monday Saturday Thursday Tuesday text-center">
+          <h3>cycling</h3>
+          <i class="fa-solid fa-bicycle"></i>
+          <p>1:00 p.m - 3:00 p.m.</p>
+        </div>
+        <div class="class_item mix Saturday Monday Thursday Friday text-center">
+          <h3>Boxing</h3>
+          <i class="fa-solid fa-person-dots-from-line"></i>
+          <p>3:00 p.m - 5:00 p.m.</p>
+        </div>
+        <div class="class_item mix Saturday Monday Friday Tuesday text-center">
+          <h3>Back Relief</h3>
+          <i class="fa-solid fa-person-praying"></i>
+          <p>5:00 p.m - 7:00 p.m.</p>
+        </div>
+        <div class="class_item mix Wednesday  Monday Friday Thursday Saturday text-center">
+          <h3>Chin Up</h3>
+          <i class="fa-solid fa-child"></i>
+          <p>09:00 a.m - 11:00 a.m.</p>
+        </div>
+        <div class="class_item  mix Wednesday Monday Tuesday text-center">
+          <h3>weight Lifting</h3>
+          <i class="fa-solid fa-dumbbell"></i>
+          <p>11:00 a.m - 1:00 p.m.</p>
+        </div>
+        <div class="class_item mix Tuesday Monday Thursday Saturday text-center">
+          <h3>weight losing</h3>
+          <i class="fa-solid fa-bicycle"></i>
+          <p>1:00 p.m - 3:00 p.m.</p>
+        </div>
+        <div class="class_item mix Tuesday Monday Friday  Saturday text-center">
+          <h3>Free Hand</h3>
+          <i class="fa-solid fa-person-dots-from-line"></i>
+          <p>3:00 p.m - 5:00 p.m.</p>
+        </div>
+        <div class="class_item  mix Saturday Monday Tuesday Friday text-center">
+          <h3>Dumbell</h3>
+          <i class="fa-solid fa-person-praying"></i>
+          <p>5:00 p.m - 7:00 p.m.</p>
+        </div>
+     
+      </div>
+    </div>
+    <div class="brand_slider">
+      <img src="{% static 'images/brand-logo.png' %}" alt="">
+      <img src="{% static 'images/brand-logo-2.png' %}" alt="">
+      <img src="{% static 'images/brand-logo-3.png' %}" alt="">
+      <img src="{% static 'images/brand-logo-4.png' %}" alt="">
+      <img src="{% static 'images/brand-logo-5.png' %}" alt="">
+      <img src="{% static 'images/brand-logo-3.png' %}" alt="">
+      <img src="{% static 'images/brand-logo-2.png' %}" alt="">
+    </div>
+  </div>
+</section>
+<!-- Class Part End -->
+
+<!-- Footer part Start -->
+<footer id="footer">
+  <section id="footer">
+    <div class="overlay">
+   <div class="head_img text-center">
+    <img src="{% static 'images/logo.png' %}" alt="">
+   </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-3">
+            <div class="footer_item">
+              <div class="footer_head">
+                <h2>OPENING HOURS</h2>
+              </div>
+              <div class="footer_body d-flex">
+                <div class="one">
+                  <p>Monday		  </p>
+                  <p>Tuesday		</p>
+                  <p>wednesday	</p>
+                  <p>Thursday		</p>
+                  <p>Friday		  </p>
+                  <p>Saturday		</p>
+                  <p>Sunday		 </p>
+                  <p>Holiday		</p>
+                </div>
+                <div class="two">
+                  <p>05:00 A.M. - 11:00 P.M.</p>
+                  <p>05:00 A.M. - 11:00 P.M.</p>
+                  <p>05:00 A.M. - 11:00 P.M.</p>
+                  <p>05:00 A.M. - 11:00 P.M.</p>
+                  <p>05:00 A.M. - 11:00 P.M.</p>
+                  <p>07:00 A.M. - 09:00 P.M.</p>
+                  <p>Closed.</p>
+                  <p>Closed</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="footer_item">
+              <div class="footer_head">
+                <h2>TWITTER FEEDS</h2>
+              </div>
+              <div class="footer_body">
+                <div class="one d-flex ">
+                  <i class="fa-brands fa-twitter"></i>
+                  <h3>We want to introduce you to a new ess theme GYMNASIUM persue new press theme. This the new idea for theme, hope you will like. <span>24 July 2017 </span>
+                  </h3>
+                </div>
+                <div class="one d-flex">
+                  <i class="fa-brands fa-twitter"></i>
+                  <h3>We want to introduce you to a new ess theme GYMNASIUM persue new press theme. This the new idea for theme, hope you will like. <span>24 July 2017 </span>
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="footer_item">
+              <div class="footer_head">
+                <h2>FLICKER PHOTOS</h2>
+              </div>
+              <div class="footer_body">
+               <img src="{% static 'images/footer-img.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-2.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-3.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-4.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-5.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-6.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-7.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-8.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-9.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-10.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-11.jpg' %}" alt="">
+               <img src="{% static 'images/footer-img-12.jpg' %}" alt="">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="footer_item">
+              <div class="footer_head">
+                <h2>TWITTER FEEDS</h2>
+              </div>
+              <div class="footer_body footer_body_two">
+                <div class="one d-flex ">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <h3>1234 Park Street Avenue, NY City         	    America.
+                  </h3>
+                </div>
+                <div class="one d-flex">
+                  <i class="fa-solid fa-phone"></i>
+                  <h3>+88 017 386 96914,
+                  </h3>
+                  <h3> +88 017 419 69683
+                  </h3>
+                </div>
+                <div class="one d-flex">
+                  <i class="fa-solid fa-envelope"></i>
+                  <h3>info@admin.com, admin@info.com
+                  </h3>
+                </div>
+              </div>
+              <div class="footer_icon">
+                <h2>GET SOCIAL</h2>
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-behance"></i></a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="copy text-center">
+        <p>Copyright  &copy; All rights reserved by <span> GYMNASIUM.</span></p>
+      </div>
+    </div>
+
+  </section>
+
+</footer>
+<!-- Footer part End -->
+
+
+
+   <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script src="{% static 'js/jquery.star-rating.js' %}"></script>
+    <script src="{% static 'js/mixitup.min.js' %}"></script>
+    <script src="{% static 'js/awsome.js' %}"></script>
+    <script src="{% static 'js/waypoints.min.js' %}"></script>
+    <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'js/venobox.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+    var swiper = new Swiper('.mySwiper', {
+        autoplay: { delay: 5000, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        loop: true,
+    });
+</script>
+</body>
+</html>

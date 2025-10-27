@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Now</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    .card {
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .form-label {
+      font-weight: 600;
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #ff7e5f, #feb47b);
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 25px;
+      transition: 0.3s;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #feb47b, #ff7e5f);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">✨ Join Our Packages ✨</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" 
+        class="card p-4 shadow-lg" style="max-width:500px; margin:auto;">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="id_plan" class="form-label">Select Plan</label>
+      {{ form.plan }}
+    </div>
+
+    <div class="mb-3">
+      <label for="id_phone" class="form-label">Phone Number</label>
+      {{ form.phone }}
+    </div>
+
+    <div class="mb-3">
+      <label for="id_email" class="form-label">Email</label>
+      {{ form.email }}
+    </div>
+
+    <div class="mb-3">
+      <label for="id_address" class="form-label">Address</label>
+      {{ form.address }}
+    </div>
+
+    <div class="mb-3">
+      <label for="id_photo" class="form-label">Upload Your Photo</label>
+      {{ form.photo }}
+    </div>
+
+    <button type="submit" class="btn btn-gradient w-100 py-2">🚀 Join Now</button>
+  </form>
+
+  <!-- Display form errors -->
+  {% if form.errors %}
+    <div class="alert alert-danger mt-3" role="alert">
+      <ul>
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li>{{ field.label }}: {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

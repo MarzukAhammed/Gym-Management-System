@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card p-4 text-center" style="max-width:400px; margin:auto; border-radius:15px;">
+
+      {% if member %}
+        {% if member.photo %}
+          <img src="{{ member.photo.url }}" class="rounded-circle mb-3" width="100" height="100" alt="Profile Picture">
+        {% else %}
+          <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle mb-3" width="100" height="100" alt="Profile Picture">
+        {% endif %}
+        <h3>{{ member.name }}</h3>
+        <p><strong>Email:</strong> {{ member.email }}</p>
+        <p><strong>Phone:</strong> {{ member.phone }}</p>
+        <p><strong>Plan:</strong> {{ member.plan }}</p>
+        <p><strong>Address:</strong> {{ member.address }}</p>
+        <p><small>Joined on: {{ member.join_date|date:"F j, Y" }}</small></p>
+      {% else %}
+        <h4>Welcome, {{ user.username|capfirst }}</h4>
+        <p>You have not joined a package yet.</p>
+        <a href="{% url 'join' %}" class="btn btn-primary">Join Now</a>
+      {% endif %}
+
+    </div>
+  </div>
+</body>
+</html>

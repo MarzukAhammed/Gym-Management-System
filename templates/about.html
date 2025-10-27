@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <style>
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url("{% static 'images/gym-bg.jpg' %}") no-repeat center center/cover;
+      color: white;
+      padding: 100px 0;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      position: relative;
+    }
+    .section-title::after {
+      content: "";
+      width: 60px;
+      height: 4px;
+      background: #ff7e5f;
+      display: block;
+      margin: 10px auto;
+      border-radius: 5px;
+    }
+    .founder-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .founder-box img {
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      max-width: 280px;
+    }
+    .founder-box .text {
+      max-width: 600px;
+    }
+    .icon-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      transition: 0.3s;
+      text-align: center;
+    }
+    .icon-box:hover {
+      transform: translateY(-8px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1>About Us</h1>
+    <p>Founded by passion, built with dedication</p>
+  </div>
+
+  <!-- Founder Section -->
+  <div class="container my-5">
+    <h2 class="section-title">Meet the Founder</h2>
+    <div class="founder-box">
+      <img src="{% static 'images/founder.jpg' %}" alt="Founder Picture">
+      <div class="text">
+        <h3>Marjuk Ahmed</h3>
+        <h5>Founder & Visionary</h5>
+        <p>
+          Hi, I’m <strong>Marjuk Ahmed</strong>, the founder of this gym.  
+          Born on <strong>May 10, 2000</strong>, I come from a family where 
+          discipline, hard work, and dedication have always been a priority.  
+          Along with my passion for fitness, I am also a <strong>CSE graduate from Bangladesh</strong>, 
+          pursuing advanced studies abroad while working towards my dream of blending 
+          <strong>technology and fitness</strong> together.  
+        </p>
+        <p>
+          I am a <strong>white-hat hacker</strong>, a technology enthusiast, and a dreamer 
+          who believes in self-improvement every single day. My vision is not only 
+          to build a premium gym environment but also to create a space where people 
+          can improve both their <strong>body and mindset</strong>.  
+        </p>
+        <p>
+          I strongly believe in the philosophy:  
+          <em>“Success is built by consistent small steps every day.”</em>  
+          This gym is a reflection of that mindset. With modern facilities, 
+          expert trainers, and a community that motivates each other, 
+          we are building more than just muscles — we are building confidence and discipline for life.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mission & Vision -->
+  <div class="container my-5">
+    <div class="row text-center">
+      <div class="col-md-6 mb-4">
+        <div class="icon-box">
+          <h4>🎯 Mission</h4>
+          <p>To empower individuals by helping them achieve their health and fitness goals, 
+             while building discipline and confidence that extends beyond the gym.</p>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="icon-box">
+          <h4>🚀 Vision</h4>
+          <p>To create a global community where <strong>fitness, technology, and personal growth</strong> 
+             merge together, inspiring people to live their best life.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
