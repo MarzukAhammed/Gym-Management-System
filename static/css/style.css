@@ -1112,3 +1112,95 @@ background: #dddddd;
         .overlay {
             background: rgba(0, 0, 0, 0.5);
         }
+
+/* Premium Slider Styles */
+.premium-section {
+    padding: 40px 0; /* Reduced padding from 60px for compactness */
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.premium-heading {
+    color: #fff;
+    font-size: 2rem; /* Reduced from 2.5rem for balance */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px; /* Reduced from 20px */
+    position: relative;
+}
+
+.premium-heading::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; /* Adjusted for smaller heading */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px; /* Reduced from 50px */
+    height: 2px; /* Reduced from 3px */
+    background: #ff6f61;
+}
+
+.heading-icon {
+    filter: brightness(0) invert(1);
+    margin-top: 10px;
+    width: 40px; /* Constrain icon size if oversized */
+}
+
+.premium-slider {
+    padding: 10px 0; /* Reduced from 20px */
+    max-height: 400px; /* Cap height to match original content size */
+}
+
+.premium-testimonial-card {
+    background: #fff;
+    border-radius: 10px; /* Reduced from 15px for subtlety */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Reduced shadow intensity */
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    max-height: 350px; /* Match original card height */
+}
+
+.premium-testimonial-card:hover {
+    transform: translateY(-3px); /* Reduced from -5px */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); /* Adjusted hover shadow */
+}
+
+.premium-info-one {
+    display: flex;
+    align-items: center;
+    padding: 15px; /* Reduced from 20px */
+}
+
+.premium-image {
+    width: 80px; /* Reduced from 100px */
+    height: 80px; /* Reduced from 100px */
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px; /* Reduced from 20px */
+    border: 3px solid #ff6f61; /* Reduced from 4px */
+}
+
+.premium-side {
+    flex: 1;
+}
+
+.premium-title {
+    color: #333;
+    font-size: 1.2rem; /* Reduced from 1.5rem */
+    font-weight: 600;
+    margin-bottom: 8px; /* Reduced from 10px */
+}
+
+.premium-text {
+    color: #666;
+    font-size: 0.9rem; /* Reduced from 1rem */
+    line-height: 1.4; /* Adjusted for compactness */
+    margin-bottom: 10px; /* Reduced from 15px */
+}

@@ -308,33 +308,33 @@
 
    <!-- Team Part End -->
  <!-- info Slide Part Start -->
-   <div class="heading_two text-center">
-    <h2>What Our Members Achieve</h2>
-    <img src="{% static 'images/icon.png' %}" alt="">
+  <div class="heading_two text-center">
+    <h2 class="premium-heading">What Our Members Achieve</h2>
+    <img src="{% static 'images/icon.png' %}" alt="" class="heading-icon">
 </div>
-<section id="info_slide">
-    <div class="overlay">
+<section id="premium-info-slide" class="premium-section">
+    <div class="premium-overlay">
         <div class="container">
             <div class="main_info">
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
-                        <div class="swiper mySwiper">
+                        <div class="swiper mySwiper premium-slider">
                             <div class="swiper-wrapper">
                                 {% for story in success_stories %}
                                 <div class="swiper-slide">
-                                    <div class="info_main testimonial-card">
-                                        <div class="info_one">
+                                    <div class="premium-testimonial-card">
+                                        <div class="premium-info-one">
                                             {% if story.photo %}
-                                                <img src="{{ story.photo.url }}" alt="{{ story.title }}">
+                                                <img src="{{ story.photo.url }}" alt="{{ story.title }}" class="premium-image">
                                             {% else %}
-                                                <img src="{% static 'images/default-user.png' %}" alt="{{ story.title }}">
+                                                <img src="{% static 'images/default-user.png' %}" alt="{{ story.title }}" class="premium-image">
                                             {% endif %}
-                                            <div class="side">
-                                                <h2>{{ story.title }}</h2>
-                                                <div class="info_two">
-                                                    <p>{{ story.story|truncatewords:10 }}</p>
+                                            <div class="premium-side">
+                                                <h2 class="premium-title">{{ story.title }}</h2>
+                                                <div class="premium-info-two">
+                                                    <p class="premium-text">{{ story.story|truncatewords:10 }}</p>
                                                 </div>
-                                                <a href="{% url 'success_detail' story.id %}" class="btn btn-outline-primary mt-2">Read More</a>
+                                                <a href="{% url 'success_detail' story.id %}" class="btn btn-premium mt-3">Read More</a>
                                             </div>
                                         </div>
                                     </div>
@@ -345,9 +345,9 @@
                                 </div>
                                 {% endfor %}
                             </div>
-                            <div class="swiper-pagination"></div>
-                            <div class="swiper-button-prev"></div>
-                            <div class="swiper-button-next"></div>
+                            <div class="swiper-pagination premium-pagination"></div>
+                            <div class="swiper-button-prev premium-nav"></div>
+                            <div class="swiper-button-next premium-nav"></div>
                         </div>
                     </div>
                 </div>
@@ -653,11 +653,28 @@
     <script src="{% static 'js/script.js' %}"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    var swiper = new Swiper('.mySwiper', {
-        autoplay: { delay: 5000, disableOnInteraction: false },
-        pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+var swiper = new Swiper('.mySwiper', {
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+        },
+        effect: 'fade',
+        fadeEffect: { crossFade: true },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+            dynamicBullets: true
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
         loop: true,
+        speed: 1000,
+        grabCursor: true,
+        slidesPerView: 1, // Ensure one slide at a time
+        spaceBetween: 10, // Minimal spacing
     });
 </script>
 </body>
