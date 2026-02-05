@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Gym{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <style>
+        body {
+            transition: 0.4s ease-in-out;
+        }
+
+        /* Dark Mode */
+        html[data-theme='dark'] {
+            background: #121212;
+            color: #ffffff;
+        }
+        html[data-theme='dark'] .card {
+            background: #1f1f1f;
+            color: #fff;
+        }
+        html[data-theme='dark'] nav {
+            background: #1f1f1f !important;
+        }
+
+        /* Dark mode switch */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            z-index: 9999;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Dark mode toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</div>
+
+    <!-- Navbar (Optional Placeholder) -->
+    {% block navbar %}
+    {% include 'navbar.html' %}
+    {% endblock %}
+
+    <!-- MAIN CONTENT BLOCK -->
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+<script>
+function toggleTheme() {
+    let theme = document.documentElement.getAttribute("data-theme");
+    let newTheme = theme === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    let savedTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

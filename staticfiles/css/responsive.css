@@ -1,0 +1,598 @@
+@media(max-width:575.98px){
+    /* Navbar part start */
+    a.navbar-brand {
+        background: none;
+        padding: 0;
+        margin-left: 0;
+        position: unset;
+    }
+    .navbar-brand img {
+        width: 61%;
+
+    }
+    #navbar .navbar-toggler i{
+        color: #fff;
+    }
+    
+
+
+    /* Navbar part End */
+
+    /* Banner Part Start */
+    .banner_text h2 {
+        font-size: 18px;
+        font-weight: 500;
+        font-family: 'Oswald', sans-serif;
+        color: #fff;
+        position: relative;
+    }
+    .banner_text p {
+        font-size: 10px;
+        padding: 0;
+    }
+    .banner_text h1 {
+        font-size: 30px;
+        font-weight: 600;
+    }
+    .banner_text h2::after {
+        background: #e23e3800;
+    }
+    .banner_text p::after {
+        background: #e23e3800;
+    }
+    .banner_text h2::before {
+        background: #e23e3800;
+    }
+    .banner_text p::before {
+        background: #e23e3800;
+    }
+
+    .banner_text .link::before {
+        background: #e23e3800;
+    }
+    .banner_text .link::after {
+        background: #e23e3800;
+    }
+    /* Banner Part End */
+    /* Video Part Start */
+    .video_text p {
+        font-size: 10px;
+        margin-bottom: 0;
+    }
+    #video {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    /* Video Part ENd */
+    /* Info Part Start */
+    .slick-slide img {
+        width: 50%;
+    }
+    .info_one {
+        flex-direction: column;
+    }
+    .main_info .info_main .info_one .rating{
+        align-items: flex-start !important;
+    }
+    .info_two p {
+        font-size: 8px;
+        font-weight: 100;
+    }
+
+  
+    /* Info Part End */
+    /* membership part start */
+
+    #membership {
+        padding: 22px 0;
+    }
+    .mem_item .down {
+        margin-bottom: 15px;
+    }
+
+    /* membership part End */
+    /* Count part start */
+    .count {
+        gap: 26px;
+    }
+    #counter .overlay {
+        background: rgb(0, 0, 0,0.9);
+        padding: 12px 0;
+    }
+    .count .counter_main h2 {
+        font-size: 18px;
+    }
+    .count .counter_main p {
+        font-size: 12px;
+    }
+    /* Count part end */
+    /* Team Part STart */
+    .team_item .image .overlay a {
+        transform: translateY(18px);
+    }
+    .team_item .image .overlay i {
+        border: 1px solid #fff;
+        height: 20px;
+        width: 20px;
+    }
+    .team_item {
+        margin-bottom: 92px;
+    }
+    .team_item .text .new_p {
+        padding: 0;
+    }
+    .team_item .text .new_p p {
+        font-size: 10px;
+    }
+    .team_item .image .overlay {
+        left: 7px;
+        top: 6px;
+        border: 3px solid #fff;
+    }
+    /* Team Part End */
+    /* Class Part Start */
+    .class_main .class_up {
+        width: 245px;
+        margin-left: 21px;
+    }
+    .class_main .class_up button {
+        padding: 18px 5px;
+        font-size: 10px;
+    }
+    .class_main .class_down .class_item {
+        height: 107px;
+        width: 138px;
+    }
+    .class_main .class_down .class_item h3 {
+        font-size: 14px;
+    }
+    .class_main .class_down .class_item i {
+        font-size: 22px;
+    }
+    .class_main .class_down .class_item p {
+        font-size: 12px;
+    }
+    /* Class Part End */
+    /* Gallery */
+    #gallery .gallery_img .two .overlay {
+        height: 80%;
+        width: 80%;
+        left: 31px;
+        top: 26px;
+    }
+    #gallery .gallery_img .one .overlay {
+        height: 80%;
+        width: 80%;
+        left: 31px;
+        top: 22px;
+    }
+
+    /* Footer Part start */
+    .copy p::after {
+        top: 14px;
+    }
+    /* Footer Part end */
+
+}
+@media (min-width:576px) and (max-width:767.98px){
+    /* Navbar part start */
+    a.navbar-brand {
+        background: none;
+        padding: 0;
+        margin-left: 0;
+        position: unset;
+    }
+    .navbar-brand img {
+        width: 80%;
+
+    }
+    #navbar .navbar-toggler i{
+        color: #fff;
+    }
+    
+
+
+    /* Navbar part End */
+    /* Banner Part Start */
+    .banner_text h2::after {
+        content: "";
+        width: 156px;
+        left: 15px;
+    }
+    .banner_text p::after {
+        height: 179px;
+        top: -74px;
+        left: 14px;
+    }
+    .banner_text .link::before {
+        width: 53px;
+        bottom: 16px;
+        left: 14px;
+    }
+    .banner_text h2::before {
+        width: 118px;
+        right: -16px;
+    }
+    .banner_text p::before {
+        height: 178px;
+        top: -73px;
+        right: -16px;
+    }
+    .banner_text .link::after {
+        width: 55px;
+        bottom: 17px;
+        right: -15px;
+    }
+    .banner_text h2 {
+        font-size: 21px;
+    }
+    .banner_text h1 {
+        font-size: 38px;
+    }
+    /* Banner Part End */
+     /* Video Part Start */
+    .video_text p {
+        font-size: 10px;
+        margin-bottom: 0;
+    }
+    #video {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    /* Video Part ENd */
+    /* Gallery Part Start */
+    #gallery .gallery_img .one .overlay {
+        height: 85%;
+        width: 90%;
+        border: 3px solid #fff;
+        position: absolute;
+        left: 20px;
+        top: 14px;
+        background: rgba(182, 22, 17, 0.5);
+        transform: scale(0);
+        transition: all linear .3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* Gallery Part End */
+    /* Team Part Start */
+    .team_item .image .overlay a {
+        transform: translateY(40px);
+    }
+    /* Team Part End */
+     /* membership part start */
+
+     #membership {
+        padding: 22px 0;
+    }
+    .mem_item .down {
+        margin-bottom: 15px;
+    }
+
+    /* membership part End */
+    /* Count part start */
+    .count {
+        gap: 23px;
+    }
+    .count .counter_main h2 {
+        font-size: 25px;
+    }
+    .count .counter_main p {
+        font-size: 14px;
+    }
+    /* Count part end */
+    
+    /* Class Part Start */
+    .class_main .class_up button {
+        padding: 18px 14px;
+        font-size: 16px;
+    }
+    .class_main .class_up {
+        width: 460px;
+        margin-left: 26px;
+        /* padding: 0px; */
+    }
+    /* Class Part End */
+    /* Brand Slider Part Start */
+    .brand_slider .prev_arrow {
+        transform: translate(0);
+        font-size: 22px;
+        top: 70px;
+    }
+    .brand_slider .next_arrow {
+        right: 20px;
+        top: 70px;
+        font-size: 22px;
+    }
+    /* Brand Slider Part End */
+     /* Footer Part start */
+     .footer_item .part_one p {
+        font-size: 12px;
+        
+    }
+    .footer_item .part_three {
+        margin-left: 18px;
+        position: relative;
+        margin-top: 40px;
+    }
+    .footer_item .head h4 {
+        font-size: 12px;
+        position: absolute;
+        left: 18px;
+        top: 450px;
+    }
+    .footer_item .part_four {
+        margin-left: 0;
+        margin-top: 40px;
+    }
+    .footer_item .head h5 {
+        font-size: 12px;
+        position: absolute;
+        top: 590px;
+        left: 0;
+    }
+    .footer_item .head h3 {
+        font-size: 12px;
+        position: absolute;
+        left: 0;
+        top: 222px;
+    }
+    .footer_item .head h2 {
+        font-size: 12px;
+    }
+    #footer .overlay .end p::after {
+        bottom: 27px;
+    }
+    /* Footer Part end */
+    
+}
+@media (min-width:768px) and (max-width:991.98px){
+     /* Navbar part start */
+     a.navbar-brand {
+        padding: 10px;
+        margin-left: 35px;
+        margin-top: 20px;
+        position: unset;
+    }
+    .navbar-brand img {
+        width: 100%;
+
+    }
+    #navbar .navbar-toggler i{
+        color: #fff;
+    }
+    
+
+
+    /* Navbar part End */
+    /* Banner Part Start */
+    .banner_text h2::before {
+        width: 141px;
+    }
+    .banner_text h2::after {
+        width: 190px;
+    }
+    .banner_text .link::after {
+        width: 69px;
+    }
+    .banner_text .link::before {
+        width: 95px;
+    }
+    /* Banner Part End */
+    /* membership part start */
+
+    #membership {
+        padding: 22px 0;
+    }
+    .mem_item .down {
+        margin-bottom: 15px;
+    }
+
+    /* membership part End */
+      /* Count Part Start */
+      .count {
+        gap: 70px;
+    }
+    .count .counter_main h2 {
+        font-size: 25px;
+    }
+    .count .counter_main p {
+        font-size: 14px;
+    }
+    /* Count part end */
+    /* Gallery Part Start */
+    #gallery .gallery_img .one .overlay {
+        left: 36px;
+        top: 25px;
+    }
+    #gallery .gallery_img .two .overlay {
+        left: 37px;
+        top: 31px;
+    }
+    /* Gallery Part end */
+      /* Class Part Start */
+      
+      .class_main .class_up{
+        width: 0px;
+    }
+    .class_main .class_down .class_item {
+        height: 150px;
+        width: 142px;
+    }
+    .class_main .class_down .class_item h3 {
+        font-size: 12px;
+    }
+    .class_main .class_down .class_item p {
+        font-size: 10px;
+    }
+    .class_main .class_up {
+        margin-left: 23px;
+    }
+    .class_main .class_up button {
+        padding: 16px 28px;
+    }
+    
+    /* Class Part End */
+      /* Brand Slider Part Start */
+      .brand_slider .prev_arrow {
+        transform: translate(0);
+        font-size: 22px;
+        top: 78px;
+    }
+    .brand_slider .next_arrow {
+        right: 20px;
+        top: 78px;
+        font-size: 22px;
+    }
+    /* Brand Slider Part End */
+     /* Footer Part start */
+     .copy p::after {
+        top: 14px;
+    }
+    .copy p {
+        color: #dddddd;
+        padding-top: 30px;
+    }
+/* Footer Part end */
+    
+}
+
+@media (min-width:992px) and (max-width:1199.98px){
+/* Banner Part Start */
+.banner_text h2::before {
+	width: 111px;
+	top: 17px;
+	right: -37px;
+}
+.banner_text h2::after {
+	width: 147px;
+	left: -9px;
+}
+.banner_text p::before {
+	height: 190px;
+	top: -65px;
+	right: -37px;
+}
+.banner_text p::after {
+	height: 196px;
+	top: -72px;
+	left: -10px;
+}
+.banner_text .link::before {
+	width: 40px;
+	bottom: 16px;
+	left: -9px;
+}
+.banner_text .link::after {
+	width: 40px;
+	bottom: 16px;
+	right: -36px;
+}
+.banner_text h2 {
+	font-size: 22px;
+}
+.banner_text h1 {
+	font-size: 36px;
+}
+
+/* Banner Part End */
+/* mem part start */
+.mem_item .up h3 {
+	font-size: 13px;
+}
+/* mem part end */
+/* count part start */
+.count {
+	gap: 130px;
+}
+/* Class Part start */
+.class_main .class_up {
+	width: 934px;
+	margin-left: 0px;
+}
+/* Class Part end */
+/* Brand Slider Part Start */
+.brand_slider .prev_arrow {
+    font-size: 22px;
+    top: 90px;
+}
+.brand_slider .next_arrow {
+    right: 20px;
+    top: 90px;
+    font-size: 22px;
+}
+/* Brand Slider Part End */
+/* Footer part start */
+.footer_item .footer_body .one p {
+	font-size: 10px;
+}
+.footer_item .footer_body .two p {
+	font-size: 10px;
+}
+.footer_item .footer_body .one h3 {
+	font-size: 10px;
+}
+.footer_item .footer_icon i {
+	height: 26px;
+	width: 26px;
+	line-height: 26px;
+}
+.copy p::after {
+	top: 10px;
+}
+.footer_item .footer_body .one h3 {
+	padding-bottom: 0;
+}
+/* Footer part end */
+/* count part end */
+}
+
+@media (min-width:1200px) and (max-width:1399.98px){
+    .banner_text h2::before {
+        width: 93px;
+        top: 39px;
+        right: 0px;
+    }
+    .banner_text h2::after {
+        width: 136px;
+        top: 38px;
+        left: 0px;
+    }
+    .banner_text p::before {
+        height: 190px;
+        top: -85px;
+        right: 0px;
+    }
+    .banner_text p::after {
+        height: 190px;
+        top: -85px;
+        left: 0px;
+    }
+    .banner_text .link::before {
+        width: 65px;
+        bottom: 16px;
+        left: 2px;
+    }
+    .banner_text .link::after {
+        width: 40px;
+        bottom: 16px;
+        right: 1px;
+    }
+    /* Class Part start */
+.class_main .class_up {
+	width: 928px;
+	margin-left: 91px;
+}
+.class_main .class_up button {
+	padding: 18px 51px;
+}
+/* Class Part end */
+}
+
+@media (min-width:1400px) and (max-width:1600px){
+
+}

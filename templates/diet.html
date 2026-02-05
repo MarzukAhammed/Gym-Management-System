@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diet Plans</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        body {
+            background: #0f172a;
+            color: #e5e7eb;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .diet-card {
+            background: linear-gradient(145deg, #1e293b, #020617);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            transition: transform 0.3s;
+        }
+
+        .diet-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .diet-title {
+            color: #38bdf8;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .meal {
+            background: #020617;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .meal h6 {
+            color: #22c55e;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .calories {
+            background: #38bdf8;
+            color: #020617;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .empty-text {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <h2 class="text-center mb-5">🥗 Premium Diet Plans</h2>
+
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="diet-card h-100">
+                <div class="diet-title">{{ plan.title }}</div>
+
+                <div class="meal mt-3">
+                    <h6>🍳 Breakfast</h6>
+                    <p>{{ plan.breakfast }}</p>
+                </div>
+
+                <div class="meal">
+                    <h6>🍛 Lunch</h6>
+                    <p>{{ plan.lunch }}</p>
+                </div>
+
+                <div class="meal">
+                    <h6>🍽 Dinner</h6>
+                    <p>{{ plan.dinner }}</p>
+                </div>
+
+                <div class="calories">
+                    🔥 {{ plan.calories }} kcal
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-text">No diet plans added yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>

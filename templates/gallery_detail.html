@@ -1,0 +1,81 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ member.name }}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+        .profile-img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .info-box {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .info-box h3 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .info-item {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .back-btn {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5 mb-5">
+    <div class="row">
+        
+        <!-- Image Section -->
+        <div class="col-md-6 mb-4">
+            <img src="{{ member.image.url }}" class="profile-img" alt="{{ member.name }}">
+        </div>
+
+        <!-- Info Section -->
+        <div class="col-md-6">
+            <div class="info-box">
+                <h3>{{ member.name }}</h3>
+
+                {% if member.role %}
+                <p class="info-item"><strong>Role:</strong> {{ member.role }}</p>
+                {% endif %}
+
+                {% if member.joined_year %}
+                <p class="info-item"><strong>Joined Year:</strong> {{ member.joined_year }}</p>
+                {% endif %}
+
+                {% if member.specialty %}
+                <p class="info-item"><strong>Specialty:</strong> {{ member.specialty }}</p>
+                {% endif %}
+
+                {% if member.program %}
+                <p class="info-item"><strong>Program:</strong> {{ member.program }}</p>
+                {% endif %}
+
+                {% if member.experience %}
+                <p class="info-item"><strong>Experience:</strong> {{ member.experience }}</p>
+                {% endif %}
+
+                <a href="{% url 'gallery' %}" class="btn btn-primary back-btn">⬅ Back to Gallery</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

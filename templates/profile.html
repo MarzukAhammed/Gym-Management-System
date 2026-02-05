@@ -1,0 +1,133 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Profile</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        body { background:#0d0d0d; color:#fff; }
+
+        .profile-card {
+            background: linear-gradient(145deg, #1c1c1c, #111);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            max-width: 750px;
+            margin: auto;
+        }
+
+        .profile-photo img {
+            width: 150px;
+            height:150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ff9600;
+        }
+
+        .info-box {
+            background:#171717;
+            padding:15px;
+            border-radius:10px;
+            margin-bottom:15px;
+            border-left:4px solid #ff9600;
+        }
+
+        .btn-edit {
+            background:#ff9600;
+            color:white;
+            border-radius: 25px;
+            padding:12px 25px;
+            font-weight:bold;
+            text-decoration:none;
+        }
+
+        .btn-edit:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="profile-card text-center">
+
+        <!-- Profile Image -->
+        <div class="profile-photo mb-3">
+            {% if profile.photo %}
+                <img src="{{ profile.photo.url }}">
+            {% else %}
+                <img src="{% static 'images/default-user.png' %}">
+            {% endif %}
+        </div>
+
+        <!-- Name -->
+        <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+        <p class="text-warning">My Plan</p>
+
+        <div class="mt-4 text-start">
+
+            <div class="info-box">
+                <strong>Email:</strong> {{ profile.email }}
+            </div>
+
+            <div class="info-box">
+                <strong>Phone:</strong> {{ profile.phone }}
+            </div>
+
+            <div class="info-box">
+                <strong>Address:</strong> {{ profile.address }}
+            </div>
+
+            {% if profile.bio %}
+            <div class="info-box">
+                <strong>Bio:</strong> {{ profile.bio }}
+            </div>
+            {% endif %}
+
+            <div class="info-box">
+                <strong>Age:</strong> {{ profile.age|default:"Not set" }}
+            </div>
+
+            <div class="info-box">
+                <strong>Gender:</strong> {{ profile.gender|default:"Not set" }}
+            </div>
+
+            <div class="info-box">
+                <strong>Date of Birth:</strong> {{ profile.date_of_birth|default:"Not set" }}
+            </div>
+
+            <div class="info-box">
+                <strong>Facebook:</strong> {{ profile.facebook|default:"None" }}
+            </div>
+
+            <div class="info-box">
+                <strong>Instagram:</strong> {{ profile.instagram|default:"None" }}
+            </div>
+
+        </div>
+
+        <!-- Edit Button -->
+        <a href="{% url 'edit_profile' %}" class="btn-edit mt-4">Edit Profile</a>
+
+    </div>
+</div>
+<a href="{% url 'home' %}" 
+   style="
+     position: fixed;
+     bottom: 20px;
+     right: 20px;
+     background:#007bff;
+     padding:12px 18px;
+     border-radius: 50px;
+     color:white;
+     font-weight:bold;
+     text-decoration:none;
+     font-size:16px;
+     z-index: 9999;
+     box-shadow:0 4px 8px rgba(0,0,0,0.3);
+   ">
+   🏠 Home
+</a>
+</body>
+</html>

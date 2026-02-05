@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ story.title }}</title>
+
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+<style>
+body {
+    background: #f6f7fb;
+    font-family: 'Georgia', serif;
+}
+
+.story-hero {
+    height: 60vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)),
+        url("{% if story.photo %}{{ story.photo.url }}{% endif %}") center/cover fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+}
+.story-hero h1 {
+    font-size: 3.2rem;
+    font-weight: 700;
+}
+
+.story-content {
+    background: white;
+    margin-top: -80px;
+    padding: 60px;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+.story-content p {
+    font-size: 1.15rem;
+    line-height: 1.9;
+}
+
+.back-btn {
+    background: black;
+    color: white;
+    padding: 12px 26px;
+    border-radius: 40px;
+    text-decoration: none;
+}
+.back-btn:hover {
+    background: gold;
+    color: black;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="story-hero">
+    <h1>{{ story.title }}</h1>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+    <div class="story-content">
+        <p>{{ story.story }}</p>
+        <a href="{% url 'home' %}" class="back-btn mt-4 d-inline-block">⬅ Back Home</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% load static %}
+{% block content %}
+<section id="add-review" class="py-5 bg-dark text-light">
+  <div class="container">
+    <h2 class="text-center mb-4">Add Your Review</h2>
+
+    <div class="card bg-secondary p-4">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="rating" class="form-label">Rating (1–5 Stars):</label>
+          {{ form.rating }}
+        </div>
+
+        <div class="mb-3">
+          <label for="comment" class="form-label">Your Comment:</label>
+          {{ form.comment }}
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-danger">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+<a href="{% url 'home' %}" 
+   style="
+     position: fixed;
+     bottom: 20px;
+     right: 20px;
+     background:#007bff;
+     padding:12px 18px;
+     border-radius: 50px;
+     color:white;
+     font-weight:bold;
+     text-decoration:none;
+     font-size:16px;
+     z-index: 9999;
+     box-shadow:0 4px 8px rgba(0,0,0,0.3);
+   ">
+   🏠 Home
+</a>
+{% endblock %}

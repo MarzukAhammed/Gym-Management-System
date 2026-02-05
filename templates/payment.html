@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Payment</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">💳 Manual Payment</h2>
+
+    <div class="card p-4 shadow">
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Amount -->
+            <div class="mb-3">
+                <label class="form-label">Enter Amount (BDT)</label>
+                <input type="number" name="amount" class="form-control" placeholder="Enter any amount" required>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="mb-3">
+                <label class="form-label">Payment Method</label>
+                <select name="method" class="form-control" required>
+                    <option value="">-- Select --</option>
+                    <option value="bkash">bKash</option>
+                    <option value="nagad">Nagad</option>
+                </select>
+            </div>
+
+            <!-- Transaction ID -->
+            <div class="mb-3">
+                <label class="form-label">Transaction ID</label>
+                <input type="text" name="trx_id" class="form-control" placeholder="Enter TrxID" required>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+                Submit Payment
+            </button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

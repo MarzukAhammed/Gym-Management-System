@@ -1,0 +1,100 @@
+{% load static %}
+
+{% block content %}
+
+<style>
+.profile-container {
+    max-width: 900px;
+    margin: 50px auto;
+    background: #111;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(0,255,150,.4);
+    color: #fff;
+}
+.custom-input {
+    background:#1c1c1c;border:1px solid #00ff99;border-radius:8px;
+    color:white;padding:10px;font-size:15px;width:100%;margin-bottom:15px;
+}
+.custom-select {
+    background:#1c1c1c;border:1px solid #00ff99;border-radius:8px;
+    color:white;padding:10px;font-size:15px;width:100%;margin-bottom:15px;
+}
+.custom-btn {
+    width:100%;background:#00ff99;color:#000;padding:12px;
+    border-radius:8px;font-size:18px;font-weight:bold;border:none;
+    transition:.3s;
+}
+.custom-btn:hover { background:#0aff6d; transform:scale(1.03); }
+label { font-weight:600; margin-bottom:5px; }
+</style>
+
+<div class="profile-container">
+
+    <h2 class="text-center mb-4">✨ Edit Full Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- FULL NAME -->
+        <label>Full Name</label>
+        <input type="text" name="name" value="{{ profile.name }}" class="custom-input">
+
+        <!-- EMAIL -->
+        <label>Email</label>
+        <input type="email" name="email" value="{{ request.user.email }}" class="custom-input">
+
+        <div class="row">
+            <div class="col-md-6">
+                <label>Phone</label>
+                <input type="text" name="phone" value="{{ profile.phone }}" class="custom-input">
+            </div>
+
+            <div class="col-md-6">
+                <label>Date of Birth</label>
+                <input type="date" name="date_of_birth" value="{{ profile.date_of_birth }}" class="custom-input">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label>Age</label>
+                <input type="number" name="age" value="{{ profile.age }}" class="custom-input">
+            </div>
+
+            <div class="col-md-6">
+                <label>Gender</label>
+                <select name="gender" class="custom-select">
+                    <option value="">Select</option>
+                    <option value="Male" {% if profile.gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if profile.gender == "Female" %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if profile.gender == "Other" %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+        </div>
+
+        <label>Plan</label>
+        <input type="text" name="plan" value="{{ profile.plan }}" class="custom-input">
+
+        <label>Facebook</label>
+        <input type="text" name="facebook" value="{{ profile.facebook }}" class="custom-input">
+
+        <label>Instagram</label>
+        <input type="text" name="instagram" value="{{ profile.instagram }}" class="custom-input">
+
+        <label>Address</label>
+        <textarea name="address" class="custom-input">{{ profile.address }}</textarea>
+
+        <label>Bio</label>
+        <textarea name="bio" class="custom-input">{{ profile.bio }}</textarea>
+
+        <label>Profile Photo</label>
+        <input type="file" name="photo" class="custom-input">
+
+        <button type="submit" class="custom-btn">Save Changes</button>
+
+    </form>
+
+</div>
+
+{% endblock %}
