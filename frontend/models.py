@@ -98,7 +98,7 @@ class Profile(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
-    age = models.IntegerField(blank=True, null=True)
+    age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=20, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     facebook = models.CharField(max_length=255, blank=True, null=True)
@@ -141,7 +141,11 @@ class Payment(models.Model):
             ('nagad', 'Nagad')
         ]
     )
-    transaction_id = models.CharField(max_length=100)
+    transaction_id = models.CharField(
+    max_length=100,
+    blank=True,
+    default=''
+)
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
