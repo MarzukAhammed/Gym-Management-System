@@ -20,7 +20,7 @@ class Plan(models.Model):
     description = models.TextField(blank=True)    # can contain multiple lines; linebreaks will render <p> tags
     image = models.ImageField(upload_to='plans/', blank=True, null=True)
 
-    def __str__(self):
+    def BDT (self):
         return self.title
 
 

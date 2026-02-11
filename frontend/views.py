@@ -25,12 +25,14 @@ def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "You are registered successfully! Please login.")
-            return redirect("login")
+            form.save()  # only creates the User
+            return render(request, "signup_success.html")
+        else:
+           return render(request, "signup.html", {"form": form})
     else:
         form = SignupForm()
     return render(request, "signup.html", {"form": form})
+
 
 # Join Now
 def join_now(request):
