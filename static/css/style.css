@@ -1292,3 +1292,59 @@ background: #dddddd;
     line-height: 1.4; /* Adjusted for compactness */
     margin-bottom: 10px; /* Reduced from 15px */
 }
+
+
+#ai-chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.ai-chat-header {
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    border-radius: 15px 15px 0 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+}
+
+#ai-chat-body {
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+    background: #f9f9f9;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+#ai-user-input {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* Class to minimize chat */
+.ai-chat-closed #ai-chat-body {
+    display: none;
+}

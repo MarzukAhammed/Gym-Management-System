@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from frontend import views
+from frontend import views  # This is the correct one!
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -26,6 +26,10 @@ urlpatterns = [
     path("diet/", views.diet, name="diet"),
     path("payment/", views.payment, name="payment"),
     path("payment/success/", views.payment_success, name="payment_success"),
+    path('', views.home, name='home'),
+    path('workout/', views.workout_page, name='workout'),
+    path('video_feed/', views.video_feed, name='video_feed'),
+    path('chat-with-ai/', views.chat_with_ai, name='chat_with_ai'),
 ]
 
 if settings.DEBUG:

@@ -13,20 +13,20 @@
     color: #fff;
 }
 .custom-input {
-    background:#1c1c1c;border:1px solid #00ff99;border-radius:8px;
-    color:white;padding:10px;font-size:15px;width:100%;margin-bottom:15px;
+    background:#1c1c1c; border:1px solid #00ff99; border-radius:8px;
+    color:white; padding:10px; font-size:15px; width:100%; margin-bottom:15px;
 }
 .custom-select {
-    background:#1c1c1c;border:1px solid #00ff99;border-radius:8px;
-    color:white;padding:10px;font-size:15px;width:100%;margin-bottom:15px;
+    background:#1c1c1c; border:1px solid #00ff99; border-radius:8px;
+    color:white; padding:10px; font-size:15px; width:100%; margin-bottom:15px;
 }
 .custom-btn {
-    width:100%;background:#00ff99;color:#000;padding:12px;
-    border-radius:8px;font-size:18px;font-weight:bold;border:none;
+    width:100%; background:#00ff99; color:#000; padding:12px;
+    border-radius:8px; font-size:18px; font-weight:bold; border:none;
     transition:.3s;
 }
 .custom-btn:hover { background:#0aff6d; transform:scale(1.03); }
-label { font-weight:600; margin-bottom:5px; }
+label { font-weight:600; margin-bottom:5px; color: #00ff99; } /* Subtle color for labels */
 </style>
 
 <div class="profile-container">
@@ -36,11 +36,9 @@ label { font-weight:600; margin-bottom:5px; }
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- FULL NAME -->
         <label>Full Name</label>
         <input type="text" name="name" value="{{ profile.name }}" class="custom-input">
 
-        <!-- EMAIL -->
         <label>Email</label>
         <input type="email" name="email" value="{{ request.user.email }}" class="custom-input">
 
@@ -58,6 +56,18 @@ label { font-weight:600; margin-bottom:5px; }
 
         <div class="row">
             <div class="col-md-6">
+                <label>Weight (kg)</label>
+                <input type="number" step="0.1" name="weight" value="{{ profile.weight }}" class="custom-input" placeholder="e.g. 75.5">
+            </div>
+
+            <div class="col-md-6">
+                <label>Height (cm)</label>
+                <input type="number" step="0.1" name="height" value="{{ profile.height }}" class="custom-input" placeholder="e.g. 175.0">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
                 <label>Age</label>
                 <input type="number" name="age" value="{{ profile.age }}" class="custom-input">
             </div>
@@ -66,15 +76,15 @@ label { font-weight:600; margin-bottom:5px; }
                 <label>Gender</label>
                 <select name="gender" class="custom-select">
                     <option value="">Select</option>
-                    <option value="Male" {% if profile.gender == "Male" %}selected{% endif %}>Male</option>
-                    <option value="Female" {% if profile.gender == "Female" %}selected{% endif %}>Female</option>
-                    <option value="Other" {% if profile.gender == "Other" %}selected{% endif %}>Other</option>
+                    <option value="male" {% if profile.gender|lower == "male" %}selected{% endif %}>Male</option>
+                    <option value="female" {% if profile.gender|lower == "female" %}selected{% endif %}>Female</option>
+                    <option value="other" {% if profile.gender|lower == "other" %}selected{% endif %}>Other</option>
                 </select>
             </div>
         </div>
 
-        <label>Plan</label>
-        <input type="text" name="plan" value="{{ profile.plan }}" class="custom-input">
+        <label>Fitness Goal / Plan</label>
+        <input type="text" name="fitness_goal" value="{{ profile.fitness_goal }}" class="custom-input">
 
         <label>Facebook</label>
         <input type="text" name="facebook" value="{{ profile.facebook }}" class="custom-input">

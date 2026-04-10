@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>AI Workout - Gymnasioum</title>
+</head>
+<body style="background: #111; color: white;">
+
+    <div class="container text-center" style="margin-top: 100px;">
+        <h2 class="fw-bold mb-4" style="color: #ff4500;">AI PUSH-UP COUNTER</h2>
+        <div class="camera-frame" style="border: 10px solid #222; border-radius: 20px; overflow: hidden; display: inline-block; background: #000;">
+            <img src="{% url 'video_feed' %}" class="img-fluid" style="width: 800px;">
+        </div>
+        <div class="mt-4">
+            <p class="text-secondary">Ensure your full body is visible for accurate counting.</p>
+            <a href="{% url 'home' %}" class="btn btn-danger btn-lg px-5">Exit Session</a>
+        </div>
+    </div>
+
+    </body>
+</html>

@@ -6,6 +6,11 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import MemberUpdateForm
+from django.http import StreamingHttpResponse
+from .camera import PushUpDetector
+from django.http import JsonResponse
+from .models import HealthMemory
+from .ai_engine import SmartCoach
 
 
 # Home Page (use this as the main index view)
@@ -64,30 +69,46 @@ def join_now(request):
     
     return render(request, 'join_now.html', {'form': form})
 
-# Profile
 @login_required
 def edit_profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        profile.email = request.POST.get('email')
+        # Basic Info
         profile.phone = request.POST.get('phone')
         profile.address = request.POST.get('address')
         profile.bio = request.POST.get('bio')
-        profile.age = request.POST.get('age')
-        profile.gender = request.POST.get('gender')
-        profile.date_of_birth = request.POST.get('date_of_birth')
         profile.facebook = request.POST.get('facebook')
         profile.instagram = request.POST.get('instagram')
+        profile.fitness_goal = request.POST.get('fitness_goal')
 
+        # Numbers (Added default 0 or existing value to prevent crashes)
+        profile.age = request.POST.get('age') or profile.age
+        profile.weight = request.POST.get('weight') or profile.weight
+        profile.height = request.POST.get('height') or profile.height
+        
+        profile.gender = request.POST.get('gender')
+
+        # Date of Birth safety
+        dob = request.POST.get('date_of_birth')
+        if dob:
+            profile.date_of_birth = dob
+
+        # Profile Photo
         if request.FILES.get('photo'):
             profile.photo = request.FILES['photo']
 
         profile.save()
+        
+        # Syncing Email back to the main User model (Good practice)
+        email = request.POST.get('email')
+        if email:
+            request.user.email = email
+            request.user.save()
+
         return redirect('profile')
 
     return render(request, 'edit_profile.html', {'profile': profile})
-
 
 @login_required
 def profile(request):
@@ -187,3 +208,35 @@ def payment(request):
 
 def payment_success(request):
     return render(request, "payment_success.html")
+
+def gen(camera):
+    while True:
+        frame = camera.get_frame()
+        if frame:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+def video_feed(request):
+    return StreamingHttpResponse(gen(PushUpDetector()),
+                                 content_type='multipart/x-mixed-replace; boundary=frame')
+
+# This function renders the HTML page
+def workout_page(request):
+    return render(request, 'workout.html')
+
+@login_required
+def chat_with_ai(request):
+    if request.method == "POST":
+        user_text = request.POST.get('text')
+        
+        # 1. ENSURE PROFILE EXISTS: This prevents the "User has no profile" error
+        Profile.objects.get_or_create(user=request.user)
+        
+        # 2. SAVE TO MEMORY
+        HealthMemory.objects.create(user=request.user, info_type="general", user_input=user_text)
+        
+        # 3. GET ADVICE
+        coach = SmartCoach(request.user)
+        response = coach.get_personalized_advice(user_text)
+        
+        return JsonResponse({'reply': response})

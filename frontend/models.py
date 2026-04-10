@@ -98,11 +98,31 @@ class Profile(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    
+    # --- ADD THESE THREE FIELDS ---
+    weight = models.FloatField(default=0.0) 
+    height = models.FloatField(default=0.0)
+    fitness_goal = models.CharField(max_length=255, blank=True, null=True)
+    # ------------------------------
+
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=20, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     facebook = models.CharField(max_length=255, blank=True, null=True)
     instagram = models.CharField(max_length=255, blank=True, null=True)
+
+    # ADD THIS FUNCTION FOR THE CALORIE CALCULATION
+    def calculate_daily_calories(self):
+        """Calculates BMR - calories burned at rest."""
+        if not self.weight or not self.height or not self.age:
+            return 0
+        
+        # Mifflin-St Jeor Equation
+        if self.gender and self.gender.lower() == 'male':
+            bmr = (10 * self.weight) + (6.25 * self.height) - (5 * self.age) + 5
+        else:
+            bmr = (10 * self.weight) + (6.25 * self.height) - (5 * self.age) - 161
+        return round(bmr)
 
     def __str__(self):
         return self.user.username
@@ -151,4 +171,31 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.amount} BDT"
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    weight = models.FloatField() # in kg
+    height = models.FloatField() # in cm
+    age = models.IntegerField()
+    gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')])
+    fitness_goal = models.CharField(max_length=255)
+
+    def calculate_daily_calories(self):
+        """Calculates BMR - calories burned at rest."""
+        if self.gender == 'male':
+            bmr = (10 * self.weight) + (6.25 * self.height) - (5 * self.age) + 5
+        else:
+            bmr = (10 * self.weight) + (6.25 * self.height) - (5 * self.age) - 161
+        return round(bmr)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+class HealthMemory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE) # Must be on_delete here too
+    info_type = models.CharField(max_length=50)
+    user_input = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.info_type}"
 

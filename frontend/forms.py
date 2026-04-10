@@ -78,5 +78,19 @@ class ReviewForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = "__all__"
-        exclude = ("user",)
+        # Explicitly listing fields ensures they are processed in order
+        fields = [
+            'photo', 'bio', 'phone', 'address', 
+            'weight', 'height', 'age', 'gender', 'fitness_goal',
+            'date_of_birth', 'facebook', 'instagram'
+        ]
+        widgets = {
+            'weight': forms.NumberInput(attrs={'class': 'custom-input', 'step': '0.1'}),
+            'height': forms.NumberInput(attrs={'class': 'custom-input', 'step': '0.1'}),
+            'age': forms.NumberInput(attrs={'class': 'custom-input'}),
+            'gender': forms.Select(attrs={'class': 'custom-select'}),
+            'fitness_goal': forms.TextInput(attrs={'class': 'custom-input'}),
+            'bio': forms.Textarea(attrs={'class': 'custom-input', 'rows': 3}),
+            'address': forms.Textarea(attrs={'class': 'custom-input', 'rows': 2}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'custom-input', 'type': 'date'}),
+        }
