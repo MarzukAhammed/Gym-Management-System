@@ -1,6 +1,10 @@
+import os
 from openai import OpenAI
 from .models import HealthMemory
+from dotenv import load_dotenv
+
 load_dotenv()
+
 class SmartCoach:
     def __init__(self, user):
         self.user = user
