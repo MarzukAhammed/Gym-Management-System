@@ -1294,57 +1294,164 @@ background: #dddddd;
 }
 
 
+/* Main Container with Glassmorphism */
+/* Premium Floating Container */
+/* --- UPDATED BASE CONTAINER --- */
+/* --- AI CHATBOT PREMIUM UI --- */
+/* The Cat Avatar (The Trigger) */
+/* Container Positioning */
 #ai-chat-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    background: white;
-    border-radius: 15px 15px 0 0;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-
-.ai-chat-header {
-    background: #007bff;
-    color: white;
-    padding: 12px;
-    border-radius: 15px 15px 0 0;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-}
-
-#ai-chat-body {
-    height: 350px;
+    bottom: 30px;
+    right: 80px; 
+    z-index: 9999;
+    font-family: 'Inter', sans-serif;
     display: flex;
     flex-direction: column;
+    align-items: flex-end; /* Keeps chat box aligned with the cat */
+}
+
+/* --- THE CAT AVATAR --- */
+#cat-pet {
+    width: 80px;
+    height: 80px;
+    background: #ff9f43; /* The base orange head */
+    border-radius: 50% 50% 45% 45%;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* STATE: SLEEPING - Eyes change from dots to lines */
+#cat-pet[data-state="sleeping"] {
+    opacity: 0.8;
+    transform: scale(0.95);
+}
+
+#cat-pet[data-state="sleeping"] .eye {
+    width: 10px;
+    height: 2px;
+    border-radius: 0;
+    margin-top: 4px;
+}
+
+/* STATE: POINTING - Head tilts toward the chatbox */
+#cat-pet[data-state="pointing"] {
+    transform: translateY(-10px) rotate(-5deg);
+}
+
+#cat-pet[data-state="pointing"] .cat-pointer {
+    opacity: 1;
+    animation: bounce 1s infinite;
+}
+
+/* --- CAT FACE PARTS --- */
+.cat-ears::before, .cat-ears::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    width: 20px;
+    height: 22px;
+    background: #ff9f43;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+.cat-ears::before { left: 8px; transform: rotate(-15deg); }
+.cat-ears::after { right: 8px; transform: rotate(15deg); }
+
+.cat-eyes {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 2px;
+}
+
+.eye {
+    width: 8px;
+    height: 8px;
+    background: #2f3640;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.cat-nose {
+    width: 6px;
+    height: 4px;
+    background: #ff7f50;
+    border-radius: 50%;
+}
+
+.cat-pointer {
+    position: absolute;
+    bottom: -25px; /* Positioned below the cat */
+    left: 35%;
+    font-size: 20px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+/* --- CHATBOX STYLES --- */
+#ai-chat-body {
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+    height: 480px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    margin-bottom: 15px; /* Gap between box and cat */
+    overflow: hidden;
+    transition: 0.3s ease-in-out;
+}
+
+.ai-chat-closed #ai-chat-body {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    pointer-events: none;
+    display: none;
 }
 
 #chat-messages {
-    flex: 1;
-    padding: 10px;
+    flex-grow: 1; 
     overflow-y: auto;
-    font-size: 14px;
-    background: #f9f9f9;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f9fafb;
 }
 
 .chat-input-area {
     display: flex;
-    padding: 10px;
-    border-top: 1px solid #ddd;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #edf2f7;
+    gap: 8px;
 }
 
 #ai-user-input {
-    flex: 1;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px;
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
 }
 
-/* Class to minimize chat */
-.ai-chat-closed #ai-chat-body {
-    display: none;
+.chat-input-area button {
+    padding: 8px 18px;
+    background: #ff9f43;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
 }

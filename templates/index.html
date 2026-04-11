@@ -18,7 +18,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
   
 
 </head>
@@ -642,14 +643,28 @@ var swiper = new Swiper('.mySwiper', {
 </script>
 {% csrf_token %}
 <div id="ai-chat-container" class="ai-chat-closed">
-    <div class="ai-chat-header" onclick="toggleChat()">
-        <span>✨ Chat with Lolona</span> 
-        <button id="close-btn">−</button>
-    </div>
-    <div id="ai-chat-body">
-        <div id="chat-messages">
-            <div class="bot-msg">Hey! I'm Lolona. Tell me how you're feeling today, and I'll keep your fitness plan on track.</div>
+    
+    <div id="cat-pet" data-state="idle" class="animate__animated animate__pulse animate__infinite">
+        <div class="cat-ears"></div>
+        <div class="cat-eyes">
+            <div class="eye"></div>
+            <div class="eye"></div>
         </div>
+        <div class="cat-nose"></div>
+        
+        <div class="cat-pointer">👇</div>
+    </div>
+
+    <div id="ai-chat-body">
+        <div class="ai-chat-header">
+            <span>✨ Lolona Chat</span>
+            <button onclick="toggleChat()" class="close-btn">−</button>
+        </div>
+        
+        <div id="chat-messages">
+             <div class="bot-msg"><b>Lolona:</b> Meow! How can I help you with your gym goals today?</div>
+        </div>
+        
         <div class="chat-input-area">
             <input type="text" id="ai-user-input" placeholder="Ask Lolona anything...">
             <button onclick="sendToAI()">Send</button>
