@@ -640,18 +640,18 @@ var swiper = new Swiper('.mySwiper', {
       justFlipIt('.flip-card', { Click: true });
   });
 </script>
+{% csrf_token %}
 <div id="ai-chat-container" class="ai-chat-closed">
     <div class="ai-chat-header" onclick="toggleChat()">
-        <span>🤖 AI Health Coach</span>
+        <span>✨ Chat with Lolona</span> 
         <button id="close-btn">−</button>
     </div>
-
     <div id="ai-chat-body">
         <div id="chat-messages">
-            <div class="bot-msg">Hello! Tell me how you're feeling today, and I'll remember it for your health plan.</div>
+            <div class="bot-msg">Hey! I'm Lolona. Tell me how you're feeling today, and I'll keep your fitness plan on track.</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="ai-user-input" placeholder="Type here (e.g., 'I ate oily food today')...">
+            <input type="text" id="ai-user-input" placeholder="Ask Lolona anything...">
             <button onclick="sendToAI()">Send</button>
         </div>
     </div>

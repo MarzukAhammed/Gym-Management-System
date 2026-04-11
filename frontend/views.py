@@ -11,6 +11,7 @@ from .camera import PushUpDetector
 from django.http import JsonResponse
 from .models import HealthMemory
 from .ai_engine import SmartCoach
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 # Home Page (use this as the main index view)
@@ -224,18 +225,18 @@ def video_feed(request):
 def workout_page(request):
     return render(request, 'workout.html')
 
-@login_required
+@ensure_csrf_cookie
 def chat_with_ai(request):
     if request.method == "POST":
         user_text = request.POST.get('text')
+        if request.user.is_authenticated:
+            Profile.objects.get_or_create(user=request.user)
+            HealthMemory.objects.create(
+                user=request.user, 
+                info_type="general", 
+                user_input=user_text
+            )
         
-        # 1. ENSURE PROFILE EXISTS: This prevents the "User has no profile" error
-        Profile.objects.get_or_create(user=request.user)
-        
-        # 2. SAVE TO MEMORY
-        HealthMemory.objects.create(user=request.user, info_type="general", user_input=user_text)
-        
-        # 3. GET ADVICE
         coach = SmartCoach(request.user)
         response = coach.get_personalized_advice(user_text)
         

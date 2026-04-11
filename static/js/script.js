@@ -145,19 +145,24 @@ function sendToAI() {
         return response.json();
     })
     .then(data => {
-        // Handle different possible key names from Django
-        const reply = data.reply || data.message || "I'm processing that. One second...";
+        const reply = data.reply || data.message || "I'm thinking...";
         
-        chatMessages.innerHTML += `<div class="bot-msg" style="margin: 10px 5px; color: #059669;"><b>AI:</b> ${reply}</div>`;
+        // Change "AI:" to "Lolona:" below
+        chatMessages.innerHTML += `<div class="bot-msg" style="margin: 10px 5px; color: #059669;"><b>Lolona:</b> ${reply}</div>`;
+        
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
         // Redirect logic
-        if (reply.includes("[REDIRECT:")) {
-            const match = reply.match(/\[REDIRECT:(.*?)\]/);
-            if (match) {
-                setTimeout(() => { window.location.href = match[1]; }, 1500);
+ if (reply.includes("[REDIRECT:")) {
+        const match = reply.match(/\[REDIRECT:(.*?)\]/);
+        if (match) {
+            const targetUrl = match[1];
+            // Instead of just moving, we ask the user:
+            if (confirm("I found the page you need! Should I take you there now?")) {
+                window.location.href = targetUrl;
             }
         }
+ }
     })
     .catch(error => {
         console.error('AI Error:', error);
