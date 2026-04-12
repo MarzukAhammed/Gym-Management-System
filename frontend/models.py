@@ -98,6 +98,8 @@ class Profile(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    goal_weight = models.DecimalField(max_digits=5, decimal_places=2, default=70.0)
+    height = models.DecimalField(max_digits=5, decimal_places=2, default=170.0) # in cm
     
     # --- ADD THESE THREE FIELDS ---
     weight = models.FloatField(default=0.0) 
@@ -218,7 +220,8 @@ class Exercise(models.Model):
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
     description = models.TextField()
     animation_url = models.URLField(help_text="Link to exercise GIF or Lottie animation")
-    calories_per_rep = models.FloatField(default=0.5) # e.g., 0.5 kcal per pushup
+    calories_per_minute = models.IntegerField(default=5)
+    calories_per_rep = models.FloatField(default=0.5)
 
     def __str__(self):
         return f"{self.name} ({self.difficulty})"
@@ -256,3 +259,19 @@ class Exercise(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.difficulty})"
+
+
+class UserProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='progress_logs')
+    date = models.DateField(auto_now_add=True)
+    calories_burned = models.IntegerField(default=0, help_text="Total calories burned today")
+    workout_duration = models.IntegerField(default=0, help_text="Duration in minutes")
+    current_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-date'] # Newest first
+        # Ensure only one log per user per day
+        unique_together = ('user', 'date')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"

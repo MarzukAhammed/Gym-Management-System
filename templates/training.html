@@ -10,7 +10,6 @@
         body { background: #111; color: white; font-family: 'Poppins', sans-serif; height: 100vh; display: flex; flex-direction: column; }
         .training-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        /* Updated Container for Video */
         .video-container { 
             width: 100%; 
             max-width: 550px; 
@@ -25,13 +24,25 @@
 
         .timer-text { font-size: 5rem; font-weight: 800; color: #28a745; line-height: 1; }
         .rep-text { font-size: 3rem; font-weight: 700; color: #fff; }
+        
+        /* New Calorie Meter Style */
+        .calorie-badge {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: #28a745;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
     <div class="p-4 bg-dark d-flex justify-content-between align-items-center border-bottom border-success">
         <h3 id="page-title" class="text-success m-0 font-weight-bold">Loading Session...</h3>
-        <a href="javascript:history.back()" class="btn btn-outline-danger">Quit Workout</a>
+        <div class="calorie-badge">🔥 <span id="total-session-calories">0</span> kcal</div>
+        <a href="javascript:history.back()" class="btn btn-outline-danger btn-sm">Quit Workout</a>
     </div>
 
     <div class="training-container p-4">
@@ -56,24 +67,28 @@
     const routineTitle = localStorage.getItem('routineTitle');
     let currentIndex = 0;
     let timerInterval;
+    
+    // Progress Tracking Variables
+    let totalBurned = 0;
+    let totalMinutes = 0;
+    let exerciseStartTime;
 
     if(routineTitle) document.getElementById('page-title').innerText = routineTitle;
 
     function loadExercise(index) {
         clearInterval(timerInterval); 
+        exerciseStartTime = new Date(); // Track when this exercise started
         
         const ex = routineData[index];
         document.getElementById('exercise-name').innerText = ex.name;
         document.getElementById('exercise-target').innerText = "TARGETING: " + ex.target;
 
-        // HANDLE VIDEO LOADING
         const video = document.getElementById('exercise-video');
         const source = document.getElementById('video-source');
         
-        // Use ex.video (which we set in the library page)
         if (ex.video) {
             source.src = ex.video;
-            video.load(); // Forces the player to refresh the source
+            video.load();
             video.play();
         }
 
@@ -86,10 +101,10 @@
         }
 
         if (ex.type === 'timer') {
-            actionArea.innerHTML = `<div class="timer-text" id="live-timer">${ex.seconds}s</div><p class="text-muted mt-2">Keep going until the timer stops!</p>`;
+            actionArea.innerHTML = `<div class="timer-text" id="live-timer">${ex.seconds}s</div><p class="text-muted mt-2">Keep going!</p>`;
             startTimer(ex.seconds);
         } else {
-            actionArea.innerHTML = `<div class="rep-text">${ex.detail}</div><p class="text-success mt-2">Complete your sets at your own pace.</p>`;
+            actionArea.innerHTML = `<div class="rep-text">${ex.detail}</div><p class="text-success mt-2">Complete sets at your own pace.</p>`;
         }
     }
 
@@ -101,6 +116,9 @@
             timeLeft--;
             display.innerText = timeLeft + "s";
             
+            // Add small calorie increments while timer runs
+            updateLiveCalories(1/60); // Add 1 second worth of effort
+
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 display.innerText = "DONE!";
@@ -108,24 +126,75 @@
         }, 1000);
     }
 
+    function updateLiveCalories(minutes) {
+        // Average burn rate if specific rate is missing: 7 kcal/min
+        const rate = 7; 
+        const burn = minutes * rate;
+        totalBurned += burn;
+        totalMinutes += minutes;
+        document.getElementById('total-session-calories').innerText = Math.round(totalBurned);
+    }
+
     function nextExercise() {
+        // Calculate time spent on the exercise just finished
+        const now = new Date();
+        const timeDiffMins = (now - exerciseStartTime) / 60000;
+        
+        // If it wasn't a timer exercise, we still need to add its time to the total
+        if (routineData[currentIndex].type !== 'timer') {
+            updateLiveCalories(timeDiffMins);
+        }
+
         currentIndex++;
         if (currentIndex < routineData.length) {
             loadExercise(currentIndex);
         } else {
-            document.querySelector('.training-container').innerHTML = `
-                <h1 class="display-3 text-success font-weight-bold mb-4">WORKOUT COMPLETE!</h1>
-                <p class="lead mb-5">Great job crushing the ${routineTitle}.</p>
-                <a href="{% url 'exercise_library' %}" class="btn btn-outline-success btn-lg px-5">Return to Library</a>
-            `;
+            finishWorkoutSession();
         }
+    }
+
+    function finishWorkoutSession() {
+        // Final screen with a record button
+        document.querySelector('.training-container').innerHTML = `
+            <h1 class="display-3 text-success font-weight-bold mb-4">GOAL REACHED!</h1>
+            <div class="card bg-dark border-success mb-5 mx-auto" style="max-width: 400px; border-radius: 20px;">
+                <div class="card-body">
+                    <h4 class="text-white">Summary</h4>
+                    <p class="text-muted">Total Calories: <strong class="text-success">${Math.round(totalBurned)} kcal</strong></p>
+                    <p class="text-muted">Duration: <strong class="text-success">${Math.round(totalMinutes)} mins</strong></p>
+                </div>
+            </div>
+            <button onclick="saveToDatabase()" class="btn btn-success btn-lg px-5 mb-3">Record Progress</button>
+            <br>
+            <a href="{% url 'exercise_library' %}" class="text-muted">Skip and Return</a>
+        `;
+    }
+
+    function saveToDatabase() {
+        fetch('/record-workout/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                duration: totalMinutes,
+                calories: totalBurned
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Progress saved to your tracker! 📈");
+            window.location.href = "{% url 'progress_tracker' %}";
+        })
+        .catch(err => alert("Error saving progress. Check connection."));
     }
 
     if (routineData && routineData.length > 0) {
         loadExercise(0);
-    } else {
-        document.querySelector('.training-container').innerHTML = "<h1 class='text-danger'>Error: No routine data found.</h1>";
     }
 </script>
+<a href="{% url 'home' %}" class="home-btn">🏠 Home</a>
+{% include "chatbox_partial.html" %}
 </body>
 </html>

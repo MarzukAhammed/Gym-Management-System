@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Progress | Gymnasium</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #111; color: white; font-family: 'Poppins', sans-serif; }
+        .stat-card { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; padding: 20px; text-align: center; height: 100%; transition: 0.3s; }
+        .stat-card:hover { border-color: #28a745; transform: translateY(-5px); }
+        .stat-value { font-size: 2.5rem; font-weight: 800; color: #28a745; }
+        .chart-container { background: #1a1a1a; border-radius: 20px; padding: 20px; border: 1px solid #333; margin-top: 30px; }
+        .form-control:focus { background-color: #222; color: white; border-color: #28a745; box-shadow: none; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-weight-bold m-0 text-uppercase letter-spacing-1">
+                <span class="text-success">{{ user_full_name }}'S</span> PROGRESS
+            </h2>
+            <p class="text-muted small mb-0">Personalized Fitness Insights</p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-outline-light btn-sm">← Back</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="stat-card shadow">
+                <h5 class="text-muted text-uppercase small font-weight-bold">Current Weight</h5>
+                <div class="stat-value">{{ current_weight }} <span style="font-size: 1rem;">kg</span></div>
+                <p class="text-success small m-0">Target: {{ goal_weight }} kg</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="stat-card shadow">
+                <h5 class="text-muted text-uppercase small font-weight-bold">Weekly Calories</h5>
+                <div class="stat-value text-warning">{{ total_calories }} <span style="font-size: 1rem;">kcal</span></div>
+                <p class="text-muted small m-0">Burned this week</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="stat-card shadow">
+                <h5 class="text-muted text-uppercase small font-weight-bold">BMI Status</h5>
+                <div class="stat-value text-info" id="bmi-display">--</div>
+                <p class="text-muted small m-0" id="bmi-label">Loading height data...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container mt-2 mb-4 shadow border-success" style="border-width: 2px;">
+        <h5 class="mb-3 text-success font-weight-bold">Update Today's Progress</h5>
+        <form method="POST" action="{% url 'update_stats' %}" class="form-inline">
+            {% csrf_token %}
+            <div class="input-group mb-2 mr-sm-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text bg-dark text-success border-secondary">KG</div>
+                </div>
+                <input type="number" step="0.1" name="weight" class="form-control bg-dark text-white border-secondary" placeholder="Today's Weight" required>
+            </div>
+            <button type="submit" class="btn btn-success px-4 mb-2 font-weight-bold">Save Record</button>
+            <small class="text-muted ml-3 mb-2">Logs today's weight on your journey.</small>
+        </form>
+    </div>
+
+    <div class="chart-container shadow-lg mb-5">
+        <h4 class="text-center mb-4">Activity Overview</h4>
+        <canvas id="progressChart" height="100"></canvas>
+    </div>
+</div>
+
+<script>
+    // 1. Data Setup from Django Context
+    const dates = JSON.parse('{{ dates_json|safe }}');
+    const calories = JSON.parse('{{ calories_json|safe }}');
+    const durations = JSON.parse('{{ durations_json|safe }}');
+
+    // 2. BMI Calculation Logic
+    // Using a default of 0 if the height is missing to prevent errors
+    const userHeightCm = parseFloat("{{ user_height }}") || 0; 
+    const userWeight = parseFloat("{{ current_weight }}") || 0;
+
+    console.log("Height detected:", userHeightCm); // Helpful for debugging
+    console.log("Weight detected:", userWeight);
+
+    if (userHeightCm > 0 && userWeight > 0) {
+        const heightMeters = userHeightCm / 100;
+        const bmi = (userWeight / (heightMeters * heightMeters)).toFixed(1);
+        document.getElementById('bmi-display').innerText = bmi;
+        
+        let label = "Healthy";
+        let colorClass = "text-success";
+
+        if (bmi < 18.5) {
+            label = "Underweight";
+            colorClass = "text-warning";
+        } else if (bmi >= 25 && bmi < 30) {
+            label = "Overweight";
+            colorClass = "text-warning";
+        } else if (bmi >= 30) {
+            label = "Obese";
+            colorClass = "text-danger";
+        }
+
+        const labelEl = document.getElementById('bmi-label');
+        labelEl.innerText = label;
+        labelEl.classList.remove('text-muted');
+        labelEl.classList.add(colorClass);
+    } else {
+        document.getElementById('bmi-label').innerText = "Update height in profile to see BMI";
+    }
+
+    // 3. Chart.js Implementation
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    const progressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Calories Burned (kcal)',
+                    data: calories,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Workout Duration (mins)',
+                    data: durations,
+                    borderColor: '#007bff',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: 'white', font: { family: 'Poppins' } } }
+            },
+            scales: {
+                x: { ticks: { color: '#aaa' }, grid: { color: '#333' } },
+                y: { ticks: { color: '#aaa' }, grid: { color: '#333' } }
+            }
+        }
+    });
+</script>
+<a href="{% url 'home' %}" class="home-btn">🏠 Home</a>
+{% include "chatbox_partial.html" %}
+</body>
+</html>

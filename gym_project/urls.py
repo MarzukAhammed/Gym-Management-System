@@ -32,6 +32,9 @@ urlpatterns = [
     path('chat-with-ai/', views.chat_with_ai, name='chat_with_ai'),
     path('exercises/', views.track_workout, name='exercise_library'),
     path('training/', views.training_session, name='training_session'),
+    path('progress/', views.progress_dashboard, name='progress_tracker'),
+    path('update-stats/', views.update_stats, name='update_stats'),
+    path('record-workout/', views.record_workout_data, name='record_workout'),
 ]
 
 if settings.DEBUG:

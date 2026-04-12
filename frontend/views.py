@@ -9,10 +9,10 @@ from .forms import MemberUpdateForm
 from django.http import StreamingHttpResponse
 from .camera import PushUpDetector
 from django.http import JsonResponse
-from .models import HealthMemory, MemberMemory, Exercise
+from .models import HealthMemory, MemberMemory, Exercise, UserProgress
 from .ai_engine import SmartCoach
 from django.views.decorators.csrf import ensure_csrf_cookie
-import json
+import json, datetime
 
 # Home Page
 def home(request):
@@ -240,3 +240,87 @@ def track_workout(request):
 
 def training_session(request):
     return render(request, 'training.html')
+
+
+@login_required
+def progress_dashboard(request):
+    # 1. Get user profile info
+    user_profile = getattr(request.user, 'profile', None) 
+    
+    # 2. Get the 7 most recent entries (ordered by date descending, then reversed for the chart)
+    # This ensures you see the latest progress from left to right
+    logs = UserProgress.objects.filter(user=request.user).order_by('-date')[:7]
+    logs = reversed(logs) # Flip them so the oldest of the 7 is on the left
+    
+    dates = []
+    calories = []
+    durations = []
+
+    for log in logs:
+        dates.append(log.date.strftime("%b %d"))
+        calories.append(float(log.calories_burned))
+        durations.append(float(log.workout_duration))
+
+    # 3. Build the context (Indented exactly 4 spaces)
+    context = {
+        'user_full_name': request.user.get_full_name() or request.user.username,
+        'current_weight': getattr(user_profile, 'weight', 0),
+        'goal_weight': getattr(user_profile, 'goal_weight', 0),
+        'user_height': getattr(user_profile, 'height', 0),
+        'total_calories': sum(calories),
+        'dates_json': json.dumps(dates),
+        'calories_json': json.dumps(calories),
+        'durations_json': json.dumps(durations),
+    }
+
+    # 4. Return the response (Indented exactly 4 spaces)
+    return render(request, 'progress.html', context)
+    
+@login_required
+def update_stats(request):
+    """Handles the form submission from the progress dashboard."""
+    if request.method == "POST":
+        new_weight = request.POST.get('weight')
+        
+        # 1. Update the User's Profile weight
+        # Assumes request.user has a related 'profile' model
+        if hasattr(request.user, 'profile'):
+            profile = request.user.profile
+            profile.weight = new_weight
+            profile.save()
+
+        # 2. Update or Create a log for today in UserProgress
+        # This is what moves the line on your Chart.js graph
+        UserProgress.objects.update_or_create(
+            user=request.user, 
+            date=datetime.date.today(),
+            defaults={'current_weight': new_weight}
+        )
+        
+        # Redirect back to the progress page to see the update
+        return redirect('progress_tracker')
+
+def record_workout_data(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        exercise_name = data.get('exercise_name')
+        duration_mins = float(data.get('duration', 0))
+        
+        # 1. Calculate Burn
+        try:
+            exercise = Exercise.objects.get(name=exercise_name)
+            calories_burned = exercise.calories_per_minute * duration_mins
+        except Exercise.DoesNotExist:
+            calories_burned = 5 * duration_mins # Default fallback
+
+        # 2. Update Progress Table
+        progress, created = UserProgress.objects.get_or_create(
+            user=request.user,
+            date=datetime.date.today()
+        )
+        
+        progress.calories_burned += int(calories_burned)
+        progress.workout_duration += int(duration_mins)
+        progress.save()
+
+        return JsonResponse({'status': 'success', 'burned': calories_burned})

@@ -591,34 +591,28 @@ var swiper = new Swiper('.mySwiper', {
       justFlipIt('.flip-card', { Click: true });
   });
 </script>
-{% csrf_token %}
-<div id="ai-chat-container" class="ai-chat-closed">
-    
-    <div id="cat-pet" data-state="idle" class="animate__animated animate__pulse animate__infinite">
-        <div class="cat-ears"></div>
-        <div class="cat-eyes">
-            <div class="eye"></div>
-            <div class="eye"></div>
-        </div>
-        <div class="cat-nose"></div>
-        
-        <div class="cat-pointer">👇</div>
-    </div>
 
-    <div id="ai-chat-body">
-        <div class="ai-chat-header">
-            <span>✨ Lolona Chat</span>
-            <button onclick="toggleChat()" class="close-btn">−</button>
+{% csrf_token %}
+<div id="floating-cat-container">
+    <div id="cat-trigger">
+        <img src="/static/images/Lovely Cat.gif" id="main-cat-img" alt="Lolona">
+    </div>
+</div>
+
+<div id="premium-chatbox" class="glass-effect">
+    <div class="chat-header">
+        <div class="user-info">
+            <div class="status-dot"></div>
+            <span>Lolona AI</span>
         </div>
-        
-        <div id="chat-messages">
-             <div class="bot-msg"><b>Lolona:</b> Meow! How can I help you with your gym goals today?</div>
-        </div>
-        
-        <div class="chat-input-area">
-            <input type="text" id="ai-user-input" placeholder="Ask Lolona anything...">
-            <button onclick="sendToAI()">Send</button>
-        </div>
+        <button onclick="toggleChat()" class="close-btn">&times;</button>
+    </div>
+    <div id="chat-messages">
+        <div class="bot-msg">Hey! Gymnasium-e apnake sashagoto. Ami Lolona, kibhabe help korte pari?</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="ai-user-input" placeholder="Type a message...">
+        <button onclick="sendToAI()"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 </body>
