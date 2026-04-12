@@ -30,6 +30,8 @@ urlpatterns = [
     path('workout/', views.workout_page, name='workout'),
     path('video_feed/', views.video_feed, name='video_feed'),
     path('chat-with-ai/', views.chat_with_ai, name='chat_with_ai'),
+    path('exercises/', views.track_workout, name='exercise_library'),
+    path('training/', views.training_session, name='training_session'),
 ]
 
 if settings.DEBUG:

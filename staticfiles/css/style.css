@@ -478,6 +478,29 @@ font-family: 'Oswald', sans-serif; */
     font-size: 20px;
     color: #fff;
 }
+
+.flip-card {
+    width: 100%;
+    height: 350px;
+}
+
+.flip-card .front, 
+.flip-card .back {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    border-radius: 10px;
+}
+
+.flip-card .back {
+    background: #111;
+    color: #fff;
+    padding: 20px;
+}
+
 /* Gallery Part End */
 /* Team Part Start */
 #team{
@@ -1015,6 +1038,71 @@ background: #dddddd;
     color: #e23e38;
 }
 
+@media (max-width: 991px) {
+    .footer_item {
+        padding-top: 30px;
+        text-align: center;
+    }
+
+    .footer_item .footer_body {
+        justify-content: center;
+    }
+
+    .footer_item .footer_body .one p,
+    .footer_item .footer_body .two p {
+        margin-right: 0;
+    }
+
+    .footer_item .footer_body .one {
+        justify-content: center;
+    }
+
+    .footer_item .footer_body img {
+        width: 60px;
+        height: auto;
+    }
+
+    .footer_item .footer_icon {
+        text-align: center;
+    }
+}
+
+/* Mobile (<= 575px) */
+@media (max-width: 575px) {
+    #footer .overlay {
+        padding-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .footer_item {
+        padding-top: 25px;
+    }
+
+    .footer_item .footer_head h2 {
+        padding-bottom: 15px;
+    }
+
+    .footer_item .footer_body .one h3 {
+        padding-bottom: 15px;
+    }
+
+    .footer_item .footer_body {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer_item .footer_body img {
+        width: 50px;
+        margin-right: 4px;
+        margin-bottom: 8px;
+    }
+
+    .copy p {
+        font-size: 12px;
+        padding-top: 15px;
+    }
+}
+
 /* Footer Part end */
 
 /* Join Now form */
@@ -1076,54 +1164,294 @@ background: #dddddd;
         }
 
     .testimonial-card {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    }
-    .info_one img {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #fff; /* White border for premium feel */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .side {
-        margin-top: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .side h2 {
-        margin: 5px 0;
-        font-size: 1.3em;
-        font-weight: 600;
-        color: #333;
-    }
-    .side h3 {
-        color: #666;
-        font-size: 0.95em;
-        margin: 5px 0;
-        font-style: italic;
-    }
-    .rating {
-        display: flex;
-        gap: 4px; /* Increased spacing for elegance */
-        padding: 0;
-        margin: 8px 0; /* More spacing for premium look */
-    }
-    .star {
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)); /* Subtle shadow for 3D effect */
-    }
-    .info_two p {
-        font-style: italic;
-        margin-top: 15px;
-        color: #444;
-        font-size: 1.1em;
-        line-height: 1.5;
-    }
-    .overlay {
-        background: rgba(0, 0, 0, 0.5);
-    }
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .info_one img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .side {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .side h2 {
+            margin: 5px 0;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+        .info_two p {
+            font-style: italic;
+            margin-top: 10px;
+            color: #444;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        .overlay {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+/* Premium Slider Styles */
+.premium-section {
+    padding: 40px 0; /* Reduced padding from 60px for compactness */
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.premium-heading {
+    color: #fff;
+    font-size: 2rem; /* Reduced from 2.5rem for balance */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px; /* Reduced from 20px */
+    position: relative;
+}
+
+.premium-heading::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; /* Adjusted for smaller heading */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px; /* Reduced from 50px */
+    height: 2px; /* Reduced from 3px */
+    background: #ff6f61;
+}
+
+.heading-icon {
+    filter: brightness(0) invert(1);
+    margin-top: 10px;
+    width: 40px; /* Constrain icon size if oversized */
+}
+
+.premium-slider {
+    padding: 10px 0; /* Reduced from 20px */
+    max-height: 400px; /* Cap height to match original content size */
+}
+
+.premium-testimonial-card {
+    background: #fff;
+    border-radius: 10px; /* Reduced from 15px for subtlety */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Reduced shadow intensity */
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    max-height: 350px; /* Match original card height */
+}
+
+.premium-testimonial-card:hover {
+    transform: translateY(-3px); /* Reduced from -5px */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); /* Adjusted hover shadow */
+}
+
+.premium-info-one {
+    display: flex;
+    align-items: center;
+    padding: 15px; /* Reduced from 20px */
+}
+
+.premium-image {
+    width: 80px; /* Reduced from 100px */
+    height: 80px; /* Reduced from 100px */
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px; /* Reduced from 20px */
+    border: 3px solid #ff6f61; /* Reduced from 4px */
+}
+
+.premium-side {
+    flex: 1;
+}
+
+.premium-title {
+    color: #333;
+    font-size: 1.2rem; /* Reduced from 1.5rem */
+    font-weight: 600;
+    margin-bottom: 8px; /* Reduced from 10px */
+}
+
+.premium-text {
+    color: #666;
+    font-size: 0.9rem; /* Reduced from 1rem */
+    line-height: 1.4; /* Adjusted for compactness */
+    margin-bottom: 10px; /* Reduced from 15px */
+}
+
+
+/* Main Container with Glassmorphism */
+/* Premium Floating Container */
+/* --- UPDATED BASE CONTAINER --- */
+/* --- AI CHATBOT PREMIUM UI --- */
+/* The Cat Avatar (The Trigger) */
+/* Container Positioning */
+#ai-chat-container {
+    position: fixed;
+    bottom: 30px;
+    right: 80px; 
+    z-index: 9999;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Keeps chat box aligned with the cat */
+}
+
+/* --- THE CAT AVATAR --- */
+#cat-pet {
+    width: 80px;
+    height: 80px;
+    background: #ff9f43; /* The base orange head */
+    border-radius: 50% 50% 45% 45%;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* STATE: SLEEPING - Eyes change from dots to lines */
+#cat-pet[data-state="sleeping"] {
+    opacity: 0.8;
+    transform: scale(0.95);
+}
+
+#cat-pet[data-state="sleeping"] .eye {
+    width: 10px;
+    height: 2px;
+    border-radius: 0;
+    margin-top: 4px;
+}
+
+/* STATE: POINTING - Head tilts toward the chatbox */
+#cat-pet[data-state="pointing"] {
+    transform: translateY(-10px) rotate(-5deg);
+}
+
+#cat-pet[data-state="pointing"] .cat-pointer {
+    opacity: 1;
+    animation: bounce 1s infinite;
+}
+
+/* --- CAT FACE PARTS --- */
+.cat-ears::before, .cat-ears::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    width: 20px;
+    height: 22px;
+    background: #ff9f43;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+.cat-ears::before { left: 8px; transform: rotate(-15deg); }
+.cat-ears::after { right: 8px; transform: rotate(15deg); }
+
+.cat-eyes {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 2px;
+}
+
+.eye {
+    width: 8px;
+    height: 8px;
+    background: #2f3640;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.cat-nose {
+    width: 6px;
+    height: 4px;
+    background: #ff7f50;
+    border-radius: 50%;
+}
+
+.cat-pointer {
+    position: absolute;
+    bottom: -25px; /* Positioned below the cat */
+    left: 35%;
+    font-size: 20px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+/* --- CHATBOX STYLES --- */
+#ai-chat-body {
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+    height: 480px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    margin-bottom: 15px; /* Gap between box and cat */
+    overflow: hidden;
+    transition: 0.3s ease-in-out;
+}
+
+.ai-chat-closed #ai-chat-body {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    pointer-events: none;
+    display: none;
+}
+
+#chat-messages {
+    flex-grow: 1; 
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f9fafb;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #edf2f7;
+    gap: 8px;
+}
+
+#ai-user-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+}
+
+.chat-input-area button {
+    padding: 8px 18px;
+    background: #ff9f43;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+}

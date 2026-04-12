@@ -1,0 +1,331 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Library | Gymnasium</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background: #111; font-family: 'Poppins', sans-serif; color: white; }
+        .main-content { padding-top: 100px !important; min-height: 100vh; }
+
+        .muscle-btn {
+            background: #222; color: #fff; border: 1px solid #444;
+            border-radius: 10px; padding: 8px 20px; transition: 0.3s; font-weight: 500;
+        }
+        .muscle-btn.active, .muscle-btn:hover {
+            background: #28a745; border-color: #28a745; color: white;
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .diff-btn {
+            background: #222; color: #aaa !important; border: 2px solid #333;
+            border-radius: 50px !important; padding: 12px 35px !important;
+            font-weight: 600; transition: all 0.4s ease;
+        }
+        .diff-btn.active {
+            background-color: #28a745 !important; color: white !important;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.4); transform: scale(1.05);
+        }
+
+        .exercise-card { transition: 0.3s; }
+        .card { border-radius: 20px; border: 1px solid #333 !important; background: #1a1a1a !important; overflow: hidden; }
+        .card:hover { transform: translateY(-5px); border-color: #28a745 !important; }
+        
+        .section-title {
+            color: #28a745; text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 700; font-size: 0.9rem;
+        }
+
+        .timer-display { font-size: 1.5rem; font-weight: bold; color: #28a745; }
+
+        .exercise-video-fluid {
+            width: 100%;
+            height: 180px;
+            object-fit: cover; 
+            border-radius: 15px;
+            background: #000;
+        }
+
+        /* Styling for the small preview video in the routine list */
+        .routine-preview-vid {
+            width: 70px; 
+            height: 70px; 
+            object-fit: cover; 
+            border-radius: 10px; 
+            border: 1px solid #28a745;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid main-content">
+        
+        <div class="container text-center mb-5">
+            <h1 class="display-4" style="font-weight: 800;">
+                WELCOME, <span style="color: #28a745;">{{ request.user.username|upper }}</span>!
+            </h1>
+            <p class="lead text-muted">Customize your session by muscle group and intensity.</p>
+            <div class="mx-auto" style="width: 100px; height: 5px; background: #28a745; border-radius: 5px;"></div>
+        </div>
+
+        <div class="container">
+            <div class="text-center mb-5">
+                <div class="row justify-content-center align-items-center mb-4">
+                    <div class="col-md-3 text-center">
+                        <div id="muscle-target-display" style="height: 180px; display: flex; justify-content: center; align-items: center;">
+                            <img id="muscle-gif-indicator" 
+                                 src="https://cdn-icons-png.flaticon.com/512/822/822143.png" 
+                                 style="height: 100%; filter: invert(1) drop-shadow(0 0 15px #28a745); transition: 0.3s;">
+                        </div>
+                        <p id="target-text" class="small text-success mt-2 font-weight-bold" style="letter-spacing: 2px; text-transform: uppercase;">Ready to Train</p>
+                    </div>
+                </div>
+
+                <p class="section-title mb-3">Step 1: Target Muscle Group</p>
+                <div class="d-flex justify-content-center flex-wrap" style="gap: 12px;">
+                    <button class="btn muscle-btn active" data-filter="all">All Muscles</button>
+                    <button class="btn muscle-btn" data-filter="chest">Chest</button>
+                    <button class="btn muscle-btn" data-filter="back">Back</button>
+                    <button class="btn muscle-btn" data-filter="legs">Legs</button>
+                    <button class="btn muscle-btn" data-filter="arms">Arms</button>
+                    <button class="btn muscle-btn" data-filter="core">Core</button>
+                </div>
+            </div>
+
+            <div class="text-center mb-5">
+                <p class="section-title mb-3">Step 2: Training Intensity</p>
+                <div class="d-flex justify-content-center" style="gap: 15px;">
+                    <button class="btn diff-btn active intensity-btn" data-intensity="beginner"><i class="fas fa-leaf mr-2"></i> Beginner</button>
+                    <button class="btn diff-btn intensity-btn" data-intensity="intermediate"><i class="fas fa-fire mr-2"></i> Intermediate</button>
+                    <button class="btn diff-btn intensity-btn" data-intensity="expert"><i class="fas fa-skull-crossbones mr-2"></i> Expert</button>
+                </div>
+            </div>
+
+            <div id="routine-slider" class="mb-5 p-4 shadow-lg" style="background: #1a1a1a; border: 2px solid #28a745; border-radius: 20px; display: none;">
+                <h3 class="text-success font-weight-bold mb-4 text-center" id="routine-title">ROUTINE</h3>
+                <div id="exercise-list" class="list-group list-group-flush"></div>
+                <div class="text-center mt-4 d-flex justify-content-center" style="gap: 15px;">
+                    <button class="btn btn-outline-secondary px-4" style="border-radius: 20px;" onclick="document.getElementById('routine-slider').style.display='none'">Close</button>
+                    <button class="btn btn-success px-5 font-weight-bold" style="border-radius: 20px;" onclick="startTrainingSession()">START TRAINING</button>
+                </div>
+            </div>
+
+            <div class="row" id="exercise-grid">
+                {% for ex in exercises %}
+                <div class="col-lg-4 col-md-6 mb-4 exercise-card {{ ex.muscle_group|lower }} {{ ex.difficulty|lower }}">
+                    <div class="card text-white border-0 shadow-lg">
+                        <div class="card-header border-0 bg-transparent text-center pt-4">
+                            <h4 class="text-success font-weight-bold">{{ ex.name }}</h4>
+                        </div>
+                        <div class="p-3 text-center">
+                            <video autoplay loop muted playsinline class="exercise-video-fluid">
+                                <source src="{% if ex.video_url.url %}{{ ex.video_url.url }}{% else %}{{ ex.video_url }}{% endif %}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-secondary">{{ ex.description }}</p>
+                            <div class="text-center mb-3 p-2" style="background: #222; border-radius: 10px;">
+                                <div class="timer-display" id="timer-{{ ex.id }}">00:<span class="seconds">15</span></div>
+                                <button class="btn btn-sm btn-outline-success mt-1" onclick="startTimer('timer-{{ ex.id }}')">Start Set</button>
+                            </div>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="exercise_id" value="{{ ex.id }}">
+                                <div class="input-group">
+                                    <input type="number" name="reps" class="form-control bg-secondary text-white border-0" placeholder="Reps" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success px-3" type="submit">LOG</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const gifIndicator = document.getElementById('muscle-gif-indicator');
+    const targetText = document.getElementById('target-text');
+
+    const gifData = {
+        'arms':  { gif: "{% static 'images/arms-anim.gif' %}",  text: 'TARGETING: BICEPS & TRICEPS' },
+        'chest': { gif: "{% static 'images/chest-anim.gif' %}", text: 'TARGETING: PECTORALS' },
+        'back':  { gif: "{% static 'images/back-anim.gif' %}",  text: 'TARGETING: LATISSIMUS' },
+        'legs':  { gif: "{% static 'images/legs-anim.gif' %}",  text: 'TARGETING: QUADRICEPS' },
+        'core':  { gif: "{% static 'images/core-anim.gif' %}",  text: 'TARGETING: ABDOMINALS' },
+        'all':   { gif: "https://cdn-icons-png.flaticon.com/512/822/822143.png", text: 'FULL BODY ACTIVATION' }
+    };
+
+    const routineData = {
+        'chest-beginner': [
+            { name: "Standard Push-ups", detail: "3 sets of 12 reps", target: "Overall Chest", type: "reps", video: "/static/videos/exercises/pushup.mp4" },
+            { name: "Mountain Climbers", detail: "3 sets of 30s", target: "Chest & Cardio", type: "timer", seconds: 30, video: "/static/videos/exercises/mountain_climbers.mp4" },
+            { name: "Incline Push-ups", detail: "3 sets of 12 reps", target: "Lower Chest", type: "reps", video: "/static/videos/exercises/incline_pushup.mp4" }
+        ],
+        'chest-intermediate': [
+            { name: "Wide Push-ups", detail: "4 sets of 15 reps", target: "Outer Chest", type: "reps", video: "/static/videos/exercises/wide_pushup.mp4" },
+            { name: "Burpees", detail: "3 sets of 12 reps", target: "Full Body Fat Burn", type: "reps", video: "/static/videos/exercises/burpees.mp4" }
+        ],
+        'chest-expert': [
+            { name: "Diamond Push-ups", detail: "4 sets of 15 reps", target: "Inner Chest & Triceps", type: "reps", video: "/static/videos/exercises/diamond_pushup.mp4" },
+            { name: "Explosive Push-ups", detail: "3 sets of 10 reps", target: "Power & Chest Pop", type: "reps", video: "/static/videos/exercises/clap_pushup.mp4" }
+        ],
+        'back-beginner': [
+            { name: "Superman Holds", detail: "3 sets of 20s", target: "Lower Back", type: "timer", seconds: 20, video: "/static/videos/exercises/superman.mp4" }
+        ],
+        'core-beginner': [
+            { name: "Abdominal Crunches", detail: "3 sets of 20 reps", target: "Upper Abs", type: "reps", video: "/static/videos/exercises/crunch.mp4" },
+            { name: "Plank Hold", detail: "45 seconds", target: "Core Strength", type: "timer", seconds: 45, video: "/static/videos/exercises/plank.mp4" }
+        ]
+    };
+
+    function showRoutine() {
+        const activeMuscle = document.querySelector('.muscle-btn.active').getAttribute('data-filter');
+        const activeIntensity = document.querySelector('.intensity-btn.active').getAttribute('data-intensity');
+        const key = `${activeMuscle}-${activeIntensity}`;
+        
+        const slider = document.getElementById('routine-slider');
+        const list = document.getElementById('exercise-list');
+        const title = document.getElementById('routine-title');
+
+        if (routineData[key]) {
+            title.innerText = `${activeMuscle.toUpperCase()} ROUTINE (${activeIntensity.toUpperCase()})`;
+            list.innerHTML = ""; 
+
+            routineData[key].forEach((ex, index) => {
+                const timerHtml = ex.type === 'timer' 
+                    ? `<div class="mt-2"><span class="badge badge-success p-2" id="set-timer-${index}">${ex.seconds}s</span> <button class="btn btn-sm btn-dark ml-2" onclick="startRoutineTimer('set-timer-${index}', ${ex.seconds})">Start Timer</button></div>`
+                    : "";
+
+                list.innerHTML += `
+                    <div class="list-group-item bg-transparent text-white border-secondary py-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="d-flex align-items-center">
+                                <video autoplay loop muted playsinline class="routine-preview-vid">
+                                    <source src="${ex.video}" type="video/mp4">
+                                </video>
+                                <div>
+                                    <h5 class="text-success mb-0">${ex.name}</h5>
+                                    <small class="text-muted">${ex.target}</small>
+                                </div>
+                            </div>
+                            <div class="text-right mt-2 mt-md-0">
+                                <span class="font-weight-bold" style="font-size: 1.1rem;">${ex.detail}</span>
+                                ${timerHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            slider.style.display = 'block';
+        } else {
+            slider.style.display = 'none';
+        }
+    }
+
+    function startRoutineTimer(id, seconds) {
+        let display = document.getElementById(id);
+        let count = seconds;
+        let timer = setInterval(() => {
+            count--;
+            display.innerText = count + "s";
+            if (count <= 0) {
+                clearInterval(timer);
+                display.innerText = "DONE!";
+            }
+        }, 1000);
+    }
+
+    function applyFilters() {
+        const activeMuscle = document.querySelector('.muscle-btn.active').getAttribute('data-filter');
+        const activeIntensity = document.querySelector('.intensity-btn.active').getAttribute('data-intensity');
+
+        document.querySelectorAll('.exercise-card').forEach(card => {
+            const muscleMatch = (activeMuscle === 'all' || card.classList.contains(activeMuscle));
+            const intensityMatch = card.classList.contains(activeIntensity);
+
+            if (muscleMatch && intensityMatch) {
+                card.style.display = 'block';
+                const sec = (activeIntensity === 'expert') ? "45" : (activeIntensity === 'intermediate' ? "30" : "15");
+                card.querySelector('.seconds').innerText = sec;
+                
+                const vid = card.querySelector('video');
+                if(vid) vid.play(); 
+            } else {
+                card.style.display = 'none';
+                const vid = card.querySelector('video');
+                if(vid) vid.pause();
+            }
+        });
+        showRoutine();
+    }
+
+    document.querySelectorAll('.muscle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.muscle-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            applyFilters();
+        });
+        btn.addEventListener('mouseenter', function() {
+            const m = this.getAttribute('data-filter');
+            if(gifData[m]) {
+                gifIndicator.src = gifData[m].gif;
+                targetText.innerText = gifData[m].text;
+                gifIndicator.style.transform = 'scale(1.1)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.intensity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.intensity-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            applyFilters();
+        });
+    });
+
+    function startTimer(id) {
+        let container = document.getElementById(id);
+        let secSpan = container.querySelector('.seconds');
+        let count = parseInt(secSpan.innerText);
+        let timer = setInterval(() => {
+            count--;
+            secSpan.innerText = count < 10 ? "0" + count : count;
+            if (count <= 0) {
+                clearInterval(timer);
+                alert("Set Complete!");
+            }
+        }, 1000);
+    }
+
+    window.onload = applyFilters;
+
+    function startTrainingSession() {
+        const activeMuscle = document.querySelector('.muscle-btn.active').getAttribute('data-filter');
+        const activeIntensity = document.querySelector('.intensity-btn.active').getAttribute('data-intensity');
+        const key = `${activeMuscle}-${activeIntensity}`;
+
+        if (routineData[key]) {
+            localStorage.setItem('activeRoutine', JSON.stringify(routineData[key]));
+            localStorage.setItem('routineTitle', `${activeMuscle.toUpperCase()} ROUTINE (${activeIntensity.toUpperCase()})`);
+            window.location.href = "{% url 'training_session' %}"; 
+        } else {
+            alert("This routine isn't ready yet!");
+        }
+    }
+</script>
+</body>
+</html>

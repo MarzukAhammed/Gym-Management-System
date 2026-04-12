@@ -199,3 +199,60 @@ class HealthMemory(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.info_type}"
 
+class MemberMemory(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True, unique=True)
+    ai_facts = models.JSONField(default=dict, blank=True) # Stores location, goals, etc.
+
+    def __str__(self):
+        return f"Memory for {self.user.username if self.user else self.session_key}"
+
+class Exercise(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('Beginner', 'Beginner'),
+        ('Intermediate', 'Intermediate'),
+        ('Expert', 'Expert'),
+    ]
+    
+    name = models.CharField(max_length=100)
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
+    description = models.TextField()
+    animation_url = models.URLField(help_text="Link to exercise GIF or Lottie animation")
+    calories_per_rep = models.FloatField(default=0.5) # e.g., 0.5 kcal per pushup
+
+    def __str__(self):
+        return f"{self.name} ({self.difficulty})"
+from django.db import models
+
+class Exercise(models.Model):
+    MUSCLE_CHOICES = [
+        ('Chest', 'Chest'),
+        ('Back', 'Back'),
+        ('Legs', 'Legs'),
+        ('Arms', 'Arms'),
+        ('Core', 'Core'),
+        ('Full Body', 'Full Body'),
+    ]
+
+    DIFFICULTY_CHOICES = [
+        ('Beginner', 'Beginner'),
+        ('Intermediate', 'Intermediate'),
+        ('Expert', 'Expert'),
+    ]
+
+    name = models.CharField(max_length=100)
+    # Ensure this field exists for your intensity filtering
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='Beginner')
+    muscle_group = models.CharField(max_length=50, choices=MUSCLE_CHOICES, default='Full Body')
+    
+    # Description for the exercises you mentioned (e.g., "Targets upper chest")
+    description = models.TextField(blank=True, null=True)
+    
+    # URL or path for the exercise-specific GIF (e.g., a push-up animation)
+    animation_url = models.URLField(max_length=500, blank=True, null=True)
+    
+    # For calorie calculation
+    calories_per_rep = models.FloatField(default=0.1)
+
+    def __str__(self):
+        return f"{self.name} ({self.difficulty})"

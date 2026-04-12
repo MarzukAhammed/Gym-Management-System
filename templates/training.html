@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Active Training | Gymnasium</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: #111; color: white; font-family: 'Poppins', sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        .training-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        
+        /* Updated Container for Video */
+        .video-container { 
+            width: 100%; 
+            max-width: 550px; 
+            border: 3px solid #28a745; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            margin-bottom: 20px; 
+            box-shadow: 0 0 30px rgba(40, 167, 69, 0.3); 
+            background: #000;
+        }
+        .video-container video { width: 100%; display: block; }
+
+        .timer-text { font-size: 5rem; font-weight: 800; color: #28a745; line-height: 1; }
+        .rep-text { font-size: 3rem; font-weight: 700; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="p-4 bg-dark d-flex justify-content-between align-items-center border-bottom border-success">
+        <h3 id="page-title" class="text-success m-0 font-weight-bold">Loading Session...</h3>
+        <a href="javascript:history.back()" class="btn btn-outline-danger">Quit Workout</a>
+    </div>
+
+    <div class="training-container p-4">
+        <h2 id="exercise-name" class="display-4 font-weight-bold mb-3">Exercise Name</h2>
+        <p id="exercise-target" class="text-muted text-uppercase letter-spacing-2 mb-4">Target Muscle</p>
+
+        <div class="video-container">
+            <video id="exercise-video" autoplay loop muted playsinline>
+                <source id="video-source" src="" type="video/mp4">
+            </video>
+        </div>
+
+        <div id="action-area" class="mb-4" style="min-height: 100px;"></div>
+
+        <button id="next-btn" class="btn btn-success btn-lg px-5 py-3 font-weight-bold" style="border-radius: 50px; font-size: 1.2rem;" onclick="nextExercise()">
+            NEXT EXERCISE ➔
+        </button>
+    </div>
+
+<script>
+    const routineData = JSON.parse(localStorage.getItem('activeRoutine'));
+    const routineTitle = localStorage.getItem('routineTitle');
+    let currentIndex = 0;
+    let timerInterval;
+
+    if(routineTitle) document.getElementById('page-title').innerText = routineTitle;
+
+    function loadExercise(index) {
+        clearInterval(timerInterval); 
+        
+        const ex = routineData[index];
+        document.getElementById('exercise-name').innerText = ex.name;
+        document.getElementById('exercise-target').innerText = "TARGETING: " + ex.target;
+
+        // HANDLE VIDEO LOADING
+        const video = document.getElementById('exercise-video');
+        const source = document.getElementById('video-source');
+        
+        // Use ex.video (which we set in the library page)
+        if (ex.video) {
+            source.src = ex.video;
+            video.load(); // Forces the player to refresh the source
+            video.play();
+        }
+
+        const actionArea = document.getElementById('action-area');
+        const nextBtn = document.getElementById('next-btn');
+
+        if (index === routineData.length - 1) {
+            nextBtn.innerText = "FINISH WORKOUT 🏆";
+            nextBtn.classList.replace('btn-success', 'btn-warning');
+        }
+
+        if (ex.type === 'timer') {
+            actionArea.innerHTML = `<div class="timer-text" id="live-timer">${ex.seconds}s</div><p class="text-muted mt-2">Keep going until the timer stops!</p>`;
+            startTimer(ex.seconds);
+        } else {
+            actionArea.innerHTML = `<div class="rep-text">${ex.detail}</div><p class="text-success mt-2">Complete your sets at your own pace.</p>`;
+        }
+    }
+
+    function startTimer(seconds) {
+        let timeLeft = seconds;
+        let display = document.getElementById('live-timer');
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            display.innerText = timeLeft + "s";
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                display.innerText = "DONE!";
+            }
+        }, 1000);
+    }
+
+    function nextExercise() {
+        currentIndex++;
+        if (currentIndex < routineData.length) {
+            loadExercise(currentIndex);
+        } else {
+            document.querySelector('.training-container').innerHTML = `
+                <h1 class="display-3 text-success font-weight-bold mb-4">WORKOUT COMPLETE!</h1>
+                <p class="lead mb-5">Great job crushing the ${routineTitle}.</p>
+                <a href="{% url 'exercise_library' %}" class="btn btn-outline-success btn-lg px-5">Return to Library</a>
+            `;
+        }
+    }
+
+    if (routineData && routineData.length > 0) {
+        loadExercise(0);
+    } else {
+        document.querySelector('.training-container').innerHTML = "<h1 class='text-danger'>Error: No routine data found.</h1>";
+    }
+</script>
+</body>
+</html>

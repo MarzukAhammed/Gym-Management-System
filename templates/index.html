@@ -57,57 +57,7 @@
   </div>
   <!-- Back to top end -->
    <!-- Navbar Part Start -->
-   <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
-    <div class="container main">
-      <a class="navbar-brand" href="#"><img src="{% static 'images/logo.png' %}" alt=""></a>
-      <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 main_menu">
-<li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'plans' %}">Plans</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'team' %}">Team</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'gallery' %}">Gallery</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'testimonial' %}">Testimonial</a></li>
-
-<li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Features
-    </a>
-    <ul class="dropdown-menu shadow" aria-labelledby="featuresDropdown">
-        <li><a class="dropdown-item" href="{% url 'workout' %}">🏋️ AI Push-up Counter</a></li>
-        <li><a class="dropdown-item" href="{% url 'diet' %}">🥗 Diet Plans</a></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="#">📊 Progress Tracker</a></li>
-    </ul>
-</li>
-
-<li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
-
-{% if user.is_authenticated %}
-    <li class="nav-item d-flex align-items-center">
-        <a href="{% url 'profile' %}" class="nav-link d-flex align-items-center me-3">
-            <div style="width: 35px; height: 35px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase;">
-                {{ user.username|slice:":1" }}
-            </div>
-            <span class="ms-2 d-none d-lg-inline">{{ user.username }}</span>
-        </a>
-
-        <form action="{% url 'logout' %}" method="post" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger">Logout</button>
-        </form>
-    </li>
-{% else %}
-    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 ms-2" href="{% url 'signup' %}">Sign Up</a></li>
-{% endif %}
-</ul>
-      </div>
-    </div>
-  </nav>
+   {% include "navbar.html" %}
 
    <!-- Navbar Part End -->
 

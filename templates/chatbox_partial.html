@@ -1,0 +1,91 @@
+<div id="chat-container" style="position: fixed; bottom: 80px; right: 20px; z-index: 9999; cursor: grab;">
+    
+    <div id="chat-bubble" style="background: #28a745; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; position: relative;">
+        
+        <div class="orange-cat" style="width: 45px; height: 45px; background: #ff9800; border-radius: 50%; position: relative;">
+            <div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 15px solid #ff9800; position: absolute; top: -8px; left: 2px; transform: rotate(-15deg);"></div>
+            <div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 15px solid #ff9800; position: absolute; top: -8px; right: 2px; transform: rotate(15deg);"></div>
+            <div style="width: 5px; height: 5px; background: #333; border-radius: 50%; position: absolute; top: 18px; left: 12px;"></div>
+            <div style="width: 5px; height: 5px; background: #333; border-radius: 50%; position: absolute; top: 18px; right: 12px;"></div>
+            <div style="width: 4px; height: 4px; background: #ff5722; border-radius: 50%; position: absolute; top: 25px; left: 21px;"></div>
+        </div>
+    </div>
+
+    <div id="chat-window" style="display: none; position: absolute; bottom: 85px; right: 0; width: 330px; height: 480px; background: white; border-radius: 20px; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #eee;">
+        
+        <div style="background: #222; color: white; padding: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold;">Lolona AI 🐾</span>
+            <button onclick="document.getElementById('chat-window').style.display='none'" style="background:none; border:none; color:white; cursor:pointer; font-size: 20px;">&times;</button>
+        </div>
+
+        <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #fff; display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: #f1f0f0; padding: 10px 15px; border-radius: 18px 18px 18px 4px; align-self: flex-start; max-width: 85%;">
+                Meow! I'm back in my orange look. Ready to work out?
+            </div>
+        </div>
+
+        <div style="padding: 15px; border-top: 1px solid #f0f0f0; display: flex;">
+            <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; border: 1px solid #e0e0e0; padding: 12px 15px; border-radius: 25px; outline: none;">
+            <button id="send-btn" style="background: #28a745; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; margin-left: 10px; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('chat-container');
+    const bubble = document.getElementById('chat-bubble');
+    const windowDiv = document.getElementById('chat-window');
+    const sendBtn = document.getElementById('send-btn');
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+
+    bubble.onclick = () => {
+        if (container.dataset.dragging !== "true") {
+            windowDiv.style.display = windowDiv.style.display === 'none' ? 'flex' : 'none';
+        }
+    };
+
+    // Dragging Logic
+    let isDragging = false, offset = { x: 0, y: 0 };
+    container.onmousedown = (e) => {
+        isDragging = true;
+        container.dataset.dragging = "false";
+        offset.x = e.clientX - container.getBoundingClientRect().left;
+        offset.y = e.clientY - container.getBoundingClientRect().top;
+    };
+    document.onmousemove = (e) => {
+        if (!isDragging) return;
+        container.dataset.dragging = "true";
+        container.style.left = (e.clientX - offset.x) + 'px';
+        container.style.top = (e.clientY - offset.y) + 'px';
+        container.style.bottom = 'auto';
+        container.style.right = 'auto';
+    };
+    document.onmouseup = () => {
+        isDragging = false;
+        setTimeout(() => { container.dataset.dragging = "false"; }, 100);
+    };
+
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        messages.innerHTML += `<div style="background: #28a745; color: white; padding: 10px 15px; border-radius: 18px 18px 4px 18px; align-self: flex-end;">${text}</div>`;
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+
+        const response = await fetch('/chat-with-ai/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: `text=${encodeURIComponent(text)}`
+        });
+        const data = await response.json();
+        messages.innerHTML += `<div style="background: #f1f0f0; padding: 10px 15px; border-radius: 18px 18px 18px 4px; align-self: flex-start;"><strong>Lolona:</strong> ${data.reply}</div>`;
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    sendBtn.onclick = sendMessage;
+    input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+</script>
