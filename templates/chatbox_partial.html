@@ -1,91 +1,280 @@
-<div id="chat-container" style="position: fixed; bottom: 80px; right: 20px; z-index: 9999; cursor: grab;">
-    
-    <div id="chat-bubble" style="background: #28a745; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; position: relative;">
-        
-        <div class="orange-cat" style="width: 45px; height: 45px; background: #ff9800; border-radius: 50%; position: relative;">
-            <div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 15px solid #ff9800; position: absolute; top: -8px; left: 2px; transform: rotate(-15deg);"></div>
-            <div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 15px solid #ff9800; position: absolute; top: -8px; right: 2px; transform: rotate(15deg);"></div>
-            <div style="width: 5px; height: 5px; background: #333; border-radius: 50%; position: absolute; top: 18px; left: 12px;"></div>
-            <div style="width: 5px; height: 5px; background: #333; border-radius: 50%; position: absolute; top: 18px; right: 12px;"></div>
-            <div style="width: 4px; height: 4px; background: #ff5722; border-radius: 50%; position: absolute; top: 25px; left: 21px;"></div>
-        </div>
-    </div>
+{% load static %}
+{% csrf_token %}
+<style>
+#floating-cat-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    cursor: grab;
+    transition: all 0.8s ease-in-out;
+    z-index: 10001 !important;
+}
 
-    <div id="chat-window" style="display: none; position: absolute; bottom: 85px; right: 0; width: 330px; height: 480px; background: white; border-radius: 20px; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #eee;">
-        
-        <div style="background: #222; color: white; padding: 18px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: bold;">Lolona AI 🐾</span>
-            <button onclick="document.getElementById('chat-window').style.display='none'" style="background:none; border:none; color:white; cursor:pointer; font-size: 20px;">&times;</button>
-        </div>
+#floating-cat-container:active { cursor: grabbing; }
 
-        <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; background: #fff; display: flex; flex-direction: column; gap: 12px;">
-            <div style="background: #f1f0f0; padding: 10px 15px; border-radius: 18px 18px 18px 4px; align-self: flex-start; max-width: 85%;">
-                Meow! I'm back in my orange look. Ready to work out?
-            </div>
-        </div>
+#cat-trigger img {
+    width: 70px;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+}
 
-        <div style="padding: 15px; border-top: 1px solid #f0f0f0; display: flex;">
-            <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; border: 1px solid #e0e0e0; padding: 12px 15px; border-radius: 25px; outline: none;">
-            <button id="send-btn" style="background: #28a745; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; margin-left: 10px; cursor: pointer;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
-        </div>
+#premium-chatbox {
+    position: fixed;
+    bottom: 110px;
+    right: 30px;
+    width: 360px;
+    height: 500px;
+    background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(9, 14, 26, 0.95));
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 22px;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 20px 55px rgba(0,0,0,0.55);
+    overflow: hidden;
+    color: white;
+    z-index: 10000 !important;
+}
+
+.chat-header {
+    background: linear-gradient(90deg, rgba(53, 88, 220, 0.35), rgba(86, 193, 253, 0.18));
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.user-info { display:flex; align-items:center; gap:10px; }
+.ai-meta { display:flex; flex-direction:column; line-height:1.15; }
+.ai-name { font-weight:700; letter-spacing:0.2px; color:#fff; }
+.ai-tagline { color: rgba(255,255,255,0.78); font-size:11px; }
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background: #2ecc71;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 10px #2ecc71;
+}
+
+#chat-messages {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at top right, rgba(86, 193, 253, 0.18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(92, 110, 240, 0.16), transparent 35%);
+}
+
+.bot-msg {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 10px 14px;
+    border-radius: 16px 16px 16px 6px;
+    max-width: 80%;
+    color: #fff;
+    font-size: 14px;
+}
+
+.user-msg {
+    background: linear-gradient(120deg, #316dff, #57b4ff) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 8px 20px rgba(42, 115, 255, 0.35);
+}
+
+.chat-input-area {
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.18);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    padding: 10px 14px;
+    color: white;
+    outline: none;
+}
+
+.chat-input-area input::placeholder { color: rgba(255,255,255,0.6); }
+
+.chat-input-area button {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(130deg, #335bff, #4cc2ff);
+    box-shadow: 0 10px 22px rgba(39, 118, 255, 0.35);
+}
+
+.close-btn {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    background: rgba(255,255,255,0.12);
+}
+</style>
+<div id="floating-cat-container">
+    <div id="cat-trigger">
+        <img
+            src="{% static 'images/Lovely Cat.gif' %}"
+            data-idle-src="{% static 'images/Lovely Cat.gif' %}"
+            data-run-src="{% static 'images/cat_run.gif' %}"
+            id="main-cat-img"
+            alt="Lolona"
+        >
     </div>
 </div>
 
 <script>
-    const container = document.getElementById('chat-container');
-    const bubble = document.getElementById('chat-bubble');
-    const windowDiv = document.getElementById('chat-window');
-    const sendBtn = document.getElementById('send-btn');
-    const input = document.getElementById('chat-input');
-    const messages = document.getElementById('chat-messages');
+const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
+</script>
 
-    bubble.onclick = () => {
-        if (container.dataset.dragging !== "true") {
-            windowDiv.style.display = windowDiv.style.display === 'none' ? 'flex' : 'none';
-        }
-    };
+<div id="premium-chatbox" class="glass-effect">
+    <div class="chat-header">
+        <div class="user-info">
+            <div class="status-dot"></div>
+            <div class="ai-meta">
+                <span class="ai-name">Lolona AI</span>
+                <small class="ai-tagline">Premium fitness assistant</small>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="close-btn">&times;</button>
+    </div>
+    <div id="chat-messages">
+        <div class="bot-msg">Welcome back, human. Ask your fitness question.</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="ai-user-input" placeholder="Type a message...">
+        <button onclick="sendToAI()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
 
-    // Dragging Logic
-    let isDragging = false, offset = { x: 0, y: 0 };
-    container.onmousedown = (e) => {
-        isDragging = true;
-        container.dataset.dragging = "false";
-        offset.x = e.clientX - container.getBoundingClientRect().left;
-        offset.y = e.clientY - container.getBoundingClientRect().top;
-    };
-    document.onmousemove = (e) => {
-        if (!isDragging) return;
-        container.dataset.dragging = "true";
-        container.style.left = (e.clientX - offset.x) + 'px';
-        container.style.top = (e.clientY - offset.y) + 'px';
-        container.style.bottom = 'auto';
-        container.style.right = 'auto';
-    };
-    document.onmouseup = () => {
-        isDragging = false;
-        setTimeout(() => { container.dataset.dragging = "false"; }, 100);
-    };
+<script>
+(function () {
+    const cat = document.getElementById("floating-cat-container");
+    const catImg = document.getElementById("main-cat-img");
+    const chatBox = document.getElementById("premium-chatbox");
+    const input = document.getElementById("ai-user-input");
+    const messages = document.getElementById("chat-messages");
+    const csrfInput = document.querySelector("[name=csrfmiddlewaretoken]");
 
-    async function sendMessage() {
-        const text = input.value.trim();
-        if (!text) return;
+    if (!cat || !chatBox || !input || !messages) return;
 
-        messages.innerHTML += `<div style="background: #28a745; color: white; padding: 10px 15px; border-radius: 18px 18px 4px 18px; align-self: flex-end;">${text}</div>`;
-        input.value = '';
-        messages.scrollTop = messages.scrollHeight;
-
-        const response = await fetch('/chat-with-ai/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: `text=${encodeURIComponent(text)}`
-        });
-        const data = await response.json();
-        messages.innerHTML += `<div style="background: #f1f0f0; padding: 10px 15px; border-radius: 18px 18px 18px 4px; align-self: flex-start;"><strong>Lolona:</strong> ${data.reply}</div>`;
+    function appendMessage(type, text) {
+        const align = type === "user" ? "flex-end" : "flex-start";
+        const bubbleClass = type === "user" ? "user-msg" : "bot-msg";
+        messages.innerHTML += `<div class="message-wrapper ${type}" style="justify-content: ${align}; display: flex; margin-bottom: 10px;"><div class="${bubbleClass}" style="padding: 8px 15px; border-radius: 15px;">${text}</div></div>`;
         messages.scrollTop = messages.scrollHeight;
     }
 
-    sendBtn.onclick = sendMessage;
-    input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+    window.toggleChat = window.toggleChat || function () {
+        chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+    };
+
+    let isDragging = false;
+    let isMoving = false;
+    let startX = 0, startY = 0;
+    let offsetX = 0, offsetY = 0;
+
+    function onMouseMove(e) {
+        const moveX = Math.abs(e.clientX - startX);
+        const moveY = Math.abs(e.clientY - startY);
+        if (moveX > 5 || moveY > 5) {
+            isDragging = true;
+            isMoving = true;
+            cat.style.transition = "none";
+            cat.style.left = (e.clientX - offsetX) + "px";
+            cat.style.top = (e.clientY - offsetY) + "px";
+            cat.style.right = "auto";
+            cat.style.bottom = "auto";
+        }
+    }
+
+    function onMouseUp() {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+        cat.style.transition = "all 0.3s ease";
+        setTimeout(function () {
+            isDragging = false;
+            isMoving = false;
+        }, 100);
+    }
+
+    cat.addEventListener("mousedown", function (e) {
+        if (e.button !== 0) return;
+        isDragging = false;
+        isMoving = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = cat.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+        e.preventDefault();
+    });
+
+    cat.addEventListener("click", function () {
+        if (isMoving || isDragging) return;
+
+        if (typeof isLoggedIn !== "undefined" && isLoggedIn === "false") {
+            const maxX = window.innerWidth - 180;
+            const maxY = window.innerHeight - 180;
+            cat.style.left = (Math.random() * maxX) + "px";
+            cat.style.top = (Math.random() * maxY) + "px";
+            cat.style.right = "auto";
+            cat.style.bottom = "auto";
+            if (catImg && catImg.dataset.runSrc) {
+                catImg.src = catImg.dataset.runSrc;
+                setTimeout(function () { catImg.src = catImg.dataset.idleSrc || catImg.src; }, 900);
+            }
+            return;
+        }
+
+        window.toggleChat();
+    });
+
+    window.sendToAI = window.sendToAI || async function () {
+        const text = input.value.trim();
+        if (!text) return;
+        appendMessage("user", text);
+        input.value = "";
+
+        try {
+            const response = await fetch("/chat-with-ai/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfInput ? csrfInput.value : ""
+                },
+                body: `text=${encodeURIComponent(text)}`
+            });
+            const data = await response.json();
+            appendMessage("bot", data.reply || "Meow.");
+        } catch (e) {
+            appendMessage("bot", "Network issue. Try again.");
+        }
+    };
+
+    input.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            window.sendToAI();
+        }
+    });
+})();
 </script>

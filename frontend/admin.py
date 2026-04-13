@@ -1,7 +1,10 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import Plan, Trainer, Member, Review, Contact, GalleryMember, SuccessStory, DietPlan, Payment
+from .models import Plan, Trainer, Member, Review, Contact, GalleryMember, SuccessStory, Payment
+
+admin.site.unregister(Group)
 
 # ১. BaseAdmin (Buttons hide + Action bar remove)
 class BaseAdmin(admin.ModelAdmin):
@@ -47,15 +50,22 @@ class MemberAdmin(ActionAdmin):
     list_display = ('user', 'plan', 'delete_button') 
     search_fields = ('user__username', 'plan__title')
 
-@admin.register(DietPlan)
-class DietPlanAdmin(ActionAdmin):
-    list_display = ('title', 'calories', 'delete_button')
-    search_fields = ('title',)
-
 @admin.register(Payment)
 class PaymentAdmin(ActionAdmin):
-    list_display = ('full_name', 'amount', 'verified', 'delete_button')
+    list_display = ('full_name', 'amount', 'verified', 'mark_received_button', 'delete_button')
     search_fields = ('full_name', 'phone', 'transaction_id')
+    actions = ['mark_payment_received']
+
+    def mark_received_button(self, obj):
+        if obj.verified:
+            return format_html('<span style="color:#22c55e;font-weight:700;">Received</span>')
+        return format_html('<span style="color:#f59e0b;font-weight:700;">Pending</span>')
+    mark_received_button.short_description = "Payment Received"
+
+    def mark_payment_received(self, request, queryset):
+        updated = queryset.update(verified=True)
+        self.message_user(request, f"{updated} payment(s) marked as received.")
+    mark_payment_received.short_description = "Mark selected payments as received"
 
 @admin.register(Review)
 class ReviewAdmin(ActionAdmin):

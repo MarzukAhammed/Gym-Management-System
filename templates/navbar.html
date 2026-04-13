@@ -18,25 +18,67 @@
     <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         Features
     </a>
-    <ul class="dropdown-menu shadow" aria-labelledby="featuresDropdown">
-        <li><a class="dropdown-item" href="{% url 'workout' %}">🏋️ AI Push-up Counter</a></li>
-        <li><a class="dropdown-item" href="{% url 'diet' %}">🥗 Diet Plans</a></li>
+    <ul class="dropdown-menu shadow feature-dropdown-menu" aria-labelledby="featuresDropdown">
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'workout' %}">
+                <span class="feature-icon">🏋️</span>
+                <span class="feature-label">AI Push-up Counter</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'diet' %}">
+                <span class="feature-icon">🥗</span>
+                <span class="feature-label">Diet Plans</span>
+            </a>
+        </li>
         <li><hr class="dropdown-divider"></li>
-        <li><a href="{% url 'progress_tracker' %}">   📊 Progress Tracker</a></li>
-        <li>  <a class="dropdown-item" href="{% url 'exercise_library' %}">
-    <img src="{% static 'icons/workout.png' %}" width="20"> Exercise Library
-</a></li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'progress_tracker' %}">
+                <span class="feature-icon">📊</span>
+                <span class="feature-label">Progress Tracker</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'exercise_library' %}">
+                <span class="feature-icon"><img src="{% static 'icons/workout.png' %}" width="18" alt="Workout"></span>
+                <span class="feature-label">Exercise Library</span>
+            </a>
+        </li>
     </ul>
 </li>
-
 <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
 
+</ul>
+<ul class="navbar-nav mb-2 mb-lg-0 ms-lg-4 auth-nav align-items-lg-center">
 {% if user.is_authenticated %}
-    <li class="nav-item d-flex align-items-center">
-        <a href="{% url 'profile' %}" class="nav-link d-flex align-items-center me-3">
-            <div style="width: 35px; height: 35px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase;">
-                {{ user.username|slice:":1" }}
-            </div>
+    <li class="nav-item dropdown me-2">
+        <a class="nav-link position-relative notification-trigger" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-regular fa-bell"></i>
+            {% if unread_notification_count > 0 %}
+                <span class="notification-badge">{{ unread_notification_count }}</span>
+            {% endif %}
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationDropdown">
+            <li class="notification-title">Notifications</li>
+            <li><hr class="dropdown-divider"></li>
+            {% for item in navbar_notifications %}
+                <li>
+                    <span class="dropdown-item notification-item {{ item.type }}">{{ item.text }}</span>
+                </li>
+            {% empty %}
+                <li><span class="dropdown-item notification-item info">No new notifications</span></li>
+            {% endfor %}
+        </ul>
+    </li>
+    <li class="nav-item d-flex align-items-center auth-user-item">
+        <a href="{% url 'profile' %}" class="nav-link d-flex align-items-center me-3 auth-profile-link">
+            {% if user.profile.photo %}
+                <img src="{{ user.profile.photo.url }}" alt="{{ user.username }}" class="nav-user-photo">
+            {% else %}
+                <div class="nav-user-photo-fallback">
+                    {{ user.username|slice:":1" }}
+                </div>
+            {% endif %}
             <span class="ms-2 d-none d-lg-inline">{{ user.username }}</span>
         </a>
 

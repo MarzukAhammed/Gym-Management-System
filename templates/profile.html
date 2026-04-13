@@ -73,6 +73,18 @@
         <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
         <p class="text-warning">Fitness Plan: {{ profile.fitness_goal|default:"General" }}</p>
 
+        {% if selected_plan %}
+        <div class="info-box text-start mt-3">
+            <strong>Membership Plan:</strong> {{ selected_plan }}
+            <div class="text-success small mt-1">Payment verified by admin ✅</div>
+        </div>
+        {% elif pending_plan %}
+        <div class="info-box text-start mt-3">
+            <strong>Membership Plan:</strong> {{ pending_plan }}
+            <div class="text-warning small mt-1">Payment verification pending. We will confirm soon.</div>
+        </div>
+        {% endif %}
+
         <div class="bmr-box mt-4">
             <h5 class="text-uppercase" style="letter-spacing: 1px; font-size: 0.9rem; color: #ff9600;">Daily Calorie Burn (BMR)</h5>
             <h2 class="display-5 fw-bold">{{ profile.calculate_daily_calories }}</h2>
@@ -109,6 +121,10 @@
             </div>
 
             <div class="info-box">
+                <strong>Date of Birth:</strong> {{ profile.date_of_birth|default:"Not set" }}
+            </div>
+
+            <div class="info-box">
                 <strong>Email:</strong> {{ profile.user.email }}
             </div>
 
@@ -116,11 +132,9 @@
                 <strong>Address:</strong> {{ profile.address|default:"Not set" }}
             </div>
 
-            {% if profile.bio %}
             <div class="info-box">
-                <strong>Bio:</strong> {{ profile.bio }}
+                <strong>Bio:</strong> {{ profile.bio|default:"Not set" }}
             </div>
-            {% endif %}
 
             <div class="info-box">
                 <strong>Socials:</strong> 

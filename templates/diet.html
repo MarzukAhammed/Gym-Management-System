@@ -88,7 +88,7 @@
                 </div>
 
                 <div class="calories">
-                    🔥 {{ plan.calories }} kcal
+                    🔥 {{ plan.display_calories|default:plan.calories }} kcal
                 </div>
             </div>
         </div>

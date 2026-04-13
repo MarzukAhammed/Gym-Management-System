@@ -2,44 +2,151 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manual Payment</title>
+    <title>bKash Manual Payment</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, rgba(255, 77, 141, 0.25), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(94, 114, 255, 0.2), transparent 40%),
+                #080c18;
+            color: #fff;
+        }
+        .pay-wrap {
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+        .pay-card {
+            border-radius: 22px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: linear-gradient(165deg, rgba(18, 24, 41, 0.95), rgba(10, 14, 27, 0.96));
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+            overflow: hidden;
+        }
+        .pay-head {
+            padding: 18px 22px;
+            background: linear-gradient(90deg, rgba(255, 77, 141, 0.35), rgba(101, 126, 255, 0.28));
+            border-bottom: 1px solid rgba(255,255,255,0.14);
+        }
+        .pay-body { padding: 22px; }
+        .merchant-box {
+            border: 1px dashed rgba(255,255,255,0.3);
+            border-radius: 14px;
+            padding: 16px;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 16px;
+        }
+        .merchant-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd4e6;
+        }
+        .qr-note {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.75);
+        }
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.72);
+            margin-top: 10px;
+        }
+        .form-label { color: rgba(255,255,255,0.9); font-weight: 600; }
+        .form-control {
+            background: rgba(255,255,255,0.09);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 12px;
+        }
+        .form-control:focus {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border-color: rgba(255, 109, 163, 0.9);
+            box-shadow: 0 0 0 0.2rem rgba(255, 109, 163, 0.2);
+        }
+        .btn-pay {
+            background: linear-gradient(120deg, #ff4d8d, #6c7dff);
+            border: 0;
+            font-weight: 700;
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">💳 Manual Payment</h2>
+<div class="pay-wrap">
+    <div class="pay-card">
+        <div class="pay-head">
+            <h3 class="mb-1">bKash Manual Payment</h3>
+            <p class="mb-0">Send payment to merchant number, then submit confirmation below.</p>
+        </div>
+        <div class="pay-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
 
-    <div class="card p-4 shadow">
-        <form method="POST">
+            <div class="merchant-box">
+                <div class="mb-2">Send money to this bKash number:</div>
+                <div class="merchant-number">01760813261</div>
+                <div class="qr-note mt-2">Reference must include your username and phone number.</div>
+                <img
+                    src="{% static 'images/bkash-qr.png' %}"
+                    alt="bKash QR"
+                    style="width:180px; height:180px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); margin-top:10px; object-fit:cover;"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                >
+                <div class="qr-placeholder" style="display:none;">
+                    Add your bKash QR image at
+                    <br>
+                    <strong>static/images/bkash-qr.png</strong>
+                </div>
+            </div>
+
+            <form method="POST">
             {% csrf_token %}
 
-            <!-- Amount -->
             <div class="mb-3">
                 <label class="form-label">Enter Amount (BDT)</label>
-                <input type="number" name="amount" class="form-control" placeholder="Enter any amount" required>
+                <input type="number" name="amount" class="form-control" placeholder="Enter amount you sent" required>
             </div>
 
-            <!-- Payment Method -->
             <div class="mb-3">
-                <label class="form-label">Payment Method</label>
-                <select name="method" class="form-control" required>
-                    <option value="">-- Select --</option>
-                    <option value="bkash">bKash</option>
-                    <option value="nagad">Nagad</option>
-                </select>
+                <label class="form-label">Your Username (Reference)</label>
+                <input type="text" name="reference_username" class="form-control" value="{{ default_username }}" placeholder="Enter your website username" required>
             </div>
 
-            <!-- Transaction ID -->
             <div class="mb-3">
-                <label class="form-label">Transaction ID</label>
-                <input type="text" name="trx_id" class="form-control" placeholder="Enter TrxID" required>
+                <label class="form-label">Your Phone Number (Reference)</label>
+                <input type="text" name="sender_number" class="form-control" placeholder="Enter your phone number" required>
             </div>
 
-            <button type="submit" class="btn btn-success w-100">
-                Submit Payment
-            </button>
-        </form>
+            <div class="mb-3">
+                <label class="form-label">Transaction ID (optional)</label>
+                <input type="text" name="trx_id" class="form-control" placeholder="Enter TrxID if available">
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="confirmPaid" required>
+                <label class="form-check-label" for="confirmPaid">
+                    I confirm I have sent payment to 01760813261 and reference includes my username + number.
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-pay w-100">I Have Sent Payment</button>
+            </form>
+        </div>
     </div>
 </div>
 {% include "chatbox_partial.html" %}

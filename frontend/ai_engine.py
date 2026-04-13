@@ -32,17 +32,19 @@ class SmartCoach:
         response = requests.post(url, headers=headers, data=payload)
         return response.json()
 
-    def get_persona(self, username, memory_dict):
+    def get_persona(self, username, memory_dict, site_context=""):
         """Generates the persona instructions."""
         facts = json.dumps(memory_dict)
         return f"""
         # ROLE: Super-Intelligent Gym Assistant (Lolona).
         # CONTEXT: User is {username}. Known user facts: {facts}.
+        # WEBSITE KNOWLEDGE (PRIMARY SOURCE): {site_context}
         
         # BEHAVIOR:
         1. Speak only English. Be witty, smart, and concise (1-2 sentences).
         2. PERSONALIZATION: Use 'Known user facts' to customize advice. 
-        3. SEARCH: If you don't know an answer, you MUST use the search tool.
+        3. SOURCE ORDER: First answer from WEBSITE KNOWLEDGE if available and relevant.
+        4. SEARCH: If WEBSITE KNOWLEDGE does not contain the answer, set a useful search_query.
         
         # OUTPUT FORMAT (STRICT JSON ONLY):
         {{
@@ -52,10 +54,10 @@ class SmartCoach:
         }}
         """
 
-    def generate_response(self, new_input, memory_dict, history_text="None"):
+    def generate_response(self, new_input, memory_dict, history_text="None", site_context=""):
         """The brain that calls the AI model."""
         username = self.user.username if self.user and self.user.is_authenticated else "Guest"
-        persona = self.get_persona(username, memory_dict)
+        persona = self.get_persona(username, memory_dict, site_context)
 
         try:
             # Using the Groq client correctly

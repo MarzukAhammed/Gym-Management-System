@@ -13,6 +13,10 @@ from .models import HealthMemory, MemberMemory, Exercise, UserProgress
 from .ai_engine import SmartCoach
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json, datetime
+import re
+from pathlib import Path
+from functools import lru_cache
+from django.conf import settings
 
 # Home Page
 def home(request):
@@ -47,11 +51,14 @@ def join_now(request):
                 messages.error(request, "A member with this email already exists.")
             else:
                 member = form.save(commit=False)
+                selected_plan = form.cleaned_data.get('plan')
+                if selected_plan:
+                    member.plan = selected_plan.title
                 if request.user.is_authenticated:
                     member.user = request.user
                 member.save()
                 messages.success(request, "🎉 You have successfully joined our gym!")
-                return redirect('home')
+                return redirect('payment')
     else:
         form = JoinForm()
         form.fields['plan'].queryset = Plan.objects.all()
@@ -61,6 +68,12 @@ def join_now(request):
 def edit_profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
+        full_name = (request.POST.get('name') or '').strip()
+        if full_name:
+            name_parts = full_name.split()
+            request.user.first_name = name_parts[0]
+            request.user.last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+
         profile.phone = request.POST.get('phone')
         profile.address = request.POST.get('address')
         profile.bio = request.POST.get('bio')
@@ -80,14 +93,61 @@ def edit_profile(request):
         email = request.POST.get('email')
         if email:
             request.user.email = email
-            request.user.save()
+        request.user.save()
         return redirect('profile')
     return render(request, 'edit_profile.html', {'profile': profile})
 
 @login_required
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
-    return render(request, 'profile.html', {'profile': profile})
+    member = getattr(request.user, 'member', None)
+    payment_qs = Payment.objects.filter(verified=True, full_name__iexact=request.user.username)
+    user_phone = ""
+    if member and getattr(member, "phone", None):
+        user_phone = member.phone
+    elif profile and getattr(profile, "phone", None):
+        user_phone = profile.phone
+
+    if user_phone:
+        verified_payment = payment_qs.filter(phone=user_phone).exists()
+    else:
+        verified_payment = payment_qs.exists()
+
+    def _resolve_plan_name(raw_plan_value):
+        if not raw_plan_value:
+            return None
+        raw = str(raw_plan_value).strip()
+        match = re.search(r"Plan object \((\d+)\)", raw)
+        if match:
+            try:
+                plan_obj = Plan.objects.filter(id=int(match.group(1))).first()
+                if plan_obj:
+                    return plan_obj.title
+            except Exception:
+                pass
+        return raw
+
+    def _friendly_plan_name(raw_name):
+        if not raw_name:
+            return raw_name
+        n = raw_name.strip().lower()
+        if "basic" in n or "starter" in n:
+            return "Starter (Basic)"
+        if "standard" in n or "pro" in n:
+            return "Pro (Standard)"
+        if "premium" in n or "elite" in n:
+            return "Elite (Premium)"
+        return raw_name
+
+    clean_plan_name = _resolve_plan_name(member.plan) if member else None
+    display_plan_name = _friendly_plan_name(clean_plan_name) if clean_plan_name else None
+    selected_plan = display_plan_name if display_plan_name and verified_payment else None
+    pending_plan = display_plan_name if display_plan_name and not verified_payment else None
+    return render(request, 'profile.html', {
+        'profile': profile,
+        'selected_plan': selected_plan,
+        'pending_plan': pending_plan,
+    })
 
 # About, Plans, Team, Gallery
 def about(request): return render(request, "about.html")
@@ -131,18 +191,61 @@ def add_review(request):
 
 def success_stories(request): return render(request, "success_stories.html", {"stories": SuccessStory.objects.all()})
 def success_detail(request, pk): return render(request, "success_detail.html", {"story": get_object_or_404(SuccessStory, pk=pk)})
-def diet(request): return render(request, 'diet.html', {'plans': DietPlan.objects.all()})
+def _extract_calories_from_text(text):
+    if not text:
+        return None
+    match = re.search(r"(\d{2,5})\s*(kcal|calories?)", str(text), flags=re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
+def _compute_total_plan_calories(breakfast, lunch, dinner, fallback=2000):
+    values = [
+        _extract_calories_from_text(breakfast),
+        _extract_calories_from_text(lunch),
+        _extract_calories_from_text(dinner),
+    ]
+    numbers = [v for v in values if isinstance(v, int)]
+    return sum(numbers) if numbers else int(fallback or 2000)
+
+
+def diet(request):
+    plans = DietPlan.objects.all()
+    for plan in plans:
+        # Always show computed calories from meal lines when available.
+        plan.display_calories = _compute_total_plan_calories(
+            plan.breakfast,
+            plan.lunch,
+            plan.dinner,
+            fallback=plan.calories
+        )
+    return render(request, 'diet.html', {'plans': plans})
 
 def payment(request):
     if request.method == "POST":
+        amount = request.POST.get("amount")
+        sender_number = request.POST.get("sender_number")
+        reference_username = request.POST.get("reference_username")
+        trx_id = request.POST.get("trx_id")
+
+        if not amount or not sender_number or not reference_username:
+            messages.error(request, "Please fill all required payment details.")
+            return redirect("payment")
+
+        # Use authenticated username as authoritative payment owner.
+        if request.user.is_authenticated:
+            reference_username = request.user.username
+
         Payment.objects.create(
-            amount=request.POST.get("amount"),
-            method=request.POST.get("method"),
-            transaction_id=request.POST.get("trx_id"),
-            status="Pending"
+            full_name=reference_username,
+            phone=sender_number,
+            amount=amount,
+            method="bkash",
+            transaction_id=trx_id or f"REF-{reference_username}-{sender_number}"
         )
         return redirect("payment_success")
-    return render(request, "payment.html")
+
+    default_username = request.user.username if request.user.is_authenticated else ""
+    return render(request, "payment.html", {"default_username": default_username})
 
 def payment_success(request): return render(request, "payment_success.html")
 
@@ -157,6 +260,145 @@ def video_feed(request):
     return StreamingHttpResponse(gen(PushUpDetector()), content_type='multipart/x-mixed-replace; boundary=frame')
 
 def workout_page(request): return render(request, 'workout.html')
+
+
+def _clean_template_text(html_text):
+    text = re.sub(r"<script[\s\S]*?</script>", " ", html_text, flags=re.IGNORECASE)
+    text = re.sub(r"<style[\s\S]*?</style>", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"{%[\s\S]*?%}", " ", text)
+    text = re.sub(r"{{[\s\S]*?}}", " ", text)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+@lru_cache(maxsize=1)
+def _get_template_knowledge_chunks():
+    templates_dir = Path(settings.BASE_DIR) / "templates"
+    if not templates_dir.exists():
+        return []
+
+    chunks = []
+    for html_file in templates_dir.rglob("*.html"):
+        try:
+            raw = html_file.read_text(encoding="utf-8", errors="ignore")
+            cleaned = _clean_template_text(raw)
+            if not cleaned:
+                continue
+            chunks.append({
+                "page": str(html_file.relative_to(templates_dir)).replace("\\", "/"),
+                "text": cleaned[:1400]
+            })
+        except Exception:
+            continue
+    return chunks
+
+
+def _build_relevant_site_context(user_query, limit=4):
+    chunks = _get_template_knowledge_chunks()
+    if not chunks:
+        return "No local page knowledge available."
+
+    terms = {t for t in re.findall(r"[a-zA-Z]{3,}", user_query.lower())}
+    scored = []
+    for c in chunks:
+        body_lower = c["text"].lower()
+        score = sum(1 for t in terms if t in body_lower)
+        if score > 0:
+            scored.append((score, c))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    chosen = [item[1] for item in scored[:limit]]
+    if not chosen:
+        chosen = chunks[:2]
+
+    context_lines = [
+        f"[{c['page']}] {c['text'][:500]}"
+        for c in chosen
+    ]
+    return "\n".join(context_lines)
+
+
+def _build_profile_context(request):
+    """Builds DB-backed profile context so AI can access full user profile data."""
+    if not request.user.is_authenticated:
+        return "Guest user (no profile context)."
+
+    profile = getattr(request.user, "profile", None)
+    member = getattr(request.user, "member", None)
+
+    if not profile and not member:
+        return f"Username: {request.user.username}. No profile/member record found."
+
+    context_parts = [f"Username: {request.user.username}"]
+    if request.user.email:
+        context_parts.append(f"Email: {request.user.email}")
+
+    if profile:
+        context_parts.extend([
+            f"Age: {getattr(profile, 'age', '')}",
+            f"Gender: {getattr(profile, 'gender', '')}",
+            f"Weight: {getattr(profile, 'weight', '')}",
+            f"Height: {getattr(profile, 'height', '')}",
+            f"Goal Weight: {getattr(profile, 'goal_weight', '')}",
+            f"Fitness Goal: {getattr(profile, 'fitness_goal', '')}",
+            f"Phone: {getattr(profile, 'phone', '')}",
+            f"Address: {getattr(profile, 'address', '')}",
+            f"Bio: {getattr(profile, 'bio', '')}",
+            f"Date of Birth: {getattr(profile, 'date_of_birth', '')}",
+            f"Facebook: {getattr(profile, 'facebook', '')}",
+            f"Instagram: {getattr(profile, 'instagram', '')}",
+        ])
+
+    if member:
+        context_parts.extend([
+            f"Member Plan: {getattr(member, 'plan', '')}",
+            f"Member Phone: {getattr(member, 'phone', '')}",
+            f"Member Address: {getattr(member, 'address', '')}",
+        ])
+
+    # Remove empty values to keep prompt compact.
+    cleaned = [part for part in context_parts if not part.endswith(": ") and not part.endswith(":")]
+    return " | ".join(cleaned)
+
+
+def _profile_usage_summary(request):
+    """Short profile summary for transparent AI replies."""
+    if not request.user.is_authenticated:
+        return ""
+    profile = getattr(request.user, "profile", None)
+    if not profile:
+        return ""
+
+    used = []
+    if getattr(profile, "weight", None):
+        used.append(f"weight {profile.weight}")
+    if getattr(profile, "height", None):
+        used.append(f"height {profile.height}")
+    if getattr(profile, "age", None):
+        used.append(f"age {profile.age}")
+    if getattr(profile, "fitness_goal", None):
+        used.append(f"goal {profile.fitness_goal}")
+
+    return ", ".join(used[:4])
+
+
+def _is_profile_related_query(text):
+    query = (text or "").lower()
+    explicit_self_phrases = [
+        "my profile",
+        "my data",
+        "my details",
+        "use my profile",
+        "based on my profile",
+        "using my data",
+        "my weight",
+        "my height",
+        "my age",
+        "my goal",
+        "my bmi",
+    ]
+    return any(p in query for p in explicit_self_phrases)
 
 @ensure_csrf_cookie
 def chat_with_ai(request):
@@ -179,9 +421,12 @@ def chat_with_ai(request):
     # 2. FIXED: History logic using sessions correctly
     raw_history = request.session.get('chat_history_list', [])
     history_text = " | ".join(raw_history[-3:]) if raw_history else "None"
+    site_context = _build_relevant_site_context(user_msg)
+    profile_context = _build_profile_context(request)
+    enriched_input = f"{user_msg}\n\nUser Profile Context: {profile_context}"
 
     # 3. Call Groq
-    response_data = coach.generate_response(user_msg, mem.ai_facts, history_text)
+    response_data = coach.generate_response(enriched_input, mem.ai_facts, history_text, site_context)
 
     try:
         # Clean AI response
@@ -196,8 +441,8 @@ def chat_with_ai(request):
         # Handle Internet Search
         if ai_json.get("search_query"):
             search_info = coach.search_internet(ai_json["search_query"])
-            search_prompt = f"Internet results for '{ai_json['search_query']}': {search_info}. Answer: {user_msg}"
-            response_data = coach.generate_response(search_prompt, mem.ai_facts, history_text)
+            search_prompt = f"Internet results for '{ai_json['search_query']}': {search_info}. Answer: {enriched_input}"
+            response_data = coach.generate_response(search_prompt, mem.ai_facts, history_text, site_context)
             ai_json = json.loads(response_data.strip().replace("```json", "").replace("```", "").strip())
 
         # Update Facts
@@ -211,7 +456,13 @@ def chat_with_ai(request):
         history.append(f"Lolona: {ai_json.get('reply', '')}")
         request.session['chat_history_list'] = history[-10:] # Keep last 10 turns
         
-        return JsonResponse({'reply': ai_json.get('reply', "Meow!")})
+        reply_text = ai_json.get('reply', "Meow!")
+        if _is_profile_related_query(user_msg):
+            summary = _profile_usage_summary(request)
+            if summary:
+                reply_text = f"Using your profile data ({summary}). {reply_text}"
+
+        return JsonResponse({'reply': reply_text})
 
     except Exception as e:
         print(f"Error: {e}")
@@ -334,11 +585,16 @@ def save_diet_plan_from_ai(request):
 
             payload = {
                 'title': data.get('title', 'AI Plan'),
-                'calories': data.get('calories', 2000),
                 'breakfast': data.get('breakfast', 'Healthy meal'),
                 'lunch': data.get('lunch', 'Healthy meal'),
                 'dinner': data.get('dinner', 'Healthy meal')
             }
+            payload['calories'] = _compute_total_plan_calories(
+                payload['breakfast'],
+                payload['lunch'],
+                payload['dinner'],
+                fallback=data.get('calories', 2000)
+            )
 
             if has_user_field:
                 if not request.user.is_authenticated:
@@ -375,15 +631,26 @@ def save_diet_plan_from_ai(request):
 def delete_diet_plan_ai(request):
     if request.method == 'POST':
         try:
+            payload = json.loads(request.body or "{}")
+            scope = str(payload.get("scope", "all")).lower()
             has_user_field = any(field.name == 'user' for field in DietPlan._meta.fields)
 
             if has_user_field:
                 if not request.user.is_authenticated:
                     return JsonResponse({'status': 'error', 'message': 'User not logged in'})
-                deleted_count, _ = DietPlan.objects.filter(user=request.user).delete()
+                qs = DietPlan.objects.filter(user=request.user).order_by('-id')
             else:
-                # For current schema (no user column), remove all saved AI diet plans.
-                deleted_count, _ = DietPlan.objects.all().delete()
+                # For current schema (no user column), operate on all plans.
+                qs = DietPlan.objects.all().order_by('-id')
+
+            if scope == "latest":
+                latest_plan = qs.first()
+                if latest_plan:
+                    deleted_count, _ = latest_plan.delete()
+                else:
+                    deleted_count = 0
+            else:
+                deleted_count, _ = qs.delete()
 
             # Keep AI memory/session aligned after deletion.
             if request.user.is_authenticated:

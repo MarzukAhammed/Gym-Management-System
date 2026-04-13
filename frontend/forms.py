@@ -38,14 +38,29 @@ class JoinForm(forms.ModelForm):
     plan = forms.ModelChoiceField(queryset=Plan.objects.all(), empty_label="Select a Plan")
     class Meta:
         model = Member
-        fields = ["plan", "phone", "email", "address", "photo"]
+        fields = ["plan", "phone", "email", "address"]
         widgets = {
             "plan": forms.Select(attrs={"class": "form-control"}),  # Use Select for ForeignKey
             "phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter phone number"}),
             "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter email"}),
             "address": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Enter your address"}),
-            "photo": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["plan"].label_from_instance = self._plan_label
+
+    @staticmethod
+    def _plan_label(plan):
+        title = (getattr(plan, "title", "") or "").strip().lower()
+        if "basic" in title or "starter" in title:
+            return "Starter (Basic)"
+        if "standard" in title or "pro" in title:
+            return "Pro (Standard)"
+        if "premium" in title or "elite" in title:
+            return "Elite (Premium)"
+        # Fallback for any other plan title
+        return f"{plan.title} ({plan.duration})"
 
 class MemberUpdateForm(forms.ModelForm):
     class Meta:

@@ -118,15 +118,26 @@ document.addEventListener("DOMContentLoaded", function() {
     const userInput = document.getElementById('ai-user-input');
     const sendBtn = document.querySelector('.chat-input-area button');
 
-    const IDLE_PATH = catImg ? catImg.src : "";
-    const RUN_PATH = catImg ? catImg.src : "";
+    const IDLE_PATH = catImg ? (catImg.dataset.idleSrc || catImg.src) : "";
+    const RUN_PATH = catImg ? (catImg.dataset.runSrc || "") : "";
+    let canUseRunGif = false;
 
     let isDragging = false;
     let isMoving = false;
+    let longPressTriggered = false;
+    let holdTimer = null;
     let startX, startY;
     let offset = { x: 0, y: 0 };
 
     if (!cat || !chatBox) return;
+
+    // Validate run GIF once so broken/missing files do not make cat disappear.
+    if (RUN_PATH) {
+        const runGifProbe = new Image();
+        runGifProbe.onload = function () { canUseRunGif = true; };
+        runGifProbe.onerror = function () { canUseRunGif = false; };
+        runGifProbe.src = RUN_PATH;
+    }
 
     // --- DRAG LOGIC ---
     cat.addEventListener('mousedown', (e) => {
@@ -134,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         isDragging = false; 
         isMoving = false;
+        longPressTriggered = false;
         startX = e.clientX;
         startY = e.clientY;
 
@@ -142,6 +154,16 @@ document.addEventListener("DOMContentLoaded", function() {
         
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
+
+        // Logged-out users can long-press the cat to open a grumpy guest chatbox.
+        if (typeof isLoggedIn !== 'undefined' && isLoggedIn === "false") {
+            holdTimer = setTimeout(() => {
+                if (!isDragging && !isMoving) {
+                    longPressTriggered = true;
+                    openGuestGrumpyChat();
+                }
+            }, 550);
+        }
         e.preventDefault(); 
     });
 
@@ -150,6 +172,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const moveY = Math.abs(e.clientY - startY);
 
         if (moveX > 5 || moveY > 5) {
+            if (holdTimer) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
             isDragging = true;
             isMoving = true;
             cat.style.transition = 'none'; 
@@ -161,6 +187,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function onMouseUp() {
+        if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+        }
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
         cat.style.transition = 'all 0.3s ease';
@@ -169,10 +199,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // --- CLICK LOGIC ---
     cat.addEventListener('click', (e) => {
-        if (isMoving || isDragging) return;
+        if (isMoving || isDragging || longPressTriggered) return;
 
         if (typeof isLoggedIn !== 'undefined' && isLoggedIn === "false") {
-            if (catImg) {
+            if (cat) {
+                cat.animate(
+                    [
+                        { transform: "translateX(0)" },
+                        { transform: "translateX(10px)" },
+                        { transform: "translateX(-10px)" },
+                        { transform: "translateX(0)" }
+                    ],
+                    { duration: 350, iterations: 2, easing: "ease-in-out" }
+                );
+            }
+
+            if (catImg && RUN_PATH && canUseRunGif) {
                 catImg.src = RUN_PATH + "?" + Date.now();
             }
 
@@ -186,8 +228,8 @@ document.addEventListener("DOMContentLoaded", function() {
             cat.style.top = `${newY}px`;
 
             setTimeout(() => {
-                if (catImg) catImg.src = IDLE_PATH;
-            }, 800);
+                if (catImg && IDLE_PATH) catImg.src = IDLE_PATH;
+            }, 1400);
 
             return;
         }
@@ -222,6 +264,121 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (sendBtn) sendBtn.addEventListener("click", sendToAI);
 });
+
+function appendBotMessage(text) {
+    const messages = document.getElementById('chat-messages');
+    if (!messages) return;
+    messages.innerHTML += `<div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;"><div class="bot-msg" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 15px;">${text}</div></div>`;
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function openGuestGrumpyChat() {
+    const cat = document.getElementById('floating-cat-container');
+    const chatBox = document.getElementById('premium-chatbox');
+    if (!cat || !chatBox) return;
+
+    const rect = cat.getBoundingClientRect();
+    const chatWidth = 320;
+    const chatHeight = 450;
+    const screenWidth = window.innerWidth;
+
+    let targetLeft = rect.left - (chatWidth / 2) + (rect.width / 2);
+    let targetTop = rect.top - chatHeight - 20;
+
+    if (targetLeft < 10) targetLeft = 10;
+    if (targetLeft + chatWidth > screenWidth) targetLeft = screenWidth - chatWidth - 10;
+    if (targetTop < 10) targetTop = rect.bottom + 20;
+
+    chatBox.style.left = `${targetLeft}px`;
+    chatBox.style.top = `${targetTop}px`;
+    chatBox.style.display = "flex";
+
+    const messages = document.getElementById('chat-messages');
+    if (messages && !messages.dataset.guestInitialized) {
+        messages.dataset.guestInitialized = "true";
+        appendBotMessage("Hmph. You are not logged in. I do not know you, human. Ask quickly.");
+    }
+}
+
+function getGrumpyGuestReply(userMsg) {
+    const m = (userMsg || "").toLowerCase();
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const catMood = pick(["😾", "🐾", "🙄", "🐱", "😼"]);
+    const spice = pick([
+        "Now shoo.",
+        "Try not to disappoint me.",
+        "And yes, I am judging.",
+        "Do it properly this time.",
+        "You're welcome, probably."
+    ]);
+
+    if (m.includes("diet") || m.includes("meal") || m.includes("calorie")) {
+        return pick([
+            `${catMood} No profile, no purr-sonalized diet. Log in and I’ll stop guessing your snack crimes.`,
+            `${catMood} Guest mode diet tip: protein first, fiber second, sugar last. Water is not optional.`,
+            `${catMood} I cannot tailor your meal plan without your data, mysterious potato.`,
+            `${catMood} Eat like an athlete, not like a raccoon at midnight. Login for custom macros.`,
+            `${catMood} Calories matter. So does consistency. So does not licking the frosting bowl.`
+        ]);
+    }
+
+    if (m.includes("workout") || m.includes("exercise") || m.includes("gym")) {
+        return pick([
+            `${catMood} Do 20 squats, 15 push-ups, 30s plank x3. Complain between rounds only.`,
+            `${catMood} Warm-up 5 min, train 20 min, stretch 5 min. Tail up, chin up.`,
+            `${catMood} Bodyweight circuit: squats, lunges, push-ups, plank. Simple, brutal, effective.`,
+            `${catMood} Move now, meow later. Discipline burns more fat than motivation.`,
+            `${catMood} If I can zoom at 3 a.m., you can do one more set.`
+        ]);
+    }
+
+    if (m.includes("hello") || m.includes("hi") || m.includes("hey")) {
+        return pick([
+            `${catMood} Oh great, a human. State your fitness emergency.`,
+            `${catMood} Hi. I'm grumpy, not heartless. Ask your question.`,
+            `${catMood} Hello. If this is small talk, I hiss politely.`,
+            `${catMood} Hey. Keep it quick, I have imaginary naps to attend.`,
+            `${catMood} Greetings, biped. What chaos are we fixing today?`
+        ]);
+    }
+
+    if (m.includes("who are you") || m.includes("your name")) {
+        return pick([
+            `${catMood} I am Lolona AI. 20% fluff, 80% sarcasm, 100% results.`,
+            `${catMood} Name: Lolona. Profession: judging form and fixing excuses.`,
+            `${catMood} I am your grumpy cat coach until you log in and become my problem.`,
+            `${catMood} Lolona AI. I purr for progress, hiss at laziness.`
+        ]);
+    }
+
+    if (m.includes("thank")) {
+        return pick([
+            `${catMood} Gratitude accepted. Effort still pending.`,
+            `${catMood} Good. Now train before I change my mind.`,
+            `${catMood} You're welcome. Don't make this emotional.`,
+            `${catMood} Nice manners. Rare species.`,
+            `${catMood} Thank me with consistency, not words.`
+        ]);
+    }
+
+    if (m.includes("joke") || m.includes("funny")) {
+        return pick([
+            `${catMood} Joke: Why did the dumbbell break up with the treadmill? Too much running around, no commitment.`,
+            `${catMood} Joke: I tried yoga once. Spent 30 minutes in "confused loaf" pose.`,
+            `${catMood} Joke: Abs are made in the kitchen. Mine are currently in witness protection.`,
+            `${catMood} Joke: What is a cat's favorite workout? Purrrpees. Sadly, they still hurt.`,
+            `${catMood} Joke over. Back to work, comedian.`
+        ]);
+    }
+
+    return pick([
+        `${catMood} Guest mode only. I can guide you, but I cannot remember you. Login for full brainpower.`,
+        `${catMood} You are still anonymous. Helpful? yes. Personalized? no. ${spice}`,
+        `${catMood} I need your profile to be spooky accurate. Login unlocks the premium claws.`,
+        `${catMood} Generic mode active. Ask workout or diet questions, and maybe I won't hiss.`,
+        `${catMood} I can coach. I just cannot stalk your progress without login.`
+    ]);
+}
 
 
 // --- HELPER FUNCTIONS ---
@@ -261,6 +418,13 @@ function hasDeletePlanIntent(text) {
     return /(delete|remove|clear)\b/.test(text) && /(diet|meal)?\s*plan\b|diet\b|meal\b/.test(text);
 }
 
+function getDeleteScope(text) {
+    const t = (text || "").toLowerCase();
+    if (/(latest|last|recent|newest)/.test(t)) return "latest";
+    if (/(all|everything|every|entire)/.test(t)) return "all";
+    return "all";
+}
+
 function hasCreatePlanIntent(text) {
     const createVerb = /(create|make|generate|give|add|save|build|prepare)\b/.test(text);
     const mentionsDiet = /((diet|meal)\s*plan\b|\bdiet\b|\bmeal\b)/.test(text);
@@ -282,12 +446,32 @@ function extractDietPlanFromReply(reply) {
         return null;
     }
 
+    const extractMealCalories = (line) => {
+        if (!line) return null;
+        const match = line.match(/(\d{2,5})\s*(kcal|calories?)/i);
+        return match ? parseInt(match[1], 10) : null;
+    };
+
+    const breakfastText = breakfastMatch[1].trim();
+    const lunchText = lunchMatch[1].trim();
+    const dinnerText = dinnerMatch[1].trim();
+
+    const breakfastCals = extractMealCalories(breakfastText);
+    const lunchCals = extractMealCalories(lunchText);
+    const dinnerCals = extractMealCalories(dinnerText);
+    const computedTotal = [breakfastCals, lunchCals, dinnerCals]
+        .filter(v => Number.isInteger(v))
+        .reduce((sum, v) => sum + v, 0);
+
+    const replyTotal = caloriesMatch ? parseInt(caloriesMatch[1], 10) : null;
+    const finalCalories = computedTotal > 0 ? computedTotal : (replyTotal || 2000);
+
     return {
         title: (titleMatch && titleMatch[1] ? titleMatch[1].trim() : "AI Diet Plan"),
-        calories: caloriesMatch ? parseInt(caloriesMatch[1], 10) : 2000,
-        breakfast: breakfastMatch[1].trim(),
-        lunch: lunchMatch[1].trim(),
-        dinner: dinnerMatch[1].trim()
+        calories: finalCalories,
+        breakfast: breakfastText,
+        lunch: lunchText,
+        dinner: dinnerText
     };
 }
 
@@ -336,13 +520,19 @@ function sendToAI() {
     if (hasDeletePlanIntent(userMsgLower)) {
         messages.innerHTML += `<div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;"><div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px;">${userMsg}</div></div>`;
         input.value = "";
-        deleteDietPlan();
+        deleteDietPlan(getDeleteScope(userMsgLower));
         return;
     }
 
     // Normal AI Chat Logic...
     messages.innerHTML += `<div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;"><div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px;">${userMsg}</div></div>`;
     input.value = "";
+
+    // Logged-out mode: local grumpy replies without personalization.
+    if (typeof isLoggedIn !== 'undefined' && isLoggedIn === "false") {
+        appendBotMessage(getGrumpyGuestReply(userMsg));
+        return;
+    }
 
     // Context from your hidden div
     const ctx = document.getElementById('global-user-context');
@@ -425,7 +615,7 @@ function savePlanToAdmin(title, cals, bf, ln, dn) {
 
 // --- DELETE ---
 
-function deleteDietPlan() {
+function deleteDietPlan(scope = "all") {
     // 1. Flag true kora jate auto-save bondho hoy
     isDeleting = true; 
 
@@ -434,7 +624,8 @@ function deleteDietPlan() {
         headers: {
             'X-CSRFToken': getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : ''),
             'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ scope: scope })
     })
     .then(res => res.json())
     .then(data => {
