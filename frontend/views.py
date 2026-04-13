@@ -330,20 +330,85 @@ def save_diet_plan_from_ai(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            DietPlan.objects.create(
-                title=data.get('title', 'AI Plan'),
-                calories=data.get('calories', 2000),
-                breakfast=data.get('breakfast', 'Healthy meal'),
-                lunch=data.get('lunch', 'Healthy meal'),
-                dinner=data.get('dinner', 'Healthy meal')
-            )
-            return JsonResponse({'status': 'success', 'message': 'Plan saved!'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+            has_user_field = any(field.name == 'user' for field in DietPlan._meta.fields)
 
+            payload = {
+                'title': data.get('title', 'AI Plan'),
+                'calories': data.get('calories', 2000),
+                'breakfast': data.get('breakfast', 'Healthy meal'),
+                'lunch': data.get('lunch', 'Healthy meal'),
+                'dinner': data.get('dinner', 'Healthy meal')
+            }
+
+            if has_user_field:
+                if not request.user.is_authenticated:
+                    return JsonResponse({'status': 'error', 'message': 'User not logged in'})
+                payload['user'] = request.user
+
+            DietPlan.objects.create(**payload)
+
+            # Keep AI memory in sync with real DB state.
+            if request.user.is_authenticated:
+                mem, _ = MemberMemory.objects.get_or_create(user=request.user)
+                facts = mem.ai_facts or {}
+                facts["diet_plan_exists"] = True
+                mem.ai_facts = facts
+                mem.save()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Plan saved successfully!'
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+
+# 🟢 DELETE DIET PLAN
 @csrf_exempt
 def delete_diet_plan_ai(request):
     if request.method == 'POST':
-        from .models import DietPlan
-        DietPlan.objects.all().delete() # Eita shob delete korbe
-        return JsonResponse({'status': 'success'})
+        try:
+            has_user_field = any(field.name == 'user' for field in DietPlan._meta.fields)
+
+            if has_user_field:
+                if not request.user.is_authenticated:
+                    return JsonResponse({'status': 'error', 'message': 'User not logged in'})
+                deleted_count, _ = DietPlan.objects.filter(user=request.user).delete()
+            else:
+                # For current schema (no user column), remove all saved AI diet plans.
+                deleted_count, _ = DietPlan.objects.all().delete()
+
+            # Keep AI memory/session aligned after deletion.
+            if request.user.is_authenticated:
+                mem, _ = MemberMemory.objects.get_or_create(user=request.user)
+                facts = mem.ai_facts or {}
+                facts["diet_plan_exists"] = False
+                mem.ai_facts = facts
+                mem.save()
+            request.session['chat_history_list'] = []
+
+            if deleted_count > 0:
+                return JsonResponse({
+                    'status': 'success',
+                    'message': f'{deleted_count} plan(s) deleted successfully'
+                })
+            else:
+                return JsonResponse({
+                    'status': 'no_plan',
+                    'message': 'No plan found to delete'
+                })
+
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

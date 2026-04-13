@@ -1,3 +1,5 @@
+let isDeleting = false;
+
 /* --- SLIDERS & UI PLUGINS --- */
 $('.one_slide').slick({
     infinite: true,
@@ -108,49 +110,39 @@ $(document).ready(function () {
 /**
  * Helper function to get Django CSRF Token
  */
+
 document.addEventListener("DOMContentLoaded", function() {
     const cat = document.getElementById('floating-cat-container');
     const catImg = document.querySelector('#cat-trigger img') || document.getElementById('cat-trigger');
-    
-    const IDLE_PATH = "/static/cat_idle.gif"; 
-    const RUN_PATH = "/static/images/cat_run.gif"; 
+    const chatBox = document.getElementById('premium-chatbox');
+    const userInput = document.getElementById('ai-user-input');
+    const sendBtn = document.querySelector('.chat-input-area button');
+
+    const IDLE_PATH = catImg ? catImg.src : "";
+    const RUN_PATH = catImg ? catImg.src : "";
 
     let isDragging = false;
-    let isMoving = false; 
+    let isMoving = false;
     let startX, startY;
     let offset = { x: 0, y: 0 };
-    let holdTimer;
-    let isHolding = false;
 
-    if (!cat) return;
+    if (!cat || !chatBox) return;
 
-    // --- MOUSE DOWN (Start) ---
+    // --- DRAG LOGIC ---
     cat.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return; // Left click only
-        
+        if (e.button !== 0) return; 
+
+        isDragging = false; 
         isMoving = false;
-        isHolding = false;
-        isDragging = false;
-        
         startX = e.clientX;
         startY = e.clientY;
-        
+
         offset.x = e.clientX - cat.getBoundingClientRect().left;
         offset.y = e.clientY - cat.getBoundingClientRect().top;
         
-        // Hold logic
-        holdTimer = setTimeout(() => {
-            if (!isMoving) {
-                isHolding = true;
-                if (typeof toggleChat === 'function') toggleChat();
-            }
-        }, 500);
-
-        // 🆕 Sticky situation thamanor jonno mousemove ar mouseup window-te deya bhalo
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
-        
-        e.preventDefault(); // Browser default drag bondho kore
+        e.preventDefault(); 
     });
 
     function onMouseMove(e) {
@@ -158,12 +150,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const moveY = Math.abs(e.clientY - startY);
 
         if (moveX > 5 || moveY > 5) {
-            isMoving = true; 
             isDragging = true;
-            clearTimeout(holdTimer);
-            
-            cat.style.transition = 'none'; // Instant movement
-            cat.style.position = 'fixed';
+            isMoving = true;
+            cat.style.transition = 'none'; 
             cat.style.left = (e.clientX - offset.x) + 'px';
             cat.style.top = (e.clientY - offset.y) + 'px';
             cat.style.right = 'auto';
@@ -172,82 +161,79 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function onMouseUp() {
-        // 🆕 Window theke listener remove kora jate "sticky" na hoy
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
-        
-        clearTimeout(holdTimer);
-        cat.style.transition = 'all 0.5s ease'; // Back to smooth transition
-
-        // Release the "stuck" state
-        setTimeout(() => { 
-            isDragging = false; 
-        }, 100);
+        cat.style.transition = 'all 0.3s ease';
+        setTimeout(() => { isDragging = false; isMoving = false; }, 100);
     }
 
-    // --- CLICK LOGIC (Run Away) ---
+    // --- CLICK LOGIC ---
     cat.addEventListener('click', (e) => {
-        if (isMoving || isHolding) return; 
+        if (isMoving || isDragging) return;
 
         if (typeof isLoggedIn !== 'undefined' && isLoggedIn === "false") {
             if (catImg) {
-                catImg.src = RUN_PATH;
-                catImg.onerror = function() {
-                    this.src = IDLE_PATH;
-                    this.onerror = null;
-                };
+                catImg.src = RUN_PATH + "?" + Date.now();
             }
 
-            const maxX = window.innerWidth - 150;
-            const maxY = window.innerHeight - 150;
+            const maxX = window.innerWidth - 200;
+            const maxY = window.innerHeight - 200;
+
             const newX = Math.random() * maxX;
             const newY = Math.random() * maxY;
 
-            cat.style.transform = newX < cat.offsetLeft ? "scaleX(-1)" : "scaleX(1)";
             cat.style.left = `${newX}px`;
             cat.style.top = `${newY}px`;
 
-            setTimeout(() => { if (catImg) catImg.src = IDLE_PATH; }, 1000);
+            setTimeout(() => {
+                if (catImg) catImg.src = IDLE_PATH;
+            }, 800);
+
             return;
         }
 
-        if (typeof toggleChat === 'function') toggleChat();
+        const rect = cat.getBoundingClientRect();
+        const chatWidth = 320;
+        const chatHeight = 450;
+        const screenWidth = window.innerWidth;
+
+        let targetLeft = rect.left - (chatWidth / 2) + (rect.width / 2);
+        let targetTop = rect.top - chatHeight - 20;
+
+        if (targetLeft < 10) targetLeft = 10;
+        if (targetLeft + chatWidth > screenWidth) targetLeft = screenWidth - chatWidth - 10;
+
+        if (targetTop < 10) {
+            targetTop = rect.bottom + 20;
+        }
+
+        chatBox.style.left = `${targetLeft}px`;
+        chatBox.style.top = `${targetTop}px`;
+
+        toggleChat();
     });
 
-    // --- AI EXTRACTION LOGIC ---
-    window.sendToAI = function() {
-        const input = document.getElementById('ai-user-input');
-        if (!input || !input.value.trim()) return;
-
-        fetch('/chat-with-ai/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken') },
-            body: `text=${encodeURIComponent(input.value)}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            const reply = data.reply;
-            if (reply.toLowerCase().includes("breakfast") || reply.toLowerCase().includes("lunch") || reply.toLowerCase().includes("dinner")) {
-                const extract = (meal) => {
-                    const regex = new RegExp(`${meal}[\\s*:]+([^\\n\\r*#]+)`, 'i');
-                    const match = reply.match(regex);
-                    return match ? match[1].trim() : "Healthy Meal";
-                };
-                savePlanToAdmin("AI Personalized Plan", 2100, extract("Breakfast"), extract("Lunch"), extract("Dinner"));
-            }
+    // --- INPUT ---
+    if (userInput) {
+        userInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); sendToAI(); }
         });
-    };
-});// --- HELPER FUNCTIONS ---
+    }
+
+    if (sendBtn) sendBtn.addEventListener("click", sendToAI);
+});
+
+
+// --- HELPER FUNCTIONS ---
 
 function getCookie(name) {
     let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
+    if (document.cookie) {
         const cookies = document.cookie.split(';');
         for (let cookie of cookies) {
             cookie = cookie.trim();
             if (cookie.startsWith(name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
             }
         }
     }
@@ -256,133 +242,219 @@ function getCookie(name) {
 
 function toggleChat() {
     const chatBox = document.getElementById('premium-chatbox');
-    if (chatBox.style.display === "none" || chatBox.style.display === "") {
-        chatBox.style.display = "flex";
-        chatBox.style.animation = "fadeInUp 0.3s ease forwards";
-    } else {
-        chatBox.style.display = "none";
-    }
+    chatBox.style.display = (chatBox.style.display === "flex") ? "none" : "flex";
 }
 
+
+// --- 🧠 USER CONTEXT ---
+function getUserContext() {
+    const el = document.getElementById("global-user-context");
+    if (!el) return {};
+    return {
+        username: el.dataset.username,
+        weight: el.dataset.weight,
+        height: el.dataset.height
+    };
+}
+
+function hasDeletePlanIntent(text) {
+    return /(delete|remove|clear)\b/.test(text) && /(diet|meal)?\s*plan\b|diet\b|meal\b/.test(text);
+}
+
+function hasCreatePlanIntent(text) {
+    const createVerb = /(create|make|generate|give|add|save|build|prepare)\b/.test(text);
+    const mentionsDiet = /((diet|meal)\s*plan\b|\bdiet\b|\bmeal\b)/.test(text);
+    const asksAnother = /(another|new one|new plan)\b/.test(text);
+    return (createVerb && mentionsDiet) || (createVerb && asksAnother);
+}
+
+function extractDietPlanFromReply(reply) {
+    if (!reply) return null;
+
+    const normalized = reply.replace(/\r/g, "");
+    const caloriesMatch = normalized.match(/calories?\s*[:\-]\s*(\d{3,5})/i);
+    const breakfastMatch = normalized.match(/breakfast\s*[:\-]\s*([^\n]+)/i);
+    const lunchMatch = normalized.match(/lunch\s*[:\-]\s*([^\n]+)/i);
+    const dinnerMatch = normalized.match(/dinner\s*[:\-]\s*([^\n]+)/i);
+    const titleMatch = normalized.match(/(?:title|plan)\s*[:\-]\s*([^\n]+)/i);
+
+    if (!breakfastMatch || !lunchMatch || !dinnerMatch) {
+        return null;
+    }
+
+    return {
+        title: (titleMatch && titleMatch[1] ? titleMatch[1].trim() : "AI Diet Plan"),
+        calories: caloriesMatch ? parseInt(caloriesMatch[1], 10) : 2000,
+        breakfast: breakfastMatch[1].trim(),
+        lunch: lunchMatch[1].trim(),
+        dinner: dinnerMatch[1].trim()
+    };
+}
+
+function buildFallbackPlanFromUserMessage(userMsgLower) {
+    if (userMsgLower.includes("vegan")) {
+        return {
+            title: "Vegan Diet Plan",
+            calories: 2000,
+            breakfast: "Overnight oats with almond milk, chia seeds, banana, and walnuts",
+            lunch: "Chickpea quinoa bowl with spinach, cucumber, tomato, and olive oil dressing",
+            dinner: "Tofu stir-fry with mixed vegetables and brown rice"
+        };
+    }
+
+    if (userMsgLower.includes("vegetarian")) {
+        return {
+            title: "Vegetarian Diet Plan",
+            calories: 2100,
+            breakfast: "Greek yogurt, mixed berries, oats, and honey",
+            lunch: "Paneer and vegetable wrap with side salad",
+            dinner: "Lentil soup with whole-grain roti and sauteed vegetables"
+        };
+    }
+
+    return {
+        title: "AI Diet Plan",
+        calories: 2000,
+        breakfast: "Egg whites or tofu scramble, oats, and fruit",
+        lunch: "Lean protein or legumes, brown rice, and mixed vegetables",
+        dinner: "Grilled protein or beans, salad, and sweet potato"
+    };
+}
+
+
+// --- 🧠 AI SEND ---
 function sendToAI() {
     const input = document.getElementById('ai-user-input');
     const messages = document.getElementById('chat-messages');
-
     if (!input || !input.value.trim()) return;
 
-    const msg = input.value;
+    const userMsg = input.value;
+    const userMsgLower = userMsg.toLowerCase();
+    const wantsPlanCreation = hasCreatePlanIntent(userMsgLower);
 
-    messages.innerHTML += `
-        <div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;">
-            <div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px 15px 0 15px; max-width: 80%;">${msg}</div>
-        </div>
-    `;
-
-    input.value = "";
-    messages.scrollTop = messages.scrollHeight;
-
-    // 🆕 BLOCK IF NOT LOGGED IN
-    if (isLoggedIn === "false") {
-        messages.innerHTML += `
-        <div class="message-wrapper bot" style="justify-content:flex-start;display:flex;margin-bottom:10px;">
-            <div class="bot-msg" style="background:#ff4d4d;color:white;padding:8px 15px;border-radius:15px;">
-                😾 Login koro age!
-            </div>
-        </div>`;
+    // Command: delete existing diet plans
+    if (hasDeletePlanIntent(userMsgLower)) {
+        messages.innerHTML += `<div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;"><div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px;">${userMsg}</div></div>`;
+        input.value = "";
+        deleteDietPlan();
         return;
     }
+
+    // Normal AI Chat Logic...
+    messages.innerHTML += `<div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;"><div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px;">${userMsg}</div></div>`;
+    input.value = "";
+
+    // Context from your hidden div
+    const ctx = document.getElementById('global-user-context');
+    let profileData = ctx ? ` [Context: Weight=${ctx.dataset.weight}, Height=${ctx.dataset.height}]` : "";
+
+    const structuredPlanInstruction = wantsPlanCreation
+        ? " Return ONLY this format in plain text: Title: ...\\nCalories: ...\\nBreakfast: ...\\nLunch: ...\\nDinner: ..."
+        : "";
 
     fetch('/chat-with-ai/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '')
         },
-        body: `text=${encodeURIComponent(msg)}`
+        body: `text=${encodeURIComponent(userMsg + " " + profileData + structuredPlanInstruction)}`
     })
     .then(res => res.json())
     .then(data => {
-        messages.innerHTML += `
-            <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
-                <div class="bot-msg" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 15px;">${data.reply}</div>
-            </div>
-        `;
+        messages.innerHTML += `<div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;"><div class="bot-msg" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 15px;">${data.reply}</div></div>`;
+        
+        // Auto-save generated diet plans when request intent + response format match
+        if (!isDeleting) {
+            const parsedPlan = extractDietPlanFromReply(data.reply || "");
+            if (wantsPlanCreation && parsedPlan) {
+                savePlanToAdmin(
+                    parsedPlan.title,
+                    parsedPlan.calories,
+                    parsedPlan.breakfast,
+                    parsedPlan.lunch,
+                    parsedPlan.dinner
+                ).then((saveRes) => {
+                    if (saveRes && saveRes.status === "success") {
+                        messages.innerHTML += `<div style="color:#6dff8b; text-align:center; font-size:13px; margin:5px 0;">✅ Diet plan saved!</div>`;
+                    } else {
+                        messages.innerHTML += `<div style="color:#ff8a8a; text-align:center; font-size:13px; margin:5px 0;">❌ Could not save diet plan. ${saveRes && saveRes.message ? saveRes.message : ""}</div>`;
+                    }
+                    messages.scrollTop = messages.scrollHeight;
+                }).catch(() => {
+                    messages.innerHTML += `<div style="color:#ff8a8a; text-align:center; font-size:13px; margin:5px 0;">❌ Could not save diet plan due to network/server error.</div>`;
+                    messages.scrollTop = messages.scrollHeight;
+                });
+            } else if (wantsPlanCreation && !parsedPlan) {
+                const fallbackPlan = buildFallbackPlanFromUserMessage(userMsgLower);
+                savePlanToAdmin(
+                    fallbackPlan.title,
+                    fallbackPlan.calories,
+                    fallbackPlan.breakfast,
+                    fallbackPlan.lunch,
+                    fallbackPlan.dinner
+                ).then((saveRes) => {
+                    if (saveRes && saveRes.status === "success") {
+                        messages.innerHTML += `<div style="color:#6dff8b; text-align:center; font-size:13px; margin:5px 0;">✅ Plan saved from request context (fallback mode).</div>`;
+                    } else {
+                        messages.innerHTML += `<div style="color:#ff8a8a; text-align:center; font-size:13px; margin:5px 0;">❌ Fallback plan could not be saved. ${saveRes && saveRes.message ? saveRes.message : ""}</div>`;
+                    }
+                    messages.scrollTop = messages.scrollHeight;
+                }).catch(() => {
+                    messages.innerHTML += `<div style="color:#ff8a8a; text-align:center; font-size:13px; margin:5px 0;">❌ Fallback save failed due to network/server error.</div>`;
+                    messages.scrollTop = messages.scrollHeight;
+                });
+            }
+        }
         messages.scrollTop = messages.scrollHeight;
-
-        const replyLower = data.reply.toLowerCase();
-
-        // 🆕 DELETE LOGIC: Jodi message-e "delete" ar "plan" thake
-        if (replyLower.includes("delete") && replyLower.includes("plan")) {
-            deletePlanFromAdmin();
-        }
-        // 🆕 DIET PLAN TRIGGER: AI message-e "diet plan" thakle details extract kore save korbe
-        else if (replyLower.includes("diet plan") || replyLower.includes("breakfast")) {
-            // Extraction Logic: AI reply theke Breakfast, Lunch, Dinner er line gulo alada kora
-            const lines = data.reply.split('\n');
-            let bf = "Healthy Meal", ln = "Healthy Meal", dn = "Healthy Meal";
-            
-            lines.forEach(line => {
-                if (line.toLowerCase().includes("breakfast")) bf = line.trim();
-                if (line.toLowerCase().includes("lunch")) ln = line.trim();
-                if (line.toLowerCase().includes("dinner")) dn = line.trim();
-            });
-
-            savePlanToAdmin("AI Personalized Plan", 2100, bf, ln, dn);
-        }
     });
 }
 
-// 🆕 UPDATED: Details soho save kora
-function savePlanToAdmin(planTitle, planCalories, bf, ln, dn) {
-    fetch('/save-diet-plan-ai/', { 
+// --- SAVE ---
+function savePlanToAdmin(title, cals, bf, ln, dn) {
+    return fetch('/save-diet-plan-ai/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': getCookie('csrftoken')
         },
-        body: JSON.stringify({
-            title: planTitle,
-            calories: planCalories,
-            breakfast: bf, 
-            lunch: ln,
-            dinner: dn 
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const messages = document.getElementById('chat-messages');
-        if (messages) {
-            messages.innerHTML += `
-            <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
-                <div class="bot-msg" style="background: #28a745; color: white; padding: 8px 15px; border-radius: 15px;">
-                    ✅ Bhai, food names soho plan-ta save kore diyechi!
-                </div>
-            </div>`;
-            messages.scrollTop = messages.scrollHeight;
-        }
-    });
+        body: JSON.stringify({ title, calories: cals, breakfast: bf, lunch: ln, dinner: dn })
+    }).then(res => res.json());
 }
 
-// 🆕 NEW FEATURE: Delete Plan Function
-function deletePlanFromAdmin() {
-    fetch('/delete-diet-plan-ai/', { // Apnar urls.py te ei path-ta thakte hobe
+
+// --- DELETE ---
+
+function deleteDietPlan() {
+    // 1. Flag true kora jate auto-save bondho hoy
+    isDeleting = true; 
+
+    fetch('/delete-diet-plan-ai/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : ''),
+            'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
         const messages = document.getElementById('chat-messages');
-        if (messages) {
-            messages.innerHTML += `
-            <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
-                <div class="bot-msg" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 15px;">
-                    🗑️ Bhai, puran plan-ta delete kore diyechi!
-                </div>
-            </div>`;
-            messages.scrollTop = messages.scrollHeight;
+        if (data.status === 'success') {
+            messages.innerHTML += `<div style="color: #ff4d4d; text-align: center; font-size: 13px; margin: 5px 0;">🗑️ ${data.message || 'Plan has been deleted!'}</div>`;
+        } else if (data.status === 'no_plan') {
+            messages.innerHTML += `<div style="color: #ffd166; text-align: center; font-size: 13px; margin: 5px 0;">⚠️ ${data.message || 'No saved diet plan found.'}</div>`;
+        } else if (data.status === 'error') {
+            messages.innerHTML += `<div style="color: #ff8a8a; text-align: center; font-size: 13px; margin: 5px 0;">❌ ${data.message || 'Could not delete plan.'}</div>`;
+        } else {
+            messages.innerHTML += `<div style="color: #ffd166; text-align: center; font-size: 13px; margin: 5px 0;">⚠️ Unexpected delete response.</div>`;
         }
+        messages.scrollTop = messages.scrollHeight;
+        
+        // 2. Kichu somoy por flag reset (Safe boundary)
+        setTimeout(() => { isDeleting = false; }, 3000);
+    })
+    .catch(err => {
+        console.error("Delete Error:", err);
+        isDeleting = false;
     });
 }

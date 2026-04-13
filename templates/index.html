@@ -591,7 +591,12 @@ var swiper = new Swiper('.mySwiper', {
       justFlipIt('.flip-card', { Click: true });
   });
 </script>
-
+<div id="global-user-context"
+     data-username="{{ request.user.username }}"
+     data-weight="{{ request.user.profile.weight }}"
+     data-height="{{ request.user.profile.height }}"
+     style="display:none;">
+</div>
 {% csrf_token %}
 <div id="floating-cat-container">
     <div id="cat-trigger">
@@ -607,6 +612,7 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         <div class="user-info">
             <div class="status-dot"></div>
             <span>Lolona AI</span>
+            
         </div>
         <button onclick="toggleChat()" class="close-btn">&times;</button>
     </div>
