@@ -11,7 +11,7 @@ from .camera import PushUpDetector
 from django.http import JsonResponse
 from .models import HealthMemory, MemberMemory, Exercise, UserProgress
 from .ai_engine import SmartCoach
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json, datetime
 
 # Home Page
@@ -324,3 +324,26 @@ def record_workout_data(request):
         progress.save()
 
         return JsonResponse({'status': 'success', 'burned': calories_burned})
+
+@csrf_exempt
+def save_diet_plan_from_ai(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            DietPlan.objects.create(
+                title=data.get('title', 'AI Plan'),
+                calories=data.get('calories', 2000),
+                breakfast=data.get('breakfast', 'Healthy meal'),
+                lunch=data.get('lunch', 'Healthy meal'),
+                dinner=data.get('dinner', 'Healthy meal')
+            )
+            return JsonResponse({'status': 'success', 'message': 'Plan saved!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+@csrf_exempt
+def delete_diet_plan_ai(request):
+    if request.method == 'POST':
+        from .models import DietPlan
+        DietPlan.objects.all().delete() # Eita shob delete korbe
+        return JsonResponse({'status': 'success'})

@@ -109,88 +109,143 @@ $(document).ready(function () {
  * Helper function to get Django CSRF Token
  */
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Elements dhora
     const cat = document.getElementById('floating-cat-container');
-    const chatBox = document.getElementById('premium-chatbox');
-    const userInput = document.getElementById('ai-user-input');
-    const sendBtn = document.querySelector('.chat-input-area button');
+    const catImg = document.querySelector('#cat-trigger img') || document.getElementById('cat-trigger');
+    
+    const IDLE_PATH = "/static/cat_idle.gif"; 
+    const RUN_PATH = "/static/images/cat_run.gif"; 
 
     let isDragging = false;
+    let isMoving = false; 
+    let startX, startY;
     let offset = { x: 0, y: 0 };
+    let holdTimer;
+    let isHolding = false;
 
-    if (!cat || !chatBox) {
-        console.error("Cat ba Chatbox container pawa jayni! HTML-e ID check korun.");
-        return;
-    }
+    if (!cat) return;
 
-    // --- DRAG LOGIC ---
+    // --- MOUSE DOWN (Start) ---
     cat.addEventListener('mousedown', (e) => {
-        isDragging = false; 
+        if (e.button !== 0) return; // Left click only
+        
+        isMoving = false;
+        isHolding = false;
+        isDragging = false;
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        
         offset.x = e.clientX - cat.getBoundingClientRect().left;
         offset.y = e.clientY - cat.getBoundingClientRect().top;
         
-        function onMouseMove(e) {
+        // Hold logic
+        holdTimer = setTimeout(() => {
+            if (!isMoving) {
+                isHolding = true;
+                if (typeof toggleChat === 'function') toggleChat();
+            }
+        }, 500);
+
+        // 🆕 Sticky situation thamanor jonno mousemove ar mouseup window-te deya bhalo
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        
+        e.preventDefault(); // Browser default drag bondho kore
+    });
+
+    function onMouseMove(e) {
+        const moveX = Math.abs(e.clientX - startX);
+        const moveY = Math.abs(e.clientY - startY);
+
+        if (moveX > 5 || moveY > 5) {
+            isMoving = true; 
             isDragging = true;
+            clearTimeout(holdTimer);
+            
+            cat.style.transition = 'none'; // Instant movement
+            cat.style.position = 'fixed';
             cat.style.left = (e.clientX - offset.x) + 'px';
             cat.style.top = (e.clientY - offset.y) + 'px';
             cat.style.right = 'auto';
             cat.style.bottom = 'auto';
         }
+    }
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', () => {
-            document.removeEventListener('mousemove', onMouseMove);
-        }, { once: true });
-    });
+    function onMouseUp() {
+        // 🆕 Window theke listener remove kora jate "sticky" na hoy
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        
+        clearTimeout(holdTimer);
+        cat.style.transition = 'all 0.5s ease'; // Back to smooth transition
 
-    // --- CLICK & POSITION LOGIC ---
+        // Release the "stuck" state
+        setTimeout(() => { 
+            isDragging = false; 
+        }, 100);
+    }
+
+    // --- CLICK LOGIC (Run Away) ---
     cat.addEventListener('click', (e) => {
-        if (!isDragging) {
-            const rect = cat.getBoundingClientRect();
-            const chatHeight = 450; 
-            
-            // Left alignment
-            chatBox.style.left = (rect.left - 140) + "px";
-            chatBox.style.right = "auto";
+        if (isMoving || isHolding) return; 
 
-            // Smart Vertical logic (Screen boundary check)
-            if (rect.top < chatHeight + 20) {
-                chatBox.style.top = (rect.bottom + 10) + "px";
-                chatBox.style.bottom = "auto";
-            } else {
-                chatBox.style.top = (rect.top - (chatHeight + 20)) + "px";
-                chatBox.style.bottom = "auto";
+        if (typeof isLoggedIn !== 'undefined' && isLoggedIn === "false") {
+            if (catImg) {
+                catImg.src = RUN_PATH;
+                catImg.onerror = function() {
+                    this.src = IDLE_PATH;
+                    this.onerror = null;
+                };
             }
 
-            toggleChat();
+            const maxX = window.innerWidth - 150;
+            const maxY = window.innerHeight - 150;
+            const newX = Math.random() * maxX;
+            const newY = Math.random() * maxY;
+
+            cat.style.transform = newX < cat.offsetLeft ? "scaleX(-1)" : "scaleX(1)";
+            cat.style.left = `${newX}px`;
+            cat.style.top = `${newY}px`;
+
+            setTimeout(() => { if (catImg) catImg.src = IDLE_PATH; }, 1000);
+            return;
         }
+
+        if (typeof toggleChat === 'function') toggleChat();
     });
 
-    // --- INPUT & SEND ---
-    if (userInput) {
-        userInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendToAI();
+    // --- AI EXTRACTION LOGIC ---
+    window.sendToAI = function() {
+        const input = document.getElementById('ai-user-input');
+        if (!input || !input.value.trim()) return;
+
+        fetch('/chat-with-ai/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken') },
+            body: `text=${encodeURIComponent(input.value)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            const reply = data.reply;
+            if (reply.toLowerCase().includes("breakfast") || reply.toLowerCase().includes("lunch") || reply.toLowerCase().includes("dinner")) {
+                const extract = (meal) => {
+                    const regex = new RegExp(`${meal}[\\s*:]+([^\\n\\r*#]+)`, 'i');
+                    const match = reply.match(regex);
+                    return match ? match[1].trim() : "Healthy Meal";
+                };
+                savePlanToAdmin("AI Personalized Plan", 2100, extract("Breakfast"), extract("Lunch"), extract("Dinner"));
             }
         });
-    }
+    };
+});// --- HELPER FUNCTIONS ---
 
-    if (sendBtn) {
-        sendBtn.addEventListener("click", sendToAI);
-    }
-});
-
-// --- HELPER FUNCTIONS (Outside DOMContentLoaded) ---
-
-// 1. CSRF Token Function (Eta chara POST request fail korbe)
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
@@ -216,45 +271,118 @@ function sendToAI() {
     if (!input || !input.value.trim()) return;
 
     const msg = input.value;
-    
-    // User message bhashano
+
     messages.innerHTML += `
         <div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;">
             <div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px 15px 0 15px; max-width: 80%;">${msg}</div>
         </div>
     `;
-    
-    input.value = ""; 
+
+    input.value = "";
     messages.scrollTop = messages.scrollHeight;
 
-    console.log("Sending message to server...");
+    // 🆕 BLOCK IF NOT LOGGED IN
+    if (isLoggedIn === "false") {
+        messages.innerHTML += `
+        <div class="message-wrapper bot" style="justify-content:flex-start;display:flex;margin-bottom:10px;">
+            <div class="bot-msg" style="background:#ff4d4d;color:white;padding:8px 15px;border-radius:15px;">
+                😾 Login koro age!
+            </div>
+        </div>`;
+        return;
+    }
 
     fetch('/chat-with-ai/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': getCookie('csrftoken') // CSRF Token pathano
+            'X-CSRFToken': getCookie('csrftoken')
         },
         body: `text=${encodeURIComponent(msg)}`
     })
-    .then(res => {
-        console.log("Response status:", res.status);
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-        console.log("Data received:", data);
-        if (data.reply) {
-            messages.innerHTML += `
-                <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
-                    <div class="bot-msg" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 8px 15px; border-radius: 15px 15px 15px 0; max-width: 80%;">${data.reply}</div>
-                </div>
-            `;
-        }
+        messages.innerHTML += `
+            <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
+                <div class="bot-msg" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 15px;">${data.reply}</div>
+            </div>
+        `;
         messages.scrollTop = messages.scrollHeight;
+
+        const replyLower = data.reply.toLowerCase();
+
+        // 🆕 DELETE LOGIC: Jodi message-e "delete" ar "plan" thake
+        if (replyLower.includes("delete") && replyLower.includes("plan")) {
+            deletePlanFromAdmin();
+        }
+        // 🆕 DIET PLAN TRIGGER: AI message-e "diet plan" thakle details extract kore save korbe
+        else if (replyLower.includes("diet plan") || replyLower.includes("breakfast")) {
+            // Extraction Logic: AI reply theke Breakfast, Lunch, Dinner er line gulo alada kora
+            const lines = data.reply.split('\n');
+            let bf = "Healthy Meal", ln = "Healthy Meal", dn = "Healthy Meal";
+            
+            lines.forEach(line => {
+                if (line.toLowerCase().includes("breakfast")) bf = line.trim();
+                if (line.toLowerCase().includes("lunch")) ln = line.trim();
+                if (line.toLowerCase().includes("dinner")) dn = line.trim();
+            });
+
+            savePlanToAdmin("AI Personalized Plan", 2100, bf, ln, dn);
+        }
+    });
+}
+
+// 🆕 UPDATED: Details soho save kora
+function savePlanToAdmin(planTitle, planCalories, bf, ln, dn) {
+    fetch('/save-diet-plan-ai/', { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            title: planTitle,
+            calories: planCalories,
+            breakfast: bf, 
+            lunch: ln,
+            dinner: dn 
+        })
     })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        messages.innerHTML += `<div style="color: #ff4d4d; font-size: 12px; text-align: center;">Error: Lolona kotha bolte parchche na!</div>`;
+    .then(response => response.json())
+    .then(data => {
+        const messages = document.getElementById('chat-messages');
+        if (messages) {
+            messages.innerHTML += `
+            <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
+                <div class="bot-msg" style="background: #28a745; color: white; padding: 8px 15px; border-radius: 15px;">
+                    ✅ Bhai, food names soho plan-ta save kore diyechi!
+                </div>
+            </div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }
+    });
+}
+
+// 🆕 NEW FEATURE: Delete Plan Function
+function deletePlanFromAdmin() {
+    fetch('/delete-diet-plan-ai/', { // Apnar urls.py te ei path-ta thakte hobe
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const messages = document.getElementById('chat-messages');
+        if (messages) {
+            messages.innerHTML += `
+            <div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;">
+                <div class="bot-msg" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 15px;">
+                    🗑️ Bhai, puran plan-ta delete kore diyechi!
+                </div>
+            </div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }
     });
 }

@@ -144,11 +144,14 @@ class GalleryMember(models.Model):
 
 
 class DietPlan(models.Model):
-    title = models.CharField(max_length=100)
-    breakfast = models.TextField()
-    lunch = models.TextField()
-    dinner = models.TextField()
+    title = models.CharField(max_length=255)
     calories = models.IntegerField()
+    breakfast = models.TextField(default="Healthy Breakfast") # Eita add korun
+    lunch = models.TextField(default="Healthy Lunch")         # Eita add korun
+    dinner = models.TextField(default="Healthy Dinner")       # Eita add korun
+
+    def __str__(self):
+        return self.title
 
 
 

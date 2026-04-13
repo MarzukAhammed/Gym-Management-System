@@ -1309,9 +1309,10 @@ background: #dddddd;
     position: fixed;
     bottom: 30px;
     right: 30px;
-    z-index: 99999;
     cursor: grab;
-    transition: transform 0.3s ease;
+    transition: all 0.8s ease-in-out;
+    z-index: 10001 !important; 
+    position: fixed;
 }
 
 #floating-cat-container:active { cursor: grabbing; }
@@ -1335,9 +1336,10 @@ background: #dddddd;
     display: none; /* Initially Hidden */
     flex-direction: column;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 100000;
     overflow: hidden;
     color: white;
+    z-index: 10000 !important;
+    position: fixed;
 }
 
 .chat-header {

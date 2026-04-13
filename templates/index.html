@@ -598,6 +598,9 @@ var swiper = new Swiper('.mySwiper', {
         <img src="/static/images/Lovely Cat.gif" id="main-cat-img" alt="Lolona">
     </div>
 </div>
+<script>
+const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
+</script>
 
 <div id="premium-chatbox" class="glass-effect">
     <div class="chat-header">
@@ -608,7 +611,7 @@ var swiper = new Swiper('.mySwiper', {
         <button onclick="toggleChat()" class="close-btn">&times;</button>
     </div>
     <div id="chat-messages">
-        <div class="bot-msg">Hey! Gymnasium-e apnake sashagoto. Ami Lolona, kibhabe help korte pari?</div>
+        <div class="bot-msg">Welcome Idiots. I Am Lolona In Your Seba</div>
     </div>
     <div class="chat-input-area">
         <input type="text" id="ai-user-input" placeholder="Type a message...">

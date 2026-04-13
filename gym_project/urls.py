@@ -35,6 +35,8 @@ urlpatterns = [
     path('progress/', views.progress_dashboard, name='progress_tracker'),
     path('update-stats/', views.update_stats, name='update_stats'),
     path('record-workout/', views.record_workout_data, name='record_workout'),
+    path('save-diet-plan-ai/', views.save_diet_plan_from_ai, name='save_diet_plan_ai'),
+    path('delete-diet-plan-ai/', views.delete_diet_plan_ai, name='delete_diet_plan_ai'),
 ]
 
 if settings.DEBUG:
