@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'frontend.middleware.AdminOnlySessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'frontend.middleware.NotificationsFromMessagesMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -133,7 +134,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Redirect users after login
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = "profile"
+LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
 

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Terms & Conditions | M-Power Fitness Lab{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 110px; padding-bottom: 40px;">
+  <div class="p-4 p-md-5" style="border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92)); border-radius: 18px; color: #fff;">
+    <h2 class="fw-bold mb-2">Terms & Conditions</h2>
+    <div class="text-white-50 mb-4" style="font-size: 13px;">Last updated: {% now "F j, Y" %}</div>
+
+    <p class="text-white-75">
+      By using <strong>M-Power Fitness Lab</strong>, you agree to the terms below. If you do not agree, please do not use the platform.
+    </p>
+
+    <h5 class="fw-bold mt-4">Accounts</h5>
+    <ul class="text-white-75">
+      <li>You are responsible for keeping your login information secure.</li>
+      <li>Do not share your password with others.</li>
+      <li>We may suspend accounts for abuse, fraud, or harmful behavior.</li>
+    </ul>
+
+    <h5 class="fw-bold mt-4">Live Training</h5>
+    <ul class="text-white-75">
+      <li>Live sessions are subject to trainer availability and schedule.</li>
+      <li>Do not record or redistribute sessions without permission.</li>
+      <li>Be respectful to trainers and other users.</li>
+    </ul>
+
+    <h5 class="fw-bold mt-4">Health disclaimer</h5>
+    <p class="text-white-75">
+      Fitness content is for general educational purposes. Consult a medical professional before starting any exercise or diet plan, especially if you have medical conditions.
+    </p>
+
+    <h5 class="fw-bold mt-4">Payments</h5>
+    <p class="text-white-75">
+      Payments may require verification. Access to premium features may depend on payment status.
+    </p>
+
+    <h5 class="fw-bold mt-4">Changes to terms</h5>
+    <p class="text-white-75 mb-0">
+      We may update these terms from time to time. Continued use of the platform means you accept the updated terms.
+    </p>
+  </div>
+</div>
+{% endblock %}
+

@@ -58,6 +58,7 @@
     </style>
 </head>
 <body>
+{% include "navbar.html" %}
 
 <div class="container mt-5 mb-5">
     <div class="profile-card text-center">
@@ -146,6 +147,7 @@
         </div>
 
         <a href="{% url 'edit_profile' %}" class="btn-edit mt-4">Edit Profile</a>
+        <a href="{% url 'add_success_story' %}" class="btn-edit mt-3" style="background:#1e88ff;">Share Success Story</a>
 
     </div>
 </div>

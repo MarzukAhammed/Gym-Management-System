@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Session | M-Power Fitness Lab</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+  <style>
+    body { background:#0d0d0d; color:#fff; }
+    .wrap { padding-top: 100px; padding-bottom: 40px; }
+    .glass {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92));
+      border-radius: 18px;
+      box-shadow: 0 16px 35px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .head {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .title { margin:0; font-weight: 900; letter-spacing: 0.3px; }
+    .sub { color: rgba(255,255,255,0.72); font-size: 13px; margin-top: 4px; }
+    .btn-outline-soft {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.06);
+      padding: 10px 14px;
+      font-weight: 900;
+      text-decoration: none;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      justify-content:center;
+    }
+    #jitsi-container {
+      width: 100%;
+      height: min(78vh, 820px);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    code { color: #a5d8ff; }
+  </style>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <div class="container wrap">
+    <div class="glass">
+      <div class="head">
+        <div>
+          <h4 class="title">Live Room</h4>
+          <div class="sub">
+            Slot: {{ slot.session_time|date:"M d, Y - h:i A" }} ·
+            {% if slot.is_booked %}Booked by <strong>{{ slot.booked_by.username }}</strong>{% else %}Not booked yet{% endif %}
+          </div>
+        </div>
+        <a class="btn-outline-soft" href="{% url 'trainer_profile' %}">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+      </div>
+
+      <div class="p-3">
+        <div class="mb-2 text-white-50" style="font-size: 12px;">
+          Meeting: <code>{{ slot.meeting_link }}</code>
+        </div>
+        <div id="jitsi-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://meet.jit.si/external_api.js"></script>
+  <script>
+    (function () {
+      const meetingLink = "{{ slot.meeting_link|escapejs }}";
+      let domain = "meet.jit.si";
+      let roomName = "";
+
+      try {
+        const url = new URL(meetingLink);
+        domain = url.host || domain;
+        roomName = (url.pathname || "").replace(/^\//, "");
+      } catch (e) {
+        roomName = meetingLink;
+      }
+
+      if (!roomName) return;
+
+      const options = {
+        roomName: roomName,
+        parentNode: document.getElementById("jitsi-container"),
+        width: "100%",
+        height: "100%",
+        userInfo: {
+          displayName: "{{ trainer.name|escapejs }}"
+        },
+        configOverwrite: {
+          prejoinPageEnabled: false,
+          disableDeepLinking: true
+        },
+        interfaceConfigOverwrite: {
+          DEFAULT_BACKGROUND: "#0b0f1a",
+          DISABLE_JOIN_LEAVE_NOTIFICATIONS: true
+        }
+      };
+
+      // eslint-disable-next-line no-undef
+      new JitsiMeetExternalAPI(domain, options);
+    })();
+  </script>
+
+  {% include "chatbox_partial.html" %}
+</body>
+</html>
+

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import uuid
 
 
 @receiver(post_save, sender=User)
@@ -35,9 +36,67 @@ class Trainer(models.Model):
     facebook = models.URLField(blank=True, null=True)
     twitter = models.URLField(blank=True, null=True)
     linkedin = models.URLField(blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="trainer_account")
 
     def __str__(self):
         return self.name
+
+
+class TrainingSlot(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="training_slots")
+    session_time = models.DateTimeField()
+    is_active = models.BooleanField(default=False)  # trainer controls when the room is open
+    meeting_link = models.URLField(max_length=500)
+    is_booked = models.BooleanField(default=False)
+    booked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="booked_training_slots")
+
+    class Meta:
+        ordering = ["session_time"]
+
+    def __str__(self):
+        return f"{self.trainer.name} slot @ {self.session_time}"
+
+    @staticmethod
+    def generate_meeting_link():
+        room = f"mpower-{uuid.uuid4().hex[:12]}"
+        return f"https://meet.jit.si/{room}"
+
+
+class TrainingSession(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="training_sessions")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="training_sessions")
+    session_time = models.DateTimeField()
+    is_active = models.BooleanField(default=False)
+    meeting_link = models.URLField(max_length=500)
+
+    def __str__(self):
+        return f"{self.trainer.name} with {self.user.username} @ {self.session_time}"
+
+    @staticmethod
+    def generate_meeting_link():
+        room = f"gymnasium-{uuid.uuid4().hex[:12]}"
+        return f"https://meet.jit.si/{room}"
+
+
+class Notification(models.Model):
+    LEVEL_CHOICES = [
+        ("success", "Success"),
+        ("info", "Info"),
+        ("warning", "Warning"),
+        ("error", "Error"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    level = models.CharField(max_length=10, choices=LEVEL_CHOICES, default="info")
+    text = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.level}"
 
 
 

@@ -155,7 +155,13 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         <button onclick="toggleChat()" class="close-btn">&times;</button>
     </div>
     <div id="chat-messages">
-        <div class="bot-msg">Welcome back, human. Ask your fitness question.</div>
+        <div class="bot-msg">
+          {% if user.is_authenticated %}
+            Welcome back, {{ user.username }}. Ask your fitness question.
+          {% else %}
+            Welcome back, human. Ask your fitness question.
+          {% endif %}
+        </div>
     </div>
     <div class="chat-input-area">
         <input type="text" id="ai-user-input" placeholder="Type a message...">
@@ -165,6 +171,12 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
 
 <script>
 (function () {
+    // Homepage already loads full chatbot logic from static/js/script.js.
+    // Avoid double-binding handlers there.
+    if (typeof window.sendToAI === "function" && typeof window.toggleChat === "function") {
+        return;
+    }
+
     const cat = document.getElementById("floating-cat-container");
     const catImg = document.getElementById("main-cat-img");
     const chatBox = document.getElementById("premium-chatbox");
@@ -185,10 +197,41 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
     };
 
+    function runCatToLolonaTextFallback() {
+        const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
+        if (!aiText) return;
+
+        if (catImg && catImg.dataset.runSrc) {
+            catImg.src = catImg.dataset.runSrc;
+        }
+
+        requestAnimationFrame(function () {
+            const catRect = cat.getBoundingClientRect();
+            const textRect = aiText.getBoundingClientRect();
+            let newLeft = textRect.left + (textRect.width / 2) - (catRect.width / 2);
+            let newTop = textRect.top - (catRect.height * 0.85);
+            const maxLeft = window.innerWidth - catRect.width - 10;
+            const maxTop = window.innerHeight - catRect.height - 10;
+            newLeft = Math.max(10, Math.min(newLeft, maxLeft));
+            newTop = Math.max(10, Math.min(newTop, maxTop));
+            cat.style.transition = "all 0.7s ease-in-out";
+            cat.style.left = newLeft + "px";
+            cat.style.top = newTop + "px";
+            cat.style.right = "auto";
+            cat.style.bottom = "auto";
+        });
+
+        setTimeout(function () {
+            if (catImg && catImg.dataset.idleSrc) catImg.src = catImg.dataset.idleSrc;
+        }, 900);
+    }
+
     let isDragging = false;
     let isMoving = false;
     let startX = 0, startY = 0;
     let offsetX = 0, offsetY = 0;
+    let pressTimer = null;
+    const LONG_PRESS_MS = 320;
 
     function onMouseMove(e) {
         const moveX = Math.abs(e.clientX - startX);
@@ -196,6 +239,10 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         if (moveX > 5 || moveY > 5) {
             isDragging = true;
             isMoving = true;
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
             cat.style.transition = "none";
             cat.style.left = (e.clientX - offsetX) + "px";
             cat.style.top = (e.clientY - offsetY) + "px";
@@ -207,6 +254,10 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
     function onMouseUp() {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
         cat.style.transition = "all 0.3s ease";
         setTimeout(function () {
             isDragging = false;
@@ -225,6 +276,12 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         offsetY = e.clientY - rect.top;
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
+        // Long-press opens chat reliably (even if click sometimes misses).
+        pressTimer = setTimeout(function () {
+            if (!isMoving && !isDragging) {
+                chatBox.style.display = "flex";
+            }
+        }, LONG_PRESS_MS);
         e.preventDefault();
     });
 
@@ -234,18 +291,24 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         if (typeof isLoggedIn !== "undefined" && isLoggedIn === "false") {
             const maxX = window.innerWidth - 180;
             const maxY = window.innerHeight - 180;
+            // Slow down the "run away" a bit so it's easier to follow.
+            cat.style.transition = "all 1.9s ease-in-out";
             cat.style.left = (Math.random() * maxX) + "px";
             cat.style.top = (Math.random() * maxY) + "px";
             cat.style.right = "auto";
             cat.style.bottom = "auto";
             if (catImg && catImg.dataset.runSrc) {
                 catImg.src = catImg.dataset.runSrc;
-                setTimeout(function () { catImg.src = catImg.dataset.idleSrc || catImg.src; }, 900);
+                setTimeout(function () { catImg.src = catImg.dataset.idleSrc || catImg.src; }, 2100);
             }
             return;
         }
 
+        const willOpen = chatBox.style.display !== "flex";
         window.toggleChat();
+        if (willOpen) {
+            setTimeout(runCatToLolonaTextFallback, 40);
+        }
     });
 
     window.sendToAI = window.sendToAI || async function () {

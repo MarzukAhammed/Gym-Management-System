@@ -1,4 +1,250 @@
 {% load static %}
+<style>
+  /* Keep navbar look consistent on all pages */
+  #navbar {
+    background: rgba(13, 13, 13, 0.78);
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 9999;
+    padding: 10px 0;
+    backdrop-filter: blur(6px);
+    transform: none !important;
+  }
+
+  #navbar .main {
+    max-width: 1200px;
+    margin: 0 auto !important;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  #navbar .navbar-brand {
+    background: #313131;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transform: none !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    margin-left: 0 !important;
+    margin-right: 14px;
+  }
+
+  #navbar .navbar-brand img {
+    transform: none;
+    max-height: 54px;
+    width: auto;
+  }
+
+  @media (max-width: 576px) {
+    #navbar .navbar-brand img {
+      max-height: 44px;
+    }
+  }
+
+  #navbar .main_menu .nav-link {
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+
+  #navbar .main_menu .nav-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  #navbar .dropdown-menu {
+    display: none;
+    position: absolute;
+    z-index: 10000;
+  }
+
+  #navbar .dropdown-menu.show {
+    display: block;
+  }
+
+  /* Desktop: open dropdowns on hover (keep click on mobile) */
+  @media (min-width: 992px) {
+    #navbar .nav-item.dropdown:hover > .dropdown-menu {
+      display: block;
+    }
+
+    #navbar .nav-item.dropdown:hover > .dropdown-toggle {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    /* Remove the "hover gap" so moving into the menu doesn't close it */
+    #navbar .nav-item.dropdown > .dropdown-menu {
+      margin-top: 0;
+    }
+  }
+
+  #navbar .feature-dropdown-menu {
+    min-width: 260px;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    background: linear-gradient(165deg, rgba(16, 26, 44, 0.96), rgba(7, 12, 24, 0.98));
+    box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45);
+  }
+
+  #navbar .feature-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e8ecff !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: all 0.25s ease;
+  }
+
+  #navbar .feature-dropdown-item:hover,
+  #navbar .feature-dropdown-item:focus {
+    color: #fff !important;
+    background: linear-gradient(120deg, rgba(53, 91, 255, 0.95), rgba(73, 196, 255, 0.95));
+    transform: translateX(3px);
+  }
+
+  #navbar .feature-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+    flex: 0 0 24px;
+  }
+
+  #navbar .feature-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  #navbar .notification-trigger,
+  #navbar .notification-trigger i {
+    color: #fff !important;
+    font-size: 18px;
+  }
+
+  #navbar .notification-badge {
+    position: absolute;
+    top: 0;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 20px;
+    background: #ff4d4d;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+
+  #navbar .notification-menu {
+    min-width: 320px;
+    padding: 10px;
+    border-radius: 12px;
+    background: linear-gradient(165deg, rgba(16, 26, 44, 0.96), rgba(7, 12, 24, 0.98));
+    border: 1px solid rgba(255,255,255,0.14);
+    right: 0;
+    left: auto;
+  }
+
+  #navbar .notification-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 4px;
+  }
+
+  #navbar .notification-item {
+    white-space: normal;
+    color: #e8ecff !important;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.35;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  #navbar .notification-item.is-read {
+    opacity: 0.62;
+  }
+
+  #navbar .notification-text {
+    display: block;
+    flex: 1;
+  }
+
+  #navbar .notification-clear {
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+  }
+
+  #navbar .notification-item.success { border-left: 3px solid #22c55e; }
+  #navbar .notification-item.warning { border-left: 3px solid #f59e0b; }
+  #navbar .notification-item.info { border-left: 3px solid #4cc2ff; }
+
+  #navbar .auth-nav .nav-link {
+    color: #fff;
+  }
+
+  #navbar .auth-user-item {
+    display: flex;
+    align-items: center;
+  }
+
+  #navbar .nav-user-photo,
+  #navbar .nav-user-photo-fallback {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    line-height: 1;
+    font-size: 12px;
+  }
+
+  @media (max-width: 991px) {
+    #navbar .navbar-collapse {
+      background: rgba(8, 12, 24, 0.98);
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    #navbar .navbar-collapse.show {
+      display: block;
+    }
+  }
+</style>
 <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
     <div class="container main">
       <a class="navbar-brand" href="#"><img src="{% static 'images/logo.png' %}" alt=""></a>
@@ -8,11 +254,44 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 main_menu">
 <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'plans' %}">Plans</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'team' %}">Team</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'gallery' %}">Gallery</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'testimonial' %}">Testimonial</a></li>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Explore
+    </a>
+    <ul class="dropdown-menu shadow feature-dropdown-menu" aria-labelledby="exploreDropdown">
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'about' %}">
+                <span class="feature-icon"><i class="fa-solid fa-circle-info"></i></span>
+                <span class="feature-label">About Us</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'team' %}">
+                <span class="feature-icon"><i class="fa-solid fa-people-group"></i></span>
+                <span class="feature-label">Team</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'gallery' %}">
+                <span class="feature-icon"><i class="fa-regular fa-images"></i></span>
+                <span class="feature-label">Gallery</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'testimonial' %}">
+                <span class="feature-icon"><i class="fa-solid fa-quote-left"></i></span>
+                <span class="feature-label">Testimonial</span>
+            </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'contact' %}">
+                <span class="feature-icon"><i class="fa-regular fa-envelope"></i></span>
+                <span class="feature-label">Contact</span>
+            </a>
+        </li>
+    </ul>
+</li>
 
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -40,13 +319,19 @@
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'exercise_library' %}">
-                <span class="feature-icon"><img src="{% static 'icons/workout.png' %}" width="18" alt="Workout"></span>
+                <span class="feature-icon"><i class="fa-solid fa-dumbbell"></i></span>
                 <span class="feature-label">Exercise Library</span>
+            </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a class="dropdown-item feature-dropdown-item" href="{% url 'live_training_dashboard' %}">
+                <span class="feature-icon"><i class="fa-solid fa-video"></i></span>
+                <span class="feature-label">Live Training</span>
             </a>
         </li>
     </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
 
 </ul>
 <ul class="navbar-nav mb-2 mb-lg-0 ms-lg-4 auth-nav align-items-lg-center">
@@ -63,11 +348,16 @@
             <li><hr class="dropdown-divider"></li>
             {% for item in navbar_notifications %}
                 <li>
-                    <span class="dropdown-item notification-item {{ item.type }}">{{ item.text }}</span>
+                    <a class="dropdown-item notification-item {{ item.level }} {% if item.is_read %}is-read{% endif %}" href="{% url 'notification_history' %}" data-notification-id="{{ item.id }}">
+                      <span class="notification-text">{{ item.text }}</span>
+                      <button type="button" class="notification-clear" title="Clear notification" aria-label="Clear notification">&times;</button>
+                    </a>
                 </li>
             {% empty %}
                 <li><span class="dropdown-item notification-item info">No new notifications</span></li>
             {% endfor %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item notification-item info" href="{% url 'notification_history' %}">View all notifications</a></li>
         </ul>
     </li>
     <li class="nav-item d-flex align-items-center auth-user-item">
@@ -82,6 +372,13 @@
             <span class="ms-2 d-none d-lg-inline">{{ user.username }}</span>
         </a>
 
+        {% if user.trainer_account %}
+          <a href="{% url 'trainer_profile' %}" class="nav-link d-flex align-items-center me-3">
+            <i class="fa-solid fa-user-tie me-2"></i>
+            <span class="d-none d-lg-inline">Trainer Profile</span>
+          </a>
+        {% endif %}
+
         <form action="{% url 'logout' %}" method="post" style="display: inline;">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-outline-danger">Logout</button>
@@ -95,3 +392,114 @@
       </div>
     </div>
   </nav>
+<script>
+  (function () {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+
+    // Keep non-home pages below fixed navbar.
+    if (window.location.pathname !== '/') {
+      document.body.style.paddingTop = '86px';
+    }
+
+    // Mobile toggler fallback (works without Bootstrap JS).
+    const toggler = nav.querySelector('.navbar-toggler');
+    const collapse = nav.querySelector('#navbarSupportedContent');
+    if (toggler && collapse) {
+      toggler.addEventListener('click', function () {
+        collapse.classList.toggle('show');
+      });
+    }
+
+    // Dropdown fallback (Explore + Features + notifications).
+    // If Bootstrap dropdown JS is present, let it handle everything.
+    const hasBootstrapDropdown = !!(window.bootstrap && window.bootstrap.Dropdown);
+    if (!hasBootstrapDropdown) {
+      const toggles = nav.querySelectorAll('.dropdown-toggle, [data-bs-toggle="dropdown"]');
+      toggles.forEach(function (toggle) {
+        toggle.addEventListener('click', function (e) {
+          e.preventDefault();
+          const parent = toggle.closest('.dropdown');
+          if (!parent) return;
+          const menu = parent.querySelector('.dropdown-menu');
+          if (!menu) return;
+
+          nav.querySelectorAll('.dropdown-menu.show').forEach(function (openMenu) {
+            if (openMenu !== menu) openMenu.classList.remove('show');
+          });
+          menu.classList.toggle('show');
+        });
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!nav.contains(e.target)) {
+        nav.querySelectorAll('.dropdown-menu.show').forEach(function (menu) {
+          menu.classList.remove('show');
+        });
+      }
+    });
+
+    function getCookie(name) {
+      const cookies = document.cookie ? document.cookie.split(';') : [];
+      for (let c of cookies) {
+        c = c.trim();
+        if (c.startsWith(name + '=')) return decodeURIComponent(c.substring(name.length + 1));
+      }
+      return '';
+    }
+
+    function updateUnreadBadge(delta) {
+      const badge = nav.querySelector('.notification-badge');
+      if (!badge) return;
+      const current = parseInt(badge.textContent || '0', 10);
+      const next = Math.max(0, current + delta);
+      if (next === 0) {
+        badge.remove();
+      } else {
+        badge.textContent = String(next);
+      }
+    }
+
+    nav.querySelectorAll('.notification-item[data-notification-id]').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        const clearBtn = e.target.closest('.notification-clear');
+        const notifId = item.getAttribute('data-notification-id');
+        if (!notifId) return;
+
+        if (clearBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          fetch('/notifications/clear/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ notification_id: notifId })
+          }).finally(function () {
+            const wasUnread = !item.classList.contains('is-read');
+            item.closest('li')?.remove();
+            if (wasUnread) updateUnreadBadge(-1);
+          });
+          return;
+        }
+
+        if (!item.classList.contains('is-read')) {
+          fetch('/notifications/read/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ notification_id: notifId })
+          }).finally(function () {
+            item.classList.add('is-read');
+            updateUnreadBadge(-1);
+          });
+        }
+        // Let the <a href> navigate to history page.
+      });
+    });
+  })();
+</script>

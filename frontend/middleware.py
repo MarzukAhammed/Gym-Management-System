@@ -1,4 +1,5 @@
 from django.shortcuts import redirect
+from django.contrib import messages
 
 
 class AdminOnlySessionMiddleware:
@@ -21,3 +22,38 @@ class AdminOnlySessionMiddleware:
         ):
             return redirect("/admin/")
         return self.get_response(request)
+
+
+class NotificationsFromMessagesMiddleware:
+    """
+    Convert Django messages (success/info/warning/error) into persistent Notification rows.
+    This makes "top alerts" appear in the bell dropdown + history page.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if not getattr(request, "user", None) or not request.user.is_authenticated:
+            return response
+
+        try:
+            from .models import Notification
+        except Exception:
+            return response
+
+        # Consume queued messages intentionally (we want them in the bell, not as page alerts).
+        storage = messages.get_messages(request)
+        for m in storage:
+            level = getattr(m, "tags", "") or "info"
+            level = (level.split() or ["info"])[0].strip().lower()
+            if level not in {"success", "info", "warning", "error"}:
+                level = "info"
+            text = str(m.message or "").strip()
+            if not text:
+                continue
+            Notification.objects.create(user=request.user, level=level, text=text)
+
+        return response

@@ -197,6 +197,38 @@ document.addEventListener("DOMContentLoaded", function() {
         setTimeout(() => { isDragging = false; isMoving = false; }, 100);
     }
 
+    function runCatToLolonaText() {
+        const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
+        if (!aiText) return;
+
+        if (catImg && RUN_PATH && canUseRunGif) {
+            catImg.src = RUN_PATH + "?" + Date.now();
+        }
+
+        requestAnimationFrame(() => {
+            const catRect = cat.getBoundingClientRect();
+            const textRect = aiText.getBoundingClientRect();
+
+            let newLeft = textRect.left + (textRect.width / 2) - (catRect.width / 2);
+            let newTop = textRect.top - (catRect.height * 0.85);
+
+            const maxLeft = window.innerWidth - catRect.width - 10;
+            const maxTop = window.innerHeight - catRect.height - 10;
+            newLeft = Math.max(10, Math.min(newLeft, maxLeft));
+            newTop = Math.max(10, Math.min(newTop, maxTop));
+
+            cat.style.transition = 'all 0.7s ease-in-out';
+            cat.style.left = `${newLeft}px`;
+            cat.style.top = `${newTop}px`;
+            cat.style.right = 'auto';
+            cat.style.bottom = 'auto';
+        });
+
+        setTimeout(() => {
+            if (catImg && IDLE_PATH) catImg.src = IDLE_PATH;
+        }, 900);
+    }
+
     // --- CLICK LOGIC ---
     cat.addEventListener('click', (e) => {
         if (isMoving || isDragging || longPressTriggered) return;
@@ -252,7 +284,11 @@ document.addEventListener("DOMContentLoaded", function() {
         chatBox.style.left = `${targetLeft}px`;
         chatBox.style.top = `${targetTop}px`;
 
+        const willOpen = chatBox.style.display !== "flex";
         toggleChat();
+        if (willOpen) {
+            setTimeout(runCatToLolonaText, 40);
+        }
     });
 
     // --- INPUT ---

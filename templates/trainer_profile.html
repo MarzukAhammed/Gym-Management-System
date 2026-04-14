@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trainer Profile | M-Power Fitness Lab</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+  <style>
+    body { background:#0d0d0d; color:#fff; }
+    .wrap { padding-top: 100px; padding-bottom: 50px; }
+    .glass {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92));
+      border-radius: 18px;
+      box-shadow: 0 16px 35px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .head {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .title { margin:0; font-weight: 900; letter-spacing: 0.3px; }
+    .sub { color: rgba(255,255,255,0.72); font-size: 13px; margin-top: 4px; }
+    .badge-soft {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.86);
+      font-weight: 800;
+    }
+    .form-control, .form-control:focus {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff;
+      box-shadow: none;
+    }
+    .btn-premium {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+      color: #fff;
+      background: linear-gradient(130deg, #335bff, #4cc2ff);
+      box-shadow: 0 14px 26px rgba(39,118,255,0.25);
+      text-decoration: none;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      justify-content:center;
+    }
+    .btn-outline-soft {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.06);
+      padding: 10px 14px;
+      font-weight: 900;
+      text-decoration: none;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      justify-content:center;
+    }
+    .btn-outline-soft:hover { color:#fff; background: rgba(255,255,255,0.10); }
+    .muted { color: rgba(255,255,255,0.70); }
+    .table-darkish th, .table-darkish td { border-color: rgba(255,255,255,0.10) !important; vertical-align: middle; font-size: 13px; }
+  </style>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <div class="container wrap">
+    <div class="glass mb-3">
+      <div class="head">
+        <div>
+          <h3 class="title">{{ trainer.name }} <span class="badge-soft">Bookings: {{ booking_count }}</span></h3>
+          <div class="sub">{{ trainer.specialty }} · Trainer Tools</div>
+        </div>
+        <a class="btn-outline-soft" href="{% url 'trainer_logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Trainer Logout</a>
+      </div>
+
+      <div class="p-3">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-5">
+            <div class="p-3" style="border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; background: rgba(255,255,255,0.03);">
+              <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
+                <strong>Create Live Slot</strong>
+                <span class="muted" style="font-size: 12px;">Users will book from your slots</span>
+              </div>
+              <form method="post" action="{% url 'trainer_create_slot' %}">
+                {% csrf_token %}
+                <div class="mb-2">
+                  <input type="datetime-local" name="session_time" class="form-control" required>
+                </div>
+                <button class="btn-premium w-100" type="submit"><i class="fa-solid fa-plus"></i> Add Slot</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-7">
+            <div class="p-3" style="border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; background: rgba(255,255,255,0.03);">
+              <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <strong>Upcoming Slots</strong>
+                <span class="muted" style="font-size: 12px;">Activate when you’re ready</span>
+              </div>
+              <div class="mt-2">
+                {% for s in upcoming %}
+                  <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap py-2" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                    <div>
+                      <div><strong>{{ s.session_time|date:"M d, Y - h:i A" }}</strong></div>
+                      <div class="muted" style="font-size: 12px;">
+                        {% if s.is_booked %}Booked by: <strong>{{ s.booked_by.username }}</strong>{% else %}Not booked yet{% endif %}
+                      </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <form method="post" action="{% url 'trainer_toggle_slot_active' s.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="is_active" value="{% if s.is_active %}false{% else %}true{% endif %}">
+                        <button class="{% if s.is_active %}btn-outline-soft{% else %}btn-premium{% endif %}" type="submit" style="padding:8px 10px; font-size: 13px;">
+                          {% if s.is_active %}<i class="fa-regular fa-circle-pause"></i> Deactivate{% else %}<i class="fa-solid fa-circle-play"></i> Activate{% endif %}
+                        </button>
+                      </form>
+                      <a class="btn-outline-soft" href="{% url 'trainer_start_session' s.id %}" style="padding:8px 10px; font-size: 13px;">
+                        <i class="fa-solid fa-video"></i> Start Session
+                      </a>
+                    </div>
+                  </div>
+                {% empty %}
+                  <div class="muted mt-2">No upcoming slots yet.</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass">
+      <div class="head">
+        <div>
+          <h4 class="title">All Slots</h4>
+          <div class="sub">See bookings and manage status</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-darkish mb-0">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Booked By</th>
+              <th style="width: 220px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in slots %}
+              <tr>
+                <td>{{ s.session_time|date:"M d, Y - h:i A" }}</td>
+                <td>
+                  {% if s.is_active %}<span class="badge-soft">Active</span>{% else %}<span class="badge-soft" style="opacity:0.7;">Inactive</span>{% endif %}
+                  {% if s.is_booked %}<span class="badge-soft" style="border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08);">Booked</span>{% endif %}
+                </td>
+                <td>{% if s.booked_by %}{{ s.booked_by.username }}{% else %}<span class="muted">—</span>{% endif %}</td>
+                <td class="d-flex gap-2">
+                  <form method="post" action="{% url 'trainer_toggle_slot_active' s.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="is_active" value="{% if s.is_active %}false{% else %}true{% endif %}">
+                    <button class="btn-outline-soft" type="submit" style="padding:8px 10px; font-size: 13px;">
+                      {% if s.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
+                  </form>
+                  <a class="btn-outline-soft" href="{% url 'trainer_start_session' s.id %}" style="padding:8px 10px; font-size: 13px;">
+                    Start
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="muted">No slots.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% include "chatbox_partial.html" %}
+</body>
+</html>
+

@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import Plan, Trainer, Member, Review, Contact, GalleryMember, SuccessStory, Payment
+from .models import Plan, Trainer, Member, Review, Contact, GalleryMember, SuccessStory, Payment, TrainingSession, Notification, TrainingSlot
+from .forms import TrainerCreateForm
 
 admin.site.unregister(Group)
 
@@ -39,6 +40,14 @@ admin.ModelAdmin.Media = type('Media', (), {
 class TrainerAdmin(ActionAdmin):
     list_display = ('name', 'specialty', 'delete_button') # ID bad diye 'name'
     search_fields = ('name', 'specialty') # Protita section-e search bar
+    add_form = TrainerCreateForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        defaults = {}
+        if obj is None:
+            defaults["form"] = self.add_form
+        defaults.update(kwargs)
+        return super().get_form(request, obj, **defaults)
 
 @admin.register(Plan)
 class PlanAdmin(ActionAdmin):
@@ -87,3 +96,24 @@ class ContactAdmin(ActionAdmin):
 class SuccessStoryAdmin(ActionAdmin):
     list_display = ('title', 'delete_button')
     search_fields = ('title',)
+
+
+@admin.register(TrainingSession)
+class TrainingSessionAdmin(ActionAdmin):
+    list_display = ("trainer", "user", "session_time", "is_active", "delete_button")
+    search_fields = ("trainer__name", "user__username", "meeting_link")
+    list_filter = ("is_active", "trainer")
+
+
+@admin.register(TrainingSlot)
+class TrainingSlotAdmin(ActionAdmin):
+    list_display = ("trainer", "session_time", "is_active", "is_booked", "booked_by", "delete_button")
+    search_fields = ("trainer__name", "meeting_link", "booked_by__username")
+    list_filter = ("is_active", "is_booked", "trainer")
+
+
+@admin.register(Notification)
+class NotificationAdmin(ActionAdmin):
+    list_display = ("user", "level", "is_read", "created_at", "delete_button")
+    search_fields = ("user__username", "text")
+    list_filter = ("level", "is_read")

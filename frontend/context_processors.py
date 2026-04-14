@@ -1,41 +1,46 @@
-from .models import Payment
+import datetime
+from .models import Payment, UserProgress, Notification
+
+
+def _calculate_workout_streak(user):
+    logs = UserProgress.objects.filter(user=user).order_by("-date")
+    if not logs.exists():
+        return 0
+
+    workout_dates = []
+    seen = set()
+    for log in logs:
+        if log.date not in seen:
+            seen.add(log.date)
+            workout_dates.append(log.date)
+
+    today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    latest = workout_dates[0]
+
+    # Streak is active only if latest workout is today or yesterday.
+    if latest not in {today, yesterday}:
+        return 0
+
+    streak = 1
+    prev_day = latest
+    for d in workout_dates[1:]:
+        if d == (prev_day - datetime.timedelta(days=1)):
+            streak += 1
+            prev_day = d
+        else:
+            break
+    return streak
 
 
 def navbar_notifications(request):
     if not request.user.is_authenticated:
         return {"navbar_notifications": [], "unread_notification_count": 0}
 
-    notifications = []
-    username = request.user.username
-
-    latest_verified = Payment.objects.filter(
-        full_name__iexact=username,
-        verified=True
-    ).order_by("-created_at").first()
-
-    latest_pending = Payment.objects.filter(
-        full_name__iexact=username,
-        verified=False
-    ).order_by("-created_at").first()
-
-    if latest_verified:
-        notifications.append({
-            "type": "success",
-            "text": f"Your payment of {latest_verified.amount} BDT is verified.",
-        })
-    elif latest_pending:
-        notifications.append({
-            "type": "warning",
-            "text": "Your payment is under admin review.",
-        })
-
-    notifications.append({
-        "type": "info",
-        "text": "Check your profile for latest membership updates.",
-    })
-
-    unread = sum(1 for n in notifications if n["type"] != "info")
+    qs = Notification.objects.filter(user=request.user)
+    unread = qs.filter(is_read=False).count()
+    visible = list(qs.all()[:8])
     return {
-        "navbar_notifications": notifications[:5],
+        "navbar_notifications": visible,
         "unread_notification_count": unread,
     }

@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Room | M-Power Fitness Lab</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+  <style>
+    body {
+      background: radial-gradient(circle at top right, rgba(86, 193, 253, 0.12), transparent 35%),
+                  radial-gradient(circle at bottom left, rgba(92, 110, 240, 0.10), transparent 35%),
+                  #0b0f1a;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .page-wrap { padding-top: 100px; padding-bottom: 40px; }
+    .glass {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92));
+      border-radius: 18px;
+      box-shadow: 0 16px 35px rgba(0,0,0,0.35);
+    }
+    .room-header {
+      padding: 16px;
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .room-title { margin:0; font-weight: 900; letter-spacing: 0.3px; }
+    .room-sub { color: rgba(255,255,255,0.72); font-size: 13px; }
+    .btn-premium {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      color: #fff;
+      background: linear-gradient(130deg, #335bff, #4cc2ff);
+      box-shadow: 0 14px 26px rgba(39,118,255,0.25);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-premium:hover { filter: brightness(1.05); color:#fff; }
+    .btn-outline-soft {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.06);
+      padding: 10px 14px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline-soft:hover { color:#fff; background: rgba(255,255,255,0.10); }
+    #jitsi-container {
+      width: 100%;
+      height: min(72vh, 720px);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .waiting {
+      padding: 22px;
+    }
+    .waiting h4 { font-weight: 900; }
+    .waiting p { color: rgba(255,255,255,0.78); margin-bottom: 10px; }
+    .meta-line { color: rgba(255,255,255,0.72); font-size: 13px; }
+    code { color: #a5d8ff; }
+  </style>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <div class="container page-wrap">
+    <div class="glass">
+      <div class="room-header">
+        <div>
+          <h4 class="room-title">Live Session with {{ session.trainer.name }}</h4>
+          <div class="room-sub">
+            Scheduled: {{ session.session_time|date:"M d, Y - h:i A" }}
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn-outline-soft" href="{% url 'live_training_dashboard' %}">
+            <i class="fa-solid fa-arrow-left"></i> Back
+          </a>
+        </div>
+      </div>
+
+      {% if session.is_active %}
+        <div class="p-3">
+          <div id="jitsi-container"></div>
+        </div>
+      {% else %}
+        <div class="waiting">
+          <h4 class="mb-2">Waiting for trainer activation…</h4>
+          <p>The Join experience will appear here automatically once the trainer marks this session as active.</p>
+          <div class="meta-line">
+            Status: <strong class="text-warning">Pending</strong> · Meeting: <code>{{ session.meeting_link }}</code>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if session.is_active %}
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <script>
+      (function () {
+        const meetingLink = "{{ session.meeting_link|escapejs }}";
+        let domain = "meet.jit.si";
+        let roomName = "";
+
+        try {
+          const url = new URL(meetingLink);
+          domain = url.host || domain;
+          roomName = (url.pathname || "").replace(/^\//, "");
+        } catch (e) {
+          // If meeting_link isn't a valid URL, treat it as a room name.
+          roomName = meetingLink;
+        }
+
+        if (!roomName) return;
+
+        const options = {
+          roomName: roomName,
+          parentNode: document.getElementById("jitsi-container"),
+          width: "100%",
+          height: "100%",
+          userInfo: {
+            displayName: "{{ request.user.username|escapejs }}"
+          },
+          configOverwrite: {
+            prejoinPageEnabled: false,
+            disableDeepLinking: true
+          },
+          interfaceConfigOverwrite: {
+            DEFAULT_BACKGROUND: "#0b0f1a",
+            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true
+          }
+        };
+
+        // eslint-disable-next-line no-undef
+        const api = new JitsiMeetExternalAPI(domain, options);
+
+        api.addEventListener("readyToClose", function () {
+          window.location.href = "{% url 'live_training_dashboard' %}";
+        });
+      })();
+    </script>
+  {% endif %}
+
+  {% include "chatbox_partial.html" %}
+</body>
+</html>

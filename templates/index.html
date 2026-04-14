@@ -1,29 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  {% load static %}
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gymnasioum</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
-   {% load static %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/venobox.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}M-Power Fitness Lab{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/venobox.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/slick.css' %}">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+{% endblock %}
 
-  
-
-</head>
-<body>
+{% block content %}
   {% if messages %}
     <div class="container">
       {% for message in messages %}
@@ -56,13 +43,7 @@
     <a id="button"></a>
   </div>
   <!-- Back to top end -->
-   <!-- Navbar Part Start -->
-   {% include "navbar.html" %}
-
-   <!-- Navbar Part End -->
-
    <!-- Banner PArt start -->
-   {% load static %}
 <section id="banner">
   <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
@@ -74,7 +55,7 @@
           <div class="container h-100 d-flex justify-content-center align-items-center">
             <div class="banner_text text-center text-white">
               <h2 class="fw-bold">TIME TO START</h2>
-              <h1 class="display-3 fw-bold text-gradient">Gymnasioum</h1>
+              <h1 class="display-3 fw-bold text-gradient">M-Power Fitness Lab</h1>
               <p class="mt-3">Achieve your dream body with premium training, expert trainers & modern facilities.</p>
               <div class="link mt-4">
                 <a href="{% url 'join' %}" class="btn btn-gradient btn-lg me-2">Join Now</a>
@@ -356,52 +337,52 @@ Join us in revolutionizing gym management, where technology meets fitness for a 
      </div>
       <div class="class_down">
         <div class="class_item  mix Monday Wednesday Thursday text-center">
-          <h3>Yoga</h3>
+          <h3>Push-Ups</h3>
           <i class="fa-solid fa-child fa-beat"></i>
           <p>09:00 a.m - 11:00 a.m.</p>
         </div>
         <div class="class_item mix Wednesday Monday Saturday Friday text-center">
-          <h3>Skipping</h3>
+          <h3>Mountain Climbers</h3>
           <i class="fa-solid fa-dumbbell"></i>
           <p>11:00 a.m - 1:00 p.m.</p>
         </div>
         <div class="class_item mix Friday Monday Saturday Thursday Tuesday text-center">
-          <h3>cycling</h3>
+          <h3>Bodyweight Squats</h3>
           <i class="fa-solid fa-bicycle"></i>
           <p>1:00 p.m - 3:00 p.m.</p>
         </div>
         <div class="class_item mix Saturday Monday Thursday Friday text-center">
-          <h3>Boxing</h3>
+          <h3>Burpees</h3>
           <i class="fa-solid fa-person-dots-from-line"></i>
           <p>3:00 p.m - 5:00 p.m.</p>
         </div>
         <div class="class_item mix Saturday Monday Friday Tuesday text-center">
-          <h3>Back Relief</h3>
+          <h3>Plank Core Hold</h3>
           <i class="fa-solid fa-person-praying"></i>
           <p>5:00 p.m - 7:00 p.m.</p>
         </div>
         <div class="class_item mix Wednesday  Monday Friday Thursday Saturday text-center">
-          <h3>Chin Up</h3>
+          <h3>Jumping Jacks</h3>
           <i class="fa-solid fa-child"></i>
           <p>09:00 a.m - 11:00 a.m.</p>
         </div>
         <div class="class_item  mix Wednesday Monday Tuesday text-center">
-          <h3>weight Lifting</h3>
+          <h3>Glute Bridges</h3>
           <i class="fa-solid fa-dumbbell"></i>
           <p>11:00 a.m - 1:00 p.m.</p>
         </div>
         <div class="class_item mix Tuesday Monday Thursday Saturday text-center">
-          <h3>weight losing</h3>
+          <h3>Lunges</h3>
           <i class="fa-solid fa-bicycle"></i>
           <p>1:00 p.m - 3:00 p.m.</p>
         </div>
         <div class="class_item mix Tuesday Monday Friday  Saturday text-center">
-          <h3>Free Hand</h3>
+          <h3>High Knees</h3>
           <i class="fa-solid fa-person-dots-from-line"></i>
           <p>3:00 p.m - 5:00 p.m.</p>
         </div>
         <div class="class_item  mix Saturday Monday Tuesday Friday text-center">
-          <h3>Dumbell</h3>
+          <h3>Russian Twists</h3>
           <i class="fa-solid fa-person-praying"></i>
           <p>5:00 p.m - 7:00 p.m.</p>
         </div>
@@ -421,182 +402,47 @@ Join us in revolutionizing gym management, where technology meets fitness for a 
 </section>
 <!-- Class Part End -->
 
-<!-- Footer part Start -->
-<footer id="footer">
-  <section id="footer">
-    <div class="overlay">
-   <div class="head_img text-center">
-    <img src="{% static 'images/logo.png' %}" alt="">
-   </div>
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-3">
-            <div class="footer_item">
-              <div class="footer_head">
-                <h2>OPENING HOURS</h2>
-              </div>
-              <div class="footer_body d-flex">
-                <div class="one">
-                  <p>Monday		  </p>
-                  <p>Tuesday		</p>
-                  <p>wednesday	</p>
-                  <p>Thursday		</p>
-                  <p>Friday		  </p>
-                  <p>Saturday		</p>
-                  <p>Sunday		 </p>
-                  <p>Holiday		</p>
-                </div>
-                <div class="two">
-                  <p>05:00 A.M. - 11:00 P.M.</p>
-                  <p>05:00 A.M. - 11:00 P.M.</p>
-                  <p>05:00 A.M. - 11:00 P.M.</p>
-                  <p>05:00 A.M. - 11:00 P.M.</p>
-                  <p>05:00 A.M. - 11:00 P.M.</p>
-                  <p>07:00 A.M. - 09:00 P.M.</p>
-                  <p>Closed.</p>
-                  <p>Closed</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3">
-            <div class="footer_item">
-              <div class="footer_head">
-                <h2>TWITTER FEEDS</h2>
-              </div>
-              <div class="footer_body">
-                <div class="one d-flex ">
-                  <i class="fa-brands fa-twitter"></i>
-                  <h3>We want to introduce you to a new ess theme GYMNASIUM persue new press theme. This the new idea for theme, hope you will like. <span>24 July 2017 </span>
-                  </h3>
-                </div>
-                <div class="one d-flex">
-                  <i class="fa-brands fa-twitter"></i>
-                  <h3>We want to introduce you to a new ess theme GYMNASIUM persue new press theme. This the new idea for theme, hope you will like. <span>24 July 2017 </span>
-                  </h3>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-sm-6">
-            <div class="footer_item">
-              <div class="footer_head">
-                <h2>FLICKER PHOTOS</h2>
-              </div>
-              <div class="footer_body">
-               <img src="{% static 'images/footer-img.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-2.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-3.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-4.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-5.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-6.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-7.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-8.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-9.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-10.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-11.jpg' %}" alt="">
-               <img src="{% static 'images/footer-img-12.jpg' %}" alt="">
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3">
-            <div class="footer_item">
-              <div class="footer_head">
-                <h2>ADRESS</h2>
-              </div>
-              <div class="footer_body footer_body_two">
-                <div class="one d-flex ">
-                  <i class="fa-solid fa-location-dot"></i>
-                  <h3>Road No 10/A, Sector-11, Uttara, Dhaka-1230
-                  </h3>
-                </div>
-                <div class="one d-flex">
-                  <i class="fa-solid fa-phone"></i>
-                  <h3>+88 01760813261
-                  </h3>
-                  <h3> +88 01560005694
-                  </h3>
-                </div>
-                <div class="one d-flex">
-                  <i class="fa-solid fa-envelope"></i>
-                  <h3>Marjukahmed113@gmail.com
-                  </h3>
-                </div>
-              </div>
-              <div class="footer_icon">
-                <h2>GET SOCIAL</h2>
-                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-behance"></i></a>
-              </div>
-            </div>
-          </div>
+{% include "chatbox_partial.html" %}
+{% endblock %}
 
-        </div>
-      </div>
-      <div class="copy text-center">
-        <p>Copyright  &copy; All rights reserved by <span> GYMNASIUM.</span></p>
-      </div>
-    </div>
-
-  </section>
-
-</footer>
-<!-- Footer part End -->
-
-
-
-   <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
-    <script src="{% static 'js/slick.min.js' %}"></script>
-    <script src="{% static 'js/jquery.star-rating.js' %}"></script>
-    <script src="{% static 'js/mixitup.min.js' %}"></script>
-    <script src="{% static 'js/awsome.js' %}"></script>
-    <script src="{% static 'js/waypoints.min.js' %}"></script>
-    <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
-    <script src="{% static 'js/venobox.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-CSS3-Powered-Flip-Animations-justFlipIt/js/jquery.justflipit.min.js"></script>
+{% block extra_js %}
+  <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+  <script src="{% static 'js/slick.min.js' %}"></script>
+  <script src="{% static 'js/jquery.star-rating.js' %}"></script>
+  <script src="{% static 'js/mixitup.min.js' %}"></script>
+  <script src="{% static 'js/awsome.js' %}"></script>
+  <script src="{% static 'js/waypoints.min.js' %}"></script>
+  <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+  <script src="{% static 'js/venobox.min.js' %}"></script>
+  <script src="{% static 'js/script.js' %}"></script>
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-CSS3-Powered-Flip-Animations-justFlipIt/js/jquery.justflipit.min.js"></script>
   <script src="https://unpkg.com/@simhub2/justflipit/dist/justFlipIt-modern.min.js"></script>
-<script>
-var swiper = new Swiper('.mySwiper', {
-        autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true
-        },
-        effect: 'fade',
-        fadeEffect: { crossFade: true },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-            dynamicBullets: true
-        },
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
-        loop: true,
-        speed: 1000,
-        grabCursor: true,
-        slidesPerView: 1, // Ensure one slide at a time
-        spaceBetween: 10, // Minimal spacing
+  <script>
+    var swiper = new Swiper('.mySwiper', {
+      autoplay: { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true },
+      effect: 'fade',
+      fadeEffect: { crossFade: true },
+      pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
+      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+      loop: true,
+      speed: 1000,
+      grabCursor: true,
+      slidesPerView: 1,
+      spaceBetween: 10
     });
 
-  document.addEventListener("DOMContentLoaded", function () {
-      justFlipIt('.flip-card', { Click: true });
-  });
-</script>
-<div id="global-user-context"
-     data-username="{{ request.user.username }}"
-     data-weight="{{ request.user.profile.weight }}"
-     data-height="{{ request.user.profile.height }}"
-     style="display:none;">
-</div>
-{% include "chatbox_partial.html" %}
-</body>
-</html>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (typeof justFlipIt === "function") {
+        justFlipIt('.flip-card', { Click: true });
+      }
+    });
+  </script>
+  <div id="global-user-context"
+       data-username="{{ request.user.username }}"
+       data-weight="{{ request.user.profile.weight }}"
+       data-height="{{ request.user.profile.height }}"
+       style="display:none;">
+  </div>
+{% endblock %}

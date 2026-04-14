@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Plan, Trainer, Member, Review, SuccessStory, Profile, GalleryMember, DietPlan, Payment
+from .models import Plan, Trainer, Member, Review, SuccessStory, Profile, GalleryMember, DietPlan, Payment, TrainingSession, Notification, TrainingSlot
 from frontend.models import Profile
-from .forms import MemberForm, SignupForm, JoinForm, ContactForm, ReviewForm, ProfileForm
+from .forms import MemberForm, SignupForm, JoinForm, ContactForm, ReviewForm, ProfileForm, SuccessStoryForm
 from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import MemberUpdateForm
@@ -17,6 +18,9 @@ import re
 from pathlib import Path
 from functools import lru_cache
 from django.conf import settings
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
 
 # Home Page
 def home(request):
@@ -154,6 +158,9 @@ def about(request): return render(request, "about.html")
 def plans_page(request): return render(request, "plans.html", {"plans": Plan.objects.all()})
 def team(request): return render(request, "team.html", {"trainers": Trainer.objects.all()})
 def gallery(request): return render(request, "gallery.html", {"members": GalleryMember.objects.all()})
+def privacy_policy(request): return render(request, "privacy_policy.html")
+def terms_conditions(request): return render(request, "terms_conditions.html")
+def refund_policy(request): return render(request, "refund_policy.html")
 
 def gallery_detail(request, id):
     member = get_object_or_404(GalleryMember, id=id)
@@ -191,6 +198,23 @@ def add_review(request):
 
 def success_stories(request): return render(request, "success_stories.html", {"stories": SuccessStory.objects.all()})
 def success_detail(request, pk): return render(request, "success_detail.html", {"story": get_object_or_404(SuccessStory, pk=pk)})
+
+
+@login_required
+def add_success_story(request):
+    if request.method == "POST":
+        form = SuccessStoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            story = form.save(commit=False)
+            story.user = request.user
+            story.save()
+            messages.success(request, "✅ Your success story has been published.")
+            return redirect("profile")
+    else:
+        form = SuccessStoryForm()
+    return render(request, "add_success_story.html", {"form": form})
+
+
 def _extract_calories_from_text(text):
     if not text:
         return None
@@ -248,6 +272,44 @@ def payment(request):
     return render(request, "payment.html", {"default_username": default_username})
 
 def payment_success(request): return render(request, "payment_success.html")
+
+
+@login_required
+def mark_notification_read(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "POST only"}, status=405)
+    try:
+        data = json.loads(request.body or "{}")
+        notif_id = str(data.get("notification_id", "")).strip()
+        if not notif_id:
+            return JsonResponse({"status": "error", "message": "notification_id required"}, status=400)
+        Notification.objects.filter(id=notif_id, user=request.user).update(is_read=True)
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+@login_required
+def clear_notification(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "POST only"}, status=405)
+    try:
+        data = json.loads(request.body or "{}")
+        notif_id = str(data.get("notification_id", "")).strip()
+        if not notif_id:
+            return JsonResponse({"status": "error", "message": "notification_id required"}, status=400)
+        Notification.objects.filter(id=notif_id, user=request.user).delete()
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+@login_required
+def notification_history(request):
+    items = Notification.objects.filter(user=request.user).order_by("-created_at")[:200]
+    # Mark all as read when visiting history (simple UX).
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return render(request, "notification_history.html", {"items": items})
 
 # AI & Workout Logic
 def gen(camera):
@@ -423,7 +485,13 @@ def chat_with_ai(request):
     history_text = " | ".join(raw_history[-3:]) if raw_history else "None"
     site_context = _build_relevant_site_context(user_msg)
     profile_context = _build_profile_context(request)
-    enriched_input = f"{user_msg}\n\nUser Profile Context: {profile_context}"
+    persona = (
+        "You are Lolona AI — a grumpy, witty cat fitness assistant for M-Power Fitness Lab. "
+        "Stay in character. Keep replies helpful and concise. "
+        "Use light sarcasm, never rude or hateful. No robotic/automated tone. "
+        "If the user is not logged in, you can tease them about it."
+    )
+    enriched_input = f"{persona}\n\nUser: {user_msg}\n\nUser Profile Context: {profile_context}"
 
     # 3. Call Groq
     response_data = coach.generate_response(enriched_input, mem.ai_facts, history_text, site_context)
@@ -471,6 +539,36 @@ def chat_with_ai(request):
 
 @login_required
 def track_workout(request):
+    beginner_back_exercises = [
+        {
+            "name": "Superman Hold",
+            "muscle_group": "Back",
+            "difficulty": "Beginner",
+            "description": "Lie prone and lift arms/legs together to activate lower back.",
+            "animation_url": "/static/videos/exercises/superman_hold.mp4",
+            "calories_per_rep": 0.3,
+        },
+        {
+            "name": "Bird-Dog",
+            "muscle_group": "Back",
+            "difficulty": "Beginner",
+            "description": "Core and back stability drill with opposite arm-leg extension.",
+            "animation_url": "/static/videos/exercises/bird_dog.mp4",
+            "calories_per_rep": 0.25,
+        },
+        {
+            "name": "Reverse Snow Angel",
+            "muscle_group": "Back",
+            "difficulty": "Beginner",
+            "description": "Great for upper-back posture and shoulder control.",
+            "animation_url": "/static/videos/exercises/reverse_snow_angel.mp4",
+            "calories_per_rep": 0.28,
+        },
+    ]
+
+    for item in beginner_back_exercises:
+        Exercise.objects.get_or_create(name=item["name"], defaults=item)
+
     if request.method == "POST":
         exercise_id = request.POST.get('exercise_id')
         reps = int(request.POST.get('reps', 0))
@@ -486,11 +584,250 @@ def track_workout(request):
         messages.success(request, f"🔥 Burned {calories_burned} kcal! Remaining goal: {profile.daily_calorie_goal} kcal.")
         return redirect('exercise_library')
 
-    exercises = Exercise.objects.all()
+    hidden_seed_exercises = [
+        "Push-Up",
+        "Bodyweight Squat",
+        "Plank Hold",
+        "Seated Cable Row (Light)",
+        "Lat Pulldown (Wide Grip)",
+        "Assisted Pull-Up",
+        "One-Arm Dumbbell Row (Light)",
+        "Superman Hold",
+        "Bird-Dog",
+        "Reverse Snow Angel",
+    ]
+    exercises = Exercise.objects.exclude(name__in=hidden_seed_exercises)
     return render(request, 'exercise_library.html', {'exercises': exercises})
 
 def training_session(request):
     return render(request, 'training.html')
+
+
+@login_required
+def live_training_dashboard(request):
+    trainers = Trainer.objects.all()
+    # Show upcoming available slots (not booked) for users to book.
+    slots = (
+        TrainingSlot.objects
+        .select_related("trainer")
+        .filter(is_booked=False, session_time__gte=timezone.now())
+        .order_by("session_time")[:60]
+    )
+
+    # For "Your bookings" badge on cards:
+    my_slots = (
+        TrainingSlot.objects
+        .select_related("trainer")
+        .filter(booked_by=request.user)
+        .order_by("-session_time")[:30]
+    )
+    latest_booked_by_trainer = {}
+    for s in my_slots:
+        if s.trainer_id not in latest_booked_by_trainer:
+            latest_booked_by_trainer[s.trainer_id] = s
+
+    trainer_cards = []
+    for t in trainers:
+        t_slots = [s for s in slots if s.trainer_id == t.id]
+        trainer_cards.append({
+            "trainer": t,
+            "available_slots": t_slots[:5],
+            "latest_booking": latest_booked_by_trainer.get(t.id),
+        })
+
+    return render(request, "live_training_dashboard.html", {
+        "trainer_cards": trainer_cards,
+        "now": timezone.now(),
+    })
+
+
+@login_required
+@require_POST
+def book_training_session(request, trainer_id):
+    trainer = get_object_or_404(Trainer, id=trainer_id)
+    slot_id = (request.POST.get("slot_id") or "").strip()
+    if not slot_id:
+        messages.error(request, "Please select a slot.")
+        return redirect("live_training_dashboard")
+
+    slot = get_object_or_404(TrainingSlot, id=slot_id, trainer=trainer)
+    if slot.is_booked:
+        messages.error(request, "That slot was already booked. Please choose another one.")
+        return redirect("live_training_dashboard")
+
+    slot.is_booked = True
+    slot.booked_by = request.user
+    slot.save(update_fields=["is_booked", "booked_by"])
+
+    # Keep the existing TrainingSession table as a booking history record.
+    TrainingSession.objects.create(
+        trainer=trainer,
+        user=request.user,
+        session_time=slot.session_time,
+        is_active=slot.is_active,
+        meeting_link=slot.meeting_link,
+    )
+
+    messages.success(request, f"✅ Session booked with {trainer.name}. Wait for the trainer to activate it.")
+    return redirect("live_training_dashboard")
+
+
+@login_required
+def live_training_room(request, session_id):
+    # New flow uses TrainingSlot IDs (booked_by=user).
+    slot = TrainingSlot.objects.select_related("trainer", "booked_by").filter(id=session_id).first()
+    if slot:
+        if slot.booked_by_id != request.user.id:
+            return redirect("live_training_dashboard")
+        return render(request, "live_training_room.html", {"session": slot})
+
+    # Backward compatibility: older links may still point to TrainingSession IDs.
+    session = get_object_or_404(
+        TrainingSession.objects.select_related("trainer", "user"),
+        id=session_id,
+        user=request.user,
+    )
+    return render(request, "live_training_room.html", {"session": session})
+
+
+@staff_member_required
+@require_POST
+def set_training_session_active(request, session_id):
+    session = get_object_or_404(TrainingSession, id=session_id)
+    is_active = (request.POST.get("is_active") or "").strip().lower() in ("1", "true", "yes", "on")
+    session.is_active = is_active
+    session.save(update_fields=["is_active"])
+    return redirect("live_training_dashboard")
+
+
+def _require_trainer_user(request):
+    trainer = Trainer.objects.filter(user=request.user).first()
+    return trainer
+
+
+def trainer_login_redirect(request):
+    return redirect("trainer_profile")
+
+
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+
+
+def trainer_login(request):
+    if request.user.is_authenticated:
+        trainer = Trainer.objects.filter(user=request.user).first()
+        if trainer:
+            return redirect("trainer_profile")
+
+    if request.method == "POST":
+        email = (request.POST.get("email") or "").strip()
+        password = (request.POST.get("password") or "").strip()
+        user = None
+        if email and password:
+            # Try username or email
+            user = authenticate(request, username=email, password=password)
+            if user is None:
+                u = User.objects.filter(email__iexact=email).first()
+                if u:
+                    user = authenticate(request, username=u.username, password=password)
+        if user is None:
+            messages.error(request, "Invalid trainer credentials.")
+            return render(request, "trainer/login.html")
+
+        # Ensure this user is a trainer account
+        if not Trainer.objects.filter(user=user).exists():
+            messages.error(request, "This account is not a trainer account.")
+            return render(request, "trainer/login.html")
+
+        auth_login(request, user)
+        return redirect("trainer_profile")
+
+    return render(request, "trainer/login.html")
+
+
+def trainer_logout(request):
+    auth_logout(request)
+    return redirect("trainer_login")
+
+
+def trainer_profile(request):
+    if not request.user.is_authenticated:
+        return redirect("trainer_login")
+    trainer = Trainer.objects.filter(user=request.user).first()
+    if not trainer:
+        return redirect("trainer_login")
+
+    slots = TrainingSlot.objects.filter(trainer=trainer).order_by("-session_time")[:80]
+    upcoming = TrainingSlot.objects.filter(trainer=trainer, session_time__gte=timezone.now()).order_by("session_time")[:20]
+    booking_count = TrainingSlot.objects.filter(trainer=trainer, is_booked=True).count()
+
+    return render(request, "trainer_profile.html", {
+        "trainer": trainer,
+        "slots": slots,
+        "upcoming": upcoming,
+        "booking_count": booking_count,
+        "now": timezone.now(),
+    })
+
+
+@require_POST
+def trainer_create_slot(request):
+    if not request.user.is_authenticated:
+        return redirect("trainer_login")
+    trainer = Trainer.objects.filter(user=request.user).first()
+    if not trainer:
+        return redirect("trainer_login")
+
+    raw_time = (request.POST.get("session_time") or "").strip()
+    if not raw_time:
+        messages.error(request, "Please select a session time.")
+        return redirect("trainer_dashboard")
+
+    try:
+        naive_dt = datetime.datetime.strptime(raw_time, "%Y-%m-%dT%H:%M")
+        session_time = timezone.make_aware(naive_dt, timezone.get_current_timezone())
+    except Exception:
+        messages.error(request, "Invalid date/time.")
+        return redirect("trainer_dashboard")
+
+    TrainingSlot.objects.create(
+        trainer=trainer,
+        session_time=session_time,
+        is_active=False,
+        meeting_link=TrainingSlot.generate_meeting_link(),
+        is_booked=False,
+        booked_by=None,
+    )
+    messages.success(request, "✅ Slot created successfully.")
+    return redirect("trainer_profile")
+
+
+@require_POST
+def trainer_toggle_slot_active(request, slot_id):
+    if not request.user.is_authenticated:
+        return redirect("trainer_login")
+    trainer = Trainer.objects.filter(user=request.user).first()
+    if not trainer:
+        return redirect("trainer_login")
+
+    slot = get_object_or_404(TrainingSlot, id=slot_id, trainer=trainer)
+    is_active = (request.POST.get("is_active") or "").strip().lower() in ("1", "true", "yes", "on")
+    slot.is_active = is_active
+    slot.save(update_fields=["is_active"])
+    messages.success(request, "✅ Session status updated.")
+    return redirect("trainer_profile")
+
+
+def trainer_start_session(request, slot_id):
+    if not request.user.is_authenticated:
+        return redirect("trainer_login")
+    trainer = Trainer.objects.filter(user=request.user).first()
+    if not trainer:
+        return redirect("trainer_login")
+
+    slot = get_object_or_404(TrainingSlot.objects.select_related("booked_by"), id=slot_id, trainer=trainer)
+    return render(request, "trainer_start_session.html", {"trainer": trainer, "slot": slot})
 
 
 @login_required

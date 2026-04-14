@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Refund Policy | M-Power Fitness Lab{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 110px; padding-bottom: 40px;">
+  <div class="p-4 p-md-5" style="border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92)); border-radius: 18px; color: #fff;">
+    <h2 class="fw-bold mb-2">Refund Policy</h2>
+    <div class="text-white-50 mb-4" style="font-size: 13px;">Last updated: {% now "F j, Y" %}</div>
+
+    <p class="text-white-75">
+      We want you to feel confident using <strong>M-Power Fitness Lab</strong>. If you need a refund, please review the policy below.
+    </p>
+
+    <h5 class="fw-bold mt-4">Refund request window</h5>
+    <p class="text-white-75">
+      You must inform us within <strong>3 days</strong> of your payment date to request a refund.
+    </p>
+
+    <h5 class="fw-bold mt-4">Verification & processing time</h5>
+    <p class="text-white-75">
+      After we verify your request, your refund will be returned within <strong>4 days</strong>.
+    </p>
+
+    <h5 class="fw-bold mt-4">How to request a refund</h5>
+    <ul class="text-white-75">
+      <li>Go to our <a href="{% url 'contact' %}" class="text-info text-decoration-none">Contact</a> page.</li>
+      <li>Include your username, payment method, transaction ID (if available), and the reason for the request.</li>
+      <li>Our team will reply after checking the payment details.</li>
+    </ul>
+
+    <h5 class="fw-bold mt-4">Notes</h5>
+    <ul class="text-white-75 mb-0">
+      <li>Refund eligibility may depend on verification of the payment and account ownership.</li>
+      <li>Processing times may vary based on payment provider.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+

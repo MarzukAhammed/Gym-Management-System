@@ -1,9 +1,46 @@
 from django import forms
-from .models import Member,Plan, Profile
+from .models import Member, Plan, Profile, SuccessStory, Trainer
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Contact
 from .models import Review
+
+
+class TrainerCreateForm(forms.ModelForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "form-control"}))
+    password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control"}))
+    password2 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control"}))
+
+    class Meta:
+        model = Trainer
+        fields = ["name", "specialty", "bio", "photo", "facebook", "twitter", "linkedin"]
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get("password1")
+        p2 = cleaned.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Passwords do not match.")
+        return cleaned
+
+    def save(self, commit=True):
+        trainer = super().save(commit=False)
+        email = self.cleaned_data["email"]
+        password = self.cleaned_data["password1"]
+
+        username = email.split("@")[0]
+        base = username
+        i = 1
+        while User.objects.filter(username=username).exists():
+            i += 1
+            username = f"{base}{i}"
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        trainer.user = user
+
+        if commit:
+            trainer.save()
+        return trainer
 
 # For creating/updating member profile
 class MemberForm(forms.ModelForm):
@@ -108,4 +145,15 @@ class ProfileForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'class': 'custom-input', 'rows': 3}),
             'address': forms.Textarea(attrs={'class': 'custom-input', 'rows': 2}),
             'date_of_birth': forms.DateInput(attrs={'class': 'custom-input', 'type': 'date'}),
+        }
+
+
+class SuccessStoryForm(forms.ModelForm):
+    class Meta:
+        model = SuccessStory
+        fields = ["title", "story", "photo"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Story title"}),
+            "story": forms.Textarea(attrs={"class": "form-control", "rows": 6, "placeholder": "Share your transformation journey..."}),
+            "photo": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }

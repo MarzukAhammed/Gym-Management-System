@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercise Library | Gymnasium</title>
+    <title>Exercise Library | M-Power Fitness Lab</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
@@ -60,9 +60,25 @@
             border: 1px solid #28a745;
             margin-right: 15px;
         }
+
+        .home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #007bff;
+            padding: 12px 18px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 16px;
+            z-index: 9999;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
+    {% include "navbar.html" %}
 
     <div class="container-fluid main-content">
         
@@ -118,7 +134,7 @@
 
             <div class="row" id="exercise-grid">
                 {% for ex in exercises %}
-                <div class="col-lg-4 col-md-6 mb-4 exercise-card {{ ex.muscle_group|lower }} {{ ex.difficulty|lower }}">
+                <div class="col-lg-4 col-md-6 mb-4 exercise-card {{ ex.muscle_group|slugify }} {{ ex.difficulty|lower }}" data-muscle="{{ ex.muscle_group|slugify }}">
                     <div class="card text-white border-0 shadow-lg">
                         <div class="card-header border-0 bg-transparent text-center pt-4">
                             <h4 class="text-success font-weight-bold">{{ ex.name }}</h4>
@@ -184,11 +200,63 @@
             { name: "Explosive Push-ups", detail: "3 sets of 10 reps", target: "Power & Chest Pop", type: "reps", video: "/static/videos/exercises/clap_pushup.mp4" }
         ],
         'back-beginner': [
-            { name: "Superman Holds", detail: "3 sets of 20s", target: "Lower Back", type: "timer", seconds: 20, video: "/static/videos/exercises/superman.mp4" }
+            { name: "Superman Holds", detail: "3 sets of 20s", target: "Lower Back", type: "timer", seconds: 20, video: "/static/videos/exercises/superman.mp4" },
+            { name: "Resistance Band Rows", detail: "3 sets of 12 reps", target: "Mid Back", type: "reps", video: "/static/videos/exercises/band_row.mp4" },
+            { name: "Assisted Pull-Ups", detail: "3 sets of 8 reps", target: "Lats & Upper Back", type: "reps", video: "/static/videos/exercises/assisted_pullup.mp4" }
+        ],
+        'back-intermediate': [
+            { name: "Bent-Over Rows", detail: "4 sets of 12 reps", target: "Mid Back & Lats", type: "reps", video: "/static/videos/exercises/bent_over_row.mp4" },
+            { name: "Seated Cable Row", detail: "4 sets of 12 reps", target: "Upper Back Thickness", type: "reps", video: "/static/videos/exercises/seated_cable_row.mp4" },
+            { name: "Lat Pulldown", detail: "4 sets of 10 reps", target: "Lat Width", type: "reps", video: "/static/videos/exercises/lat_pulldown.mp4" }
+        ],
+        'back-expert': [
+            { name: "Pull-Ups", detail: "5 sets of 8 reps", target: "Full Back Development", type: "reps", video: "/static/videos/exercises/pullup.mp4" },
+            { name: "Deadlifts", detail: "5 sets of 6 reps", target: "Posterior Chain Power", type: "reps", video: "/static/videos/exercises/deadlift.mp4" },
+            { name: "T-Bar Row", detail: "4 sets of 10 reps", target: "Mid Back Density", type: "reps", video: "/static/videos/exercises/tbar_row.mp4" }
+        ],
+        'legs-beginner': [
+            { name: "Bodyweight Squats", detail: "3 sets of 15 reps", target: "Quads & Glutes", type: "reps", video: "/static/videos/exercises/bodyweight_squat.mp4" },
+            { name: "Walking Lunges", detail: "3 sets of 12 reps each leg", target: "Leg Endurance", type: "reps", video: "/static/videos/exercises/walking_lunge.mp4" },
+            { name: "Wall Sit", detail: "3 sets of 30s", target: "Quad Strength", type: "timer", seconds: 30, video: "/static/videos/exercises/wall_sit.mp4" }
+        ],
+        'legs-intermediate': [
+            { name: "Goblet Squat", detail: "4 sets of 12 reps", target: "Quads & Core", type: "reps", video: "/static/videos/exercises/goblet_squat.mp4" },
+            { name: "Romanian Deadlift", detail: "4 sets of 10 reps", target: "Hamstrings & Glutes", type: "reps", video: "/static/videos/exercises/romanian_deadlift.mp4" },
+            { name: "Bulgarian Split Squat", detail: "3 sets of 10 reps each leg", target: "Single-Leg Strength", type: "reps", video: "/static/videos/exercises/bulgarian_split_squat.mp4" }
+        ],
+        'legs-expert': [
+            { name: "Barbell Back Squat", detail: "5 sets of 8 reps", target: "Overall Leg Power", type: "reps", video: "/static/videos/exercises/barbell_back_squat.mp4" },
+            { name: "Jump Squats", detail: "4 sets of 15 reps", target: "Explosive Leg Strength", type: "reps", video: "/static/videos/exercises/jump_squat.mp4" },
+            { name: "Pistol Squat Progression", detail: "3 sets of 6 reps each leg", target: "Advanced Balance & Strength", type: "reps", video: "/static/videos/exercises/pistol_squat.mp4" }
+        ],
+        'arms-beginner': [
+            { name: "Dumbbell Biceps Curl", detail: "3 sets of 12 reps", target: "Biceps", type: "reps", video: "/static/videos/exercises/biceps_curl.mp4" },
+            { name: "Bench Dips", detail: "3 sets of 10 reps", target: "Triceps", type: "reps", video: "/static/videos/exercises/bench_dip.mp4" },
+            { name: "Hammer Curl", detail: "3 sets of 12 reps", target: "Biceps & Forearms", type: "reps", video: "/static/videos/exercises/hammer_curl.mp4" }
+        ],
+        'arms-intermediate': [
+            { name: "Cable Triceps Pushdown", detail: "4 sets of 12 reps", target: "Triceps Isolation", type: "reps", video: "/static/videos/exercises/triceps_pushdown.mp4" },
+            { name: "EZ Bar Curl", detail: "4 sets of 10 reps", target: "Biceps Mass", type: "reps", video: "/static/videos/exercises/ez_bar_curl.mp4" },
+            { name: "Overhead Triceps Extension", detail: "3 sets of 12 reps", target: "Long Head Triceps", type: "reps", video: "/static/videos/exercises/overhead_triceps_extension.mp4" }
+        ],
+        'arms-expert': [
+            { name: "Close-Grip Push-Ups", detail: "4 sets of 15 reps", target: "Triceps Power", type: "reps", video: "/static/videos/exercises/close_grip_pushup.mp4" },
+            { name: "Chin-Ups", detail: "4 sets of 8 reps", target: "Biceps & Lats", type: "reps", video: "/static/videos/exercises/chinup.mp4" },
+            { name: "Concentration Curl", detail: "4 sets of 10 reps", target: "Peak Biceps", type: "reps", video: "/static/videos/exercises/concentration_curl.mp4" }
         ],
         'core-beginner': [
             { name: "Abdominal Crunches", detail: "3 sets of 20 reps", target: "Upper Abs", type: "reps", video: "/static/videos/exercises/crunch.mp4" },
             { name: "Plank Hold", detail: "45 seconds", target: "Core Strength", type: "timer", seconds: 45, video: "/static/videos/exercises/plank.mp4" }
+        ],
+        'core-intermediate': [
+            { name: "Bicycle Crunch", detail: "4 sets of 20 reps", target: "Obliques & Upper Abs", type: "reps", video: "/static/videos/exercises/bicycle_crunch.mp4" },
+            { name: "Leg Raises", detail: "4 sets of 15 reps", target: "Lower Abs", type: "reps", video: "/static/videos/exercises/leg_raise.mp4" },
+            { name: "Side Plank", detail: "3 sets of 30s each side", target: "Obliques", type: "timer", seconds: 30, video: "/static/videos/exercises/side_plank.mp4" }
+        ],
+        'core-expert': [
+            { name: "Hanging Knee Raises", detail: "4 sets of 12 reps", target: "Lower Abs & Hip Flexors", type: "reps", video: "/static/videos/exercises/hanging_knee_raise.mp4" },
+            { name: "V-Ups", detail: "4 sets of 15 reps", target: "Full Core Activation", type: "reps", video: "/static/videos/exercises/vup.mp4" },
+            { name: "Plank to Push-Up", detail: "3 sets of 12 reps", target: "Core & Shoulder Stability", type: "reps", video: "/static/videos/exercises/plank_to_pushup.mp4" }
         ]
     };
 
@@ -252,9 +320,13 @@
     function applyFilters() {
         const activeMuscle = document.querySelector('.muscle-btn.active').getAttribute('data-filter');
         const activeIntensity = document.querySelector('.intensity-btn.active').getAttribute('data-intensity');
+        const allowedMusclesInAll = ['chest', 'back', 'legs', 'arms', 'core'];
 
         document.querySelectorAll('.exercise-card').forEach(card => {
-            const muscleMatch = (activeMuscle === 'all' || card.classList.contains(activeMuscle));
+            const muscleValue = card.dataset.muscle || '';
+            const muscleMatch = (activeMuscle === 'all')
+                ? allowedMusclesInAll.includes(muscleValue)
+                : muscleValue === activeMuscle;
             const intensityMatch = card.classList.contains(activeIntensity);
 
             if (muscleMatch && intensityMatch) {

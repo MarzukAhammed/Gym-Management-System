@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications | M-Power Fitness Lab</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+  <style>
+    body {
+      background: radial-gradient(circle at top right, rgba(86, 193, 253, 0.10), transparent 35%),
+                  radial-gradient(circle at bottom left, rgba(92, 110, 240, 0.08), transparent 35%),
+                  #0b0f1a;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .page-wrap { padding-top: 100px; padding-bottom: 50px; }
+    .glass {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92));
+      border-radius: 18px;
+      box-shadow: 0 16px 35px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .head {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .title { margin:0; font-weight: 900; letter-spacing: 0.3px; }
+    .sub { color: rgba(255,255,255,0.72); font-size: 13px; }
+    .item {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex: 0 0 10px;
+      background: rgba(255,255,255,0.35);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+    }
+    .dot.success { background: rgba(34,197,94,0.95); box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+    .dot.warning { background: rgba(245,158,11,0.95); box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
+    .dot.error { background: rgba(239,68,68,0.95); box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+    .dot.info { background: rgba(76,194,255,0.95); box-shadow: 0 0 0 3px rgba(76,194,255,0.12); }
+    .text { color: rgba(255,255,255,0.92); }
+    .meta { color: rgba(255,255,255,0.60); font-size: 12px; margin-top: 4px; }
+    .empty { padding: 22px; color: rgba(255,255,255,0.75); }
+    .btn-outline-soft {
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.06);
+      padding: 10px 14px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline-soft:hover { color:#fff; background: rgba(255,255,255,0.10); }
+  </style>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <div class="container page-wrap">
+    <div class="glass">
+      <div class="head">
+        <div>
+          <h4 class="title">Notification History</h4>
+          <div class="sub">All your recent notifications in one place.</div>
+        </div>
+        <a class="btn-outline-soft" href="{% url 'home' %}">
+          <i class="fa-solid fa-house"></i> Home
+        </a>
+      </div>
+
+      {% for n in items %}
+        <div class="item" style="{% if not n.is_read %}background: rgba(255,255,255,0.04);{% endif %}">
+          <span class="dot {{ n.level }}"></span>
+          <div>
+            <div class="text">{{ n.text }}</div>
+            <div class="meta">{{ n.created_at|date:"M d, Y - h:i A" }}</div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty">No notifications yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% include "chatbox_partial.html" %}
+</body>
+</html>
