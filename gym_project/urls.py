@@ -1,11 +1,12 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from frontend import views  # This is the correct one!
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path("i18n/", include("django.conf.urls.i18n")),
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path("join/", views.join_now, name="join"),
@@ -18,8 +19,13 @@ urlpatterns = [
     path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
     path("terms-and-conditions/", views.terms_conditions, name="terms_conditions"),
     path("refund-policy/", views.refund_policy, name="refund_policy"),
+    path("daily-challenge/<int:challenge_id>/", views.daily_challenge_record, name="daily_challenge_record"),
+    path("daily-challenge/<int:challenge_id>/submit/", views.daily_challenge_submit, name="daily_challenge_submit"),
     path("plans/", views.plans_page, name="plans"),
     path("team/", views.team, name="team"),
+    path("team/video/<int:submission_id>/comment/", views.add_challenge_video_comment, name="add_challenge_video_comment"),
+    path("team/comments/<int:comment_id>/edit/", views.edit_challenge_video_comment, name="edit_challenge_video_comment"),
+    path("team/comments/<int:comment_id>/delete/", views.delete_challenge_video_comment, name="delete_challenge_video_comment"),
     path("testimonial/", views.testimonial, name="testimonial"),
     path("add_review/", views.add_review, name="add_review"),
     path("add-success-story/", views.add_success_story, name="add_success_story"),

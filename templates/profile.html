@@ -74,6 +74,11 @@
         <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
         <p class="text-warning">Fitness Plan: {{ profile.fitness_goal|default:"General" }}</p>
 
+        <div class="info-box text-start mt-3">
+            <strong>Gym Coins:</strong> {{ profile.gym_coins|default:0 }}
+            <div class="text-muted small mt-1">Earn coins by completing Daily Challenges.</div>
+        </div>
+
         {% if selected_plan %}
         <div class="info-box text-start mt-3">
             <strong>Membership Plan:</strong> {{ selected_plan }}
@@ -85,12 +90,6 @@
             <div class="text-warning small mt-1">Payment verification pending. We will confirm soon.</div>
         </div>
         {% endif %}
-
-        <div class="bmr-box mt-4">
-            <h5 class="text-uppercase" style="letter-spacing: 1px; font-size: 0.9rem; color: #ff9600;">Daily Calorie Burn (BMR)</h5>
-            <h2 class="display-5 fw-bold">{{ profile.calculate_daily_calories }}</h2>
-            <p class="text-muted small mb-0">Calories burned per day at rest</p>
-        </div>
 
         <div class="mt-4 text-start">
             <h5 class="mb-3 border-bottom border-secondary pb-2">Body & Contact Info</h5>

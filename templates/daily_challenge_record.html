@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daily Challenge | M-Power Fitness Lab{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 110px; padding-bottom: 40px;">
+  <div class="p-4 p-md-5" style="border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92)); border-radius: 18px; color: #fff;">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <h3 class="fw-bold mb-1">{{ challenge.title }}</h3>
+        <div class="text-white-50" style="font-size: 13px;">{{ challenge.instruction }}</div>
+      </div>
+      <a href="{% url 'home' %}" class="btn btn-outline-light">Back</a>
+    </div>
+
+    <hr class="border-secondary my-4">
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-7">
+        <div class="p-3" style="border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.04);">
+          <div class="fw-bold mb-2">Record workout proof</div>
+          <video id="preview" playsinline autoplay muted style="width:100%; border-radius: 12px; background:#000;"></video>
+          <video id="playback" controls style="display:none; width:100%; margin-top: 10px; border-radius: 12px; background:#000;"></video>
+
+          <div class="d-flex gap-2 flex-wrap mt-3">
+            <button id="btnStart" class="btn btn-primary">Start Recording</button>
+            <button id="btnStop" class="btn btn-warning" disabled>Stop</button>
+            <button id="btnSubmit" class="btn btn-success" disabled>Upload & Submit</button>
+          </div>
+          <div id="status" class="text-white-50 mt-2" style="font-size: 13px;">Ready.</div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="p-3" style="border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.04);">
+          <div class="fw-bold mb-2">Rules</div>
+          <ul class="text-white-75" style="font-size: 13px;">
+            <li>Record yourself clearly performing the challenge.</li>
+            <li>Keep the camera stable and well-lit.</li>
+            <li>Upload after recording to update your streak and earn coins.</li>
+          </ul>
+          <div class="mt-3">
+            <span class="badge bg-info text-dark">Reward: {{ challenge.coins_reward }} Gym Coins</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const btnStart = document.getElementById("btnStart");
+    const btnStop = document.getElementById("btnStop");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const preview = document.getElementById("preview");
+    const playback = document.getElementById("playback");
+    const status = document.getElementById("status");
+
+    let stream = null;
+    let recorder = null;
+    let chunks = [];
+    let recordedBlob = null;
+
+    function setStatus(t) { status.textContent = t; }
+
+    async function initCamera() {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      preview.srcObject = stream;
+    }
+
+    btnStart.addEventListener("click", async () => {
+      try {
+        if (!stream) await initCamera();
+        chunks = [];
+        recordedBlob = null;
+        playback.style.display = "none";
+        btnSubmit.disabled = true;
+
+        recorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp8,opus" });
+        recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+        recorder.onstop = () => {
+          recordedBlob = new Blob(chunks, { type: "video/webm" });
+          playback.src = URL.createObjectURL(recordedBlob);
+          playback.style.display = "block";
+          btnSubmit.disabled = false;
+          setStatus("Recording ready to upload.");
+        };
+        recorder.start();
+        btnStart.disabled = true;
+        btnStop.disabled = false;
+        setStatus("Recording...");
+      } catch (e) {
+        setStatus("Camera error. Please allow camera/mic permissions.");
+      }
+    });
+
+    btnStop.addEventListener("click", () => {
+      if (recorder && recorder.state !== "inactive") {
+        recorder.stop();
+      }
+      btnStop.disabled = true;
+      btnStart.disabled = false;
+    });
+
+    btnSubmit.addEventListener("click", async () => {
+      if (!recordedBlob) return;
+      btnSubmit.disabled = true;
+      setStatus("Uploading...");
+
+      const form = new FormData();
+      form.append("video", recordedBlob, "proof.webm");
+
+      const res = await fetch("{% url 'daily_challenge_submit' challenge.id %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: form
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== "success") {
+        setStatus(data.message || "Upload failed.");
+        btnSubmit.disabled = false;
+        return;
+      }
+      const pending = Number(data.coins_pending || 0);
+      if (pending > 0) {
+        setStatus(`Submitted! +${pending} coins pending admin approval. Streak: ${data.current_streak}.`);
+      } else {
+        setStatus(`Submitted! Streak: ${data.current_streak}.`);
+      }
+      setTimeout(() => { window.location.href = "{% url 'home' %}"; }, 1100);
+    });
+  })();
+</script>
+{% endblock %}
+

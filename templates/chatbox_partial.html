@@ -8,6 +8,7 @@
     cursor: grab;
     transition: all 0.8s ease-in-out;
     z-index: 10001 !important;
+    touch-action: none; /* allow pointer dragging without browser gestures */
 }
 
 #floating-cat-container:active { cursor: grabbing; }
@@ -79,6 +80,31 @@
     font-size: 14px;
 }
 
+.typing-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    display: inline-block;
+    animation: typingBounce 1s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; opacity: 0.9; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; opacity: 0.8; }
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-4px); }
+}
+
 .user-msg {
     background: linear-gradient(120deg, #316dff, #57b4ff) !important;
     color: #fff !important;
@@ -133,6 +159,8 @@
             src="{% static 'images/Lovely Cat.gif' %}"
             data-idle-src="{% static 'images/Lovely Cat.gif' %}"
             data-run-src="{% static 'images/cat_run.gif' %}"
+            data-wave-src="{% static 'images/cat_wave.gif' %}"
+            data-sit-src="{% static 'images/cat_sit.gif' %}"
             id="main-cat-img"
             alt="Lolona"
         >
@@ -141,6 +169,7 @@
 
 <script>
 const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
+const chatUserName = "{{ user.username|default:'' }}";
 </script>
 
 <div id="premium-chatbox" class="glass-effect">
@@ -155,13 +184,6 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         <button onclick="toggleChat()" class="close-btn">&times;</button>
     </div>
     <div id="chat-messages">
-        <div class="bot-msg">
-          {% if user.is_authenticated %}
-            Welcome back, {{ user.username }}. Ask your fitness question.
-          {% else %}
-            Welcome back, human. Ask your fitness question.
-          {% endif %}
-        </div>
     </div>
     <div class="chat-input-area">
         <input type="text" id="ai-user-input" placeholder="Type a message...">
@@ -193,17 +215,82 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         messages.scrollTop = messages.scrollHeight;
     }
 
+    let typingEl = null;
+    function showTyping() {
+        if (!messages) return;
+        if (typingEl && typingEl.isConnected) return;
+        const wrap = document.createElement("div");
+        wrap.className = "message-wrapper bot";
+        wrap.style.cssText = "justify-content:flex-start; display:flex; margin-bottom:10px;";
+        wrap.innerHTML = `
+          <div class="bot-msg typing-bubble" style="padding: 8px 15px; border-radius: 15px;">
+            <span style="color: rgba(255,255,255,0.9); font-weight: 700; font-size: 12px;">Lolona</span>
+            <span class="typing-dots" aria-label="Typing">
+              <span></span><span></span><span></span>
+            </span>
+          </div>
+        `;
+        typingEl = wrap;
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function hideTyping() {
+        try { typingEl?.remove(); } catch (e) {}
+        typingEl = null;
+    }
+
+    function maybeSendGreetingOnOpen() {
+        if (!messages) return;
+        const alreadyHasMsgs = messages.querySelectorAll(".message-wrapper").length > 0;
+        if (alreadyHasMsgs) return;
+
+        const name = (typeof chatUserName !== "undefined" && chatUserName) ? chatUserName : "";
+        const logged = (typeof isLoggedIn !== "undefined" && isLoggedIn === "true");
+        const who = (logged && name) ? name : "human";
+
+        const greetings = [
+            `Yeah, yeah… welcome${logged ? " back" : ""}, ${who}. What do you want—fat loss, muscle, or stamina?`,
+            `You're here again, ${who}. Ask your fitness question before I change my mind.`,
+            `Alright ${who}. Give me your goal and your current weight. No excuses.`,
+            `Hmm. ${who}, tell me what you trained today—or admit you didn't.`
+        ];
+        const pick = greetings[Math.floor(Math.random() * greetings.length)];
+        appendMessage("bot", pick);
+    }
+
     window.toggleChat = window.toggleChat || function () {
         chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+        if (chatBox.style.display === "flex") {
+            maybeSendGreetingOnOpen();
+        }
     };
+
+    function setCatImg(src) {
+        if (!catImg || !src) return;
+        const isGif = /\.gif(\?|$)/i.test(src);
+        const next = (isGif ? (src + (src.includes("?") ? "&" : "?") + "v=" + Date.now()) : src);
+        catImg.src = next;
+    }
+
+    // Preload GIFs to make switching reliable
+    if (catImg && catImg.dataset && catImg.dataset.runSrc) {
+        const preload = new Image();
+        preload.src = catImg.dataset.runSrc;
+    }
+    let canUseSitGif = false;
+    if (catImg && catImg.dataset && catImg.dataset.sitSrc) {
+        const preloadSit = new Image();
+        preloadSit.onload = function () { canUseSitGif = true; };
+        preloadSit.onerror = function () { canUseSitGif = false; };
+        preloadSit.src = catImg.dataset.sitSrc;
+    }
 
     function runCatToLolonaTextFallback() {
         const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
         if (!aiText) return;
-
-        if (catImg && catImg.dataset.runSrc) {
-            catImg.src = catImg.dataset.runSrc;
-        }
+        // Any time the cat moves, show run GIF.
+        if (catImg && catImg.dataset && catImg.dataset.runSrc) setCatImg(catImg.dataset.runSrc);
 
         requestAnimationFrame(function () {
             const catRect = cat.getBoundingClientRect();
@@ -214,7 +301,7 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
             const maxTop = window.innerHeight - catRect.height - 10;
             newLeft = Math.max(10, Math.min(newLeft, maxLeft));
             newTop = Math.max(10, Math.min(newTop, maxTop));
-            cat.style.transition = "all 0.7s ease-in-out";
+            cat.style.transition = "all 0.9s ease-in-out";
             cat.style.left = newLeft + "px";
             cat.style.top = newTop + "px";
             cat.style.right = "auto";
@@ -222,8 +309,51 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         });
 
         setTimeout(function () {
-            if (catImg && catImg.dataset.idleSrc) catImg.src = catImg.dataset.idleSrc;
+            // Stop = sit immediately (fallback to idle if sit isn't available).
+            if (catImg && catImg.dataset.sitSrc && canUseSitGif) setCatImg(catImg.dataset.sitSrc);
+            else if (catImg && catImg.dataset.idleSrc) setCatImg(catImg.dataset.idleSrc);
         }, 900);
+    }
+
+    function triggerCatRunToHeader() {
+        const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
+        if (!aiText) return;
+        if (catImg && catImg.dataset.runSrc) setCatImg(catImg.dataset.runSrc);
+        runCatToLolonaTextFallback();
+        setTimeout(function () {
+            // Switch immediately to sitting after run ends.
+            if (catImg && catImg.dataset.sitSrc && canUseSitGif) setCatImg(catImg.dataset.sitSrc);
+            else if (catImg && catImg.dataset.idleSrc) setCatImg(catImg.dataset.idleSrc);
+        }, 900);
+    }
+
+    function triggerCatRunAwayFast() {
+        const maxX = window.innerWidth - 180;
+        const maxY = window.innerHeight - 180;
+        // Prevent "teleport" on first run by anchoring current fixed position
+        // before switching from right/bottom to left/top.
+        const rect = cat.getBoundingClientRect();
+        cat.style.transition = "none";
+        cat.style.left = rect.left + "px";
+        cat.style.top = rect.top + "px";
+        cat.style.right = "auto";
+        cat.style.bottom = "auto";
+
+        if (catImg && catImg.dataset.runSrc) setCatImg(catImg.dataset.runSrc);
+
+        requestAnimationFrame(function () {
+            cat.style.transition = "all 1.05s ease-in-out";
+            cat.style.left = (Math.random() * maxX) + "px";
+            cat.style.top = (Math.random() * maxY) + "px";
+        });
+
+        const switchToSit = function () {
+            cat.removeEventListener("transitionend", switchToSit);
+            if (catImg && catImg.dataset.sitSrc && canUseSitGif) setCatImg(catImg.dataset.sitSrc);
+            else if (catImg && catImg.dataset.idleSrc) setCatImg(catImg.dataset.idleSrc);
+        };
+        cat.addEventListener("transitionend", switchToSit);
+        setTimeout(switchToSit, 1200);
     }
 
     let isDragging = false;
@@ -232,17 +362,41 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
     let offsetX = 0, offsetY = 0;
     let pressTimer = null;
     const LONG_PRESS_MS = 320;
+    let activePointerId = null;
 
-    function onMouseMove(e) {
+    function clearPressTimer() {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+    }
+
+    function handleClickToggle() {
+        if (typeof isLoggedIn !== "undefined" && isLoggedIn === "false") {
+            triggerCatRunAwayFast();
+            return;
+        }
+        const willOpen = chatBox.style.display !== "flex";
+        window.toggleChat();
+        if (willOpen) {
+            // On open: cat moves to header -> must use run GIF.
+            setTimeout(runCatToLolonaTextFallback, 40);
+            // Ensure greeting appears even if chat is opened without toggleChat (long-press fallback)
+            setTimeout(maybeSendGreetingOnOpen, 60);
+        }
+    }
+
+    // --- Pointer Events drag (preferred) ---
+    function onPointerMove(e) {
+        if (activePointerId === null || e.pointerId !== activePointerId) return;
         const moveX = Math.abs(e.clientX - startX);
         const moveY = Math.abs(e.clientY - startY);
         if (moveX > 5 || moveY > 5) {
             isDragging = true;
             isMoving = true;
-            if (pressTimer) {
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
+            clearPressTimer();
+            e.preventDefault();
+            if (catImg && catImg.dataset && catImg.dataset.runSrc) setCatImg(catImg.dataset.runSrc);
             cat.style.transition = "none";
             cat.style.left = (e.clientX - offsetX) + "px";
             cat.style.top = (e.clientY - offsetY) + "px";
@@ -251,63 +405,120 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         }
     }
 
-    function onMouseUp() {
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
+    function endPointerInteraction() {
+        clearPressTimer();
+        activePointerId = null;
         cat.style.transition = "all 0.3s ease";
-        setTimeout(function () {
-            isDragging = false;
-            isMoving = false;
-        }, 100);
-    }
-
-    cat.addEventListener("mousedown", function (e) {
-        if (e.button !== 0) return;
         isDragging = false;
         isMoving = false;
-        startX = e.clientX;
-        startY = e.clientY;
-        const rect = cat.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-        window.addEventListener("mousemove", onMouseMove);
-        window.addEventListener("mouseup", onMouseUp);
-        // Long-press opens chat reliably (even if click sometimes misses).
-        pressTimer = setTimeout(function () {
-            if (!isMoving && !isDragging) {
-                chatBox.style.display = "flex";
-            }
-        }, LONG_PRESS_MS);
-        e.preventDefault();
-    });
+        // End of movement -> sit immediately (fallback to idle).
+        if (catImg && catImg.dataset && catImg.dataset.sitSrc && canUseSitGif) setCatImg(catImg.dataset.sitSrc);
+        else if (catImg && catImg.dataset && catImg.dataset.idleSrc) setCatImg(catImg.dataset.idleSrc);
+    }
 
-    cat.addEventListener("click", function () {
-        if (isMoving || isDragging) return;
+    if (window.PointerEvent) {
+        cat.addEventListener("pointerdown", function (e) {
+            if (e.button !== undefined && e.button !== 0) return;
+            activePointerId = e.pointerId;
+            isDragging = false;
+            isMoving = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = cat.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
 
-        if (typeof isLoggedIn !== "undefined" && isLoggedIn === "false") {
-            const maxX = window.innerWidth - 180;
-            const maxY = window.innerHeight - 180;
-            // Slow down the "run away" a bit so it's easier to follow.
-            cat.style.transition = "all 1.9s ease-in-out";
-            cat.style.left = (Math.random() * maxX) + "px";
-            cat.style.top = (Math.random() * maxY) + "px";
-            cat.style.right = "auto";
-            cat.style.bottom = "auto";
-            if (catImg && catImg.dataset.runSrc) {
-                catImg.src = catImg.dataset.runSrc;
-                setTimeout(function () { catImg.src = catImg.dataset.idleSrc || catImg.src; }, 2100);
+            try { cat.setPointerCapture(e.pointerId); } catch (err) {}
+            e.preventDefault();
+
+            // Long-press opens chat reliably.
+            pressTimer = setTimeout(function () {
+                if (!isMoving && !isDragging) {
+                    chatBox.style.display = "flex";
+                    maybeSendGreetingOnOpen();
+                }
+            }, LONG_PRESS_MS);
+        });
+
+        cat.addEventListener("pointermove", onPointerMove);
+
+        cat.addEventListener("pointerup", function (e) {
+            if (activePointerId === null || e.pointerId !== activePointerId) return;
+            try { cat.releasePointerCapture(e.pointerId); } catch (err) {}
+            const wasDrag = isDragging;
+            endPointerInteraction();
+            if (!wasDrag) handleClickToggle();
+        });
+
+        cat.addEventListener("pointercancel", function (e) {
+            if (activePointerId === null || e.pointerId !== activePointerId) return;
+            try { cat.releasePointerCapture(e.pointerId); } catch (err) {}
+            endPointerInteraction();
+        });
+    } else {
+        // --- Mouse fallback drag ---
+        function onMouseMove(e) {
+            const moveX = Math.abs(e.clientX - startX);
+            const moveY = Math.abs(e.clientY - startY);
+            if (moveX > 5 || moveY > 5) {
+                isDragging = true;
+                isMoving = true;
+                clearPressTimer();
+                cat.style.transition = "none";
+                cat.style.left = (e.clientX - offsetX) + "px";
+                cat.style.top = (e.clientY - offsetY) + "px";
+                cat.style.right = "auto";
+                cat.style.bottom = "auto";
             }
-            return;
         }
 
-        const willOpen = chatBox.style.display !== "flex";
-        window.toggleChat();
-        if (willOpen) {
-            setTimeout(runCatToLolonaTextFallback, 40);
+        function onMouseUp() {
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+            clearPressTimer();
+            const wasDrag = isDragging;
+            cat.style.transition = "all 0.3s ease";
+            isDragging = false;
+            isMoving = false;
+            if (!wasDrag) handleClickToggle();
+        }
+
+        cat.addEventListener("mousedown", function (e) {
+            if (e.button !== 0) return;
+            isDragging = false;
+            isMoving = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = cat.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
+            pressTimer = setTimeout(function () {
+                if (!isMoving && !isDragging) chatBox.style.display = "flex";
+            }, LONG_PRESS_MS);
+        });
+    }
+
+    // Hard safety: if mouse button released outside window, cancel drag.
+    window.addEventListener("blur", function () {
+        isDragging = false;
+        isMoving = false;
+        activePointerId = null;
+        clearPressTimer();
+        cat.style.transition = "all 0.3s ease";
+    });
+
+    // Prevent duplicated click handlers (pointerup/mouseup handles click behavior).
+
+    // On page load: wave once, then return to idle.
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!catImg) return;
+        if (catImg.dataset.waveSrc) {
+            setCatImg(catImg.dataset.waveSrc);
+            setTimeout(function () {
+                setCatImg(catImg.dataset.idleSrc || catImg.dataset.waveSrc);
+            }, 1200);
         }
     });
 
@@ -316,6 +527,15 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
         if (!text) return;
         appendMessage("user", text);
         input.value = "";
+        showTyping();
+
+        // Logged-in: any message triggers the run animation (as requested).
+        // Logged-out: keep current behavior (cat runs away only on click).
+        if (typeof isLoggedIn !== "undefined" && isLoggedIn === "true") {
+            // If they want to "catch" the cat, run away. Otherwise run to header.
+            if (/catch/i.test(text)) triggerCatRunAwayFast();
+            else triggerCatRunToHeader();
+        }
 
         try {
             const response = await fetch("/chat-with-ai/", {
@@ -327,8 +547,10 @@ const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
                 body: `text=${encodeURIComponent(text)}`
             });
             const data = await response.json();
+            hideTyping();
             appendMessage("bot", data.reply || "Meow.");
         } catch (e) {
+            hideTyping();
             appendMessage("bot", "Network issue. Try again.");
         }
     };

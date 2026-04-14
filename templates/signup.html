@@ -1,133 +1,114 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Create Account</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "base.html" %}
+{% load static i18n %}
 
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% block title %}{% trans "Sign Up" %} | M-Power Fitness Lab{% endblock %}
 
-  <style>
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', sans-serif;
-    }
+{% block extra_css %}
+<style>
+  .auth-wrap {
+    min-height: calc(100vh - 86px);
+    display: flex;
+    align-items: center;
+    padding: 28px 0;
+  }
+  .auth-card {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    background: radial-gradient(circle at top right, rgba(86,193,253,0.10), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(255,106,0,0.10), transparent 40%),
+                linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+  .auth-card .form-control,
+  .auth-card input[type="text"],
+  .auth-card input[type="password"],
+  .auth-card input[type="email"] {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.16) !important;
+    color: #fff !important;
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .auth-card label {
+    color: rgba(255,255,255,0.80);
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .btn-premium-auth {
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: #0b0f1a;
+    background: linear-gradient(120deg, #fbbf24, #ff6a00);
+    box-shadow: 0 14px 26px rgba(0,0,0,0.35);
+  }
+  .btn-premium-auth:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .btn-premium-auth:active { transform: translateY(0); }
+  .helptext, .auth-card .text-muted { color: rgba(255,255,255,0.65) !important; }
+  .errorlist { margin: 10px 0 0 0; padding-left: 16px; color: #ffb4b4; }
+</style>
+{% endblock %}
 
-    .signup-card {
-      width: 420px;
-      backdrop-filter: blur(15px);
-      background: rgba(255,255,255,0.12);
-      border-radius: 18px;
-      padding: 30px;
-      box-shadow: 0 25px 60px rgba(0,0,0,.4);
-      color: #fff;
-    }
+{% block content %}
+<div class="auth-wrap">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-9 col-lg-6">
+        <div class="auth-card p-4 p-md-5">
+          <div class="text-center mb-4">
+            <div class="text-white-50" style="font-size: 13px; letter-spacing: .4px;">M-POWER FITNESS LAB</div>
+            <h2 class="mt-2 mb-1">{% trans "Create your account" %}</h2>
+            <div class="text-white-50">{% trans "Join the community and start earning Gym Coins." %}</div>
+          </div>
 
-    .signup-card h2 {
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 10px;
-    }
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
 
-    .signup-card p {
-      text-align: center;
-      color: #ddd;
-      font-size: 14px;
-      margin-bottom: 25px;
-    }
+          <form method="post" novalidate>
+            {% csrf_token %}
 
-    .signup-card label {
-      font-size: 14px;
-      margin-top: 12px;
-      color: #eee;
-    }
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="{{ form.username.id_for_label }}" class="form-label">{% trans "Username" %}</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+              </div>
 
-    .signup-card input {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: #fff;
-      padding: 12px;
-      border-radius: 10px;
-    }
+              <div class="col-12">
+                <label for="{{ form.email.id_for_label }}" class="form-label">{% trans "Email" %}</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+              </div>
 
-    .signup-card input:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px #00e0ff;
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
+              <div class="col-12 col-md-6">
+                <label for="{{ form.password1.id_for_label }}" class="form-label">{% trans "Password" %}</label>
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+              </div>
 
-    .signup-card button {
-      background: linear-gradient(135deg, #00e0ff, #007bff);
-      border: none;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: bold;
-      margin-top: 20px;
-      transition: 0.3s;
-    }
+              <div class="col-12 col-md-6">
+                <label for="{{ form.password2.id_for_label }}" class="form-label">{% trans "Confirm password" %}</label>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+              </div>
+            </div>
 
-    .signup-card button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0,224,255,.4);
-    }
+            <button type="submit" class="btn-premium-auth w-100 mt-4">{% trans "Create Account" %}</button>
+          </form>
 
-    .signup-card a {
-      color: #00e0ff;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .signup-card a:hover {
-      text-decoration: underline;
-    }
-
-    .home-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #007bff;
-      padding: 12px 18px;
-      border-radius: 50px;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,.4);
-    }
-  </style>
-</head>
-
-<body>
-{% include "navbar.html" %}
-
-  <div class="signup-card">
-    <h2>Join Our Gym</h2>
-    <p>Create your account & start your fitness journey</p>
-
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-
-      <button type="submit" class="w-100">
-        <i class="fa-solid fa-user-plus me-2"></i> Create Account
-      </button>
-    </form>
-
-    <p class="mt-4 text-center">
-      Already have an account?
-      <a href="{% url 'login' %}">Login here</a>
-    </p>
+          <div class="text-center mt-4 text-white-50">
+            {% trans "Already have an account?" %}
+            <a href="{% url 'login' %}" class="fw-bold">{% trans "Login" %}</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <a href="{% url 'home' %}" class="home-btn">
-    🏠 Home
-  </a>
-{% include "chatbox_partial.html" %}
-</body>
-</html>
+</div>
+{% endblock %}

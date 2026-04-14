@@ -1,172 +1,123 @@
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Testimonials</title>
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body {
-      background: url("{% static 'images/background-2.jpg' %}") no-repeat center center/cover;
-      background-attachment: fixed;
-      color: #fff;
-    }
+{% extends "base.html" %}
+{% load static i18n %}
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.8);
-      padding: 60px 0;
-    }
+{% block title %}{% trans "Trainer Reviews" %} | M-Power Fitness Lab{% endblock %}
 
-    .heading_two h2 {
-      font-size: 30px;
-      font-weight: 600;
-      font-family: 'Oswald', sans-serif;
-      color: #e23e38;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
+{% block extra_css %}
+<style>
+  .reviews-hero {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px;
+    padding: 22px;
+    background: radial-gradient(circle at top right, rgba(86,193,253,0.12), transparent 42%),
+                radial-gradient(circle at bottom left, rgba(255,106,0,0.10), transparent 42%),
+                linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+  }
+  .review-card {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.04);
+    padding: 16px;
+  }
+  .avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.18);
+  }
+  .stars i { color: #fbbf24; }
+  .btn-cta {
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    color: #0b0f1a;
+    background: linear-gradient(120deg, #fbbf24, #ff6a00);
+    box-shadow: 0 14px 26px rgba(0,0,0,0.35);
+  }
+  .btn-cta:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .btn-cta:active { transform: translateY(0); }
+</style>
+{% endblock %}
 
-    .testimonial-card {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 30px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-
-    .testimonial-card:hover {
-      transform: translateY(-5px);
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .info_one {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .info_one img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 2px solid #e23e38;
-    }
-
-    .info_one h2 {
-      font-size: 18px;
-      margin-bottom: 2px;
-      color: #fff;
-      text-transform: capitalize;
-    }
-
-    .info_one h3 {
-      font-size: 14px;
-      color: #ccc;
-      margin-bottom: 5px;
-    }
-
-    .rating i {
-      color: gold;
-    }
-
-    .info_two p {
-      margin-top: 15px;
-      font-size: 15px;
-      color: #ddd;
-      font-style: italic;
-    }
-
-    .info_two small {
-      display: block;
-      margin-top: 8px;
-      font-size: 12px;
-      color: #999;
-    }
-
-    .btn-primary {
-      background: #e23e38;
-      border: none;
-      transition: 0.3s;
-    }
-
-    .btn-primary:hover {
-      background: #ff4d45;
-    }
-  </style>
-</head>
-<body>
-{% include "navbar.html" %}
-  <div class="heading_two text-center">
-    <h2>What Our Members Say</h2>
-    <img src="{% static 'images/icon.png' %}" alt="">
-  </div>
-
-  <section id="info_slide">
-    <div class="overlay">
-      <div class="container">
-        {% for review in reviews %}
-          <div class="testimonial-card mb-4">
-            <div class="info_one">
-              {% if review.member.photo %}
-                <img src="{{ review.member.photo.url }}" alt="{{ review.member.name }}">
-              {% else %}
-                <img src="{% static 'images/default-avatar.png' %}" alt="Default Avatar">
-              {% endif %}
-              <div class="side">
-                <h2>{{ review.member.name }}</h2>
-                <h3>{{ review.member.plan }}</h3>
-                <div class="rating">
-                  {% for i in "12345" %}
-                    {% if forloop.counter <= review.rating %}
-                      <i class="fa fa-star"></i>
-                    {% else %}
-                      <i class="fa fa-star-o"></i>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-            <div class="info_two">
-              <p>“{{ review.comment }}”</p>
-              <small>{{ review.created_at|date:"F j, Y" }}</small>
-            </div>
-          </div>
-        {% empty %}
-          <p class="text-center text-light">No reviews yet. Be the first to share your experience!</p>
-        {% endfor %}
-
+{% block content %}
+<div class="container py-4">
+  <div class="reviews-hero mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+      <div>
+        <div class="text-white-50" style="font-size: 13px; letter-spacing: .35px;">M-POWER FITNESS LAB</div>
+        <h2 class="mt-2 mb-2 fw-bold">{% trans "Trainer Reviews" %}</h2>
+        <div class="text-white-50">{% trans "Review our trainers and help members choose the best coach." %}</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <form method="get" class="d-flex gap-2">
+          <select name="trainer" class="form-control" style="min-width: 240px;">
+            <option value="">{% trans "All trainers" %}</option>
+            {% for t in trainers %}
+              <option value="{{ t.id }}" {% if active_trainer_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-outline-light" type="submit">{% trans "Filter" %}</button>
+        </form>
         {% if user.is_authenticated %}
-          <div class="text-center mt-4">
-            <a href="{% url 'add_review' %}" class="btn btn-primary px-4 py-2">Add Your Review</a>
-          </div>
+          <a href="{% url 'add_review' %}" class="btn btn-cta">{% trans "Add Trainer Review" %}</a>
         {% else %}
-          <p class="text-center mt-4">Please <a href="{% url 'login' %}" class="text-danger">login</a> to add a review.</p>
+          <a href="{% url 'login' %}" class="btn btn-outline-light" style="border-radius:999px;padding:12px 16px;">{% trans "Login to review" %}</a>
         {% endif %}
       </div>
     </div>
-  </section>
-  <a href="{% url 'home' %}" 
-   style="
-     position: fixed;
-     bottom: 20px;
-     right: 20px;
-     background:#007bff;
-     padding:12px 18px;
-     border-radius: 50px;
-     color:white;
-     font-weight:bold;
-     text-decoration:none;
-     font-size:16px;
-     z-index: 9999;
-     box-shadow:0 4px 8px rgba(0,0,0,0.3);
-   ">
-   🏠 Home
-</a>
-{% include "chatbox_partial.html" %}
-</body>
-</html>
+  </div>
+
+  <div class="row g-3">
+    {% for review in reviews %}
+      <div class="col-12 col-lg-6">
+        <div class="review-card">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div class="d-flex align-items-center gap-3">
+              {% if review.trainer.photo %}
+                <img class="avatar" src="{{ review.trainer.photo.url }}" alt="{{ review.trainer.name }}">
+              {% else %}
+                <img class="avatar" src="{% static 'images/default-avatar.png' %}" alt="Trainer">
+              {% endif %}
+              <div>
+                <div class="fw-bold">{{ review.trainer.name }}</div>
+                <div class="text-white-50" style="font-size: 13px;">{{ review.trainer.specialty }}</div>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="stars">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= review.rating %}
+                    <i class="fa-solid fa-star"></i>
+                  {% else %}
+                    <i class="fa-regular fa-star"></i>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <div class="text-white-50" style="font-size: 12px;">{{ review.created_at|date:"M d, Y" }}</div>
+            </div>
+          </div>
+
+          <div class="mt-3 text-white-50" style="font-size: 14px;">
+            “{{ review.comment }}”
+          </div>
+          <div class="mt-3 text-white-50" style="font-size: 12px;">
+            {% trans "By" %} <span class="text-white">{{ review.user.username }}</span>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="reviews-hero text-center p-5">
+          <h4 class="mb-2">{% trans "No trainer reviews yet." %}</h4>
+          <div class="text-white-50">{% trans "Be the first to review a trainer." %}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

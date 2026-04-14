@@ -57,6 +57,16 @@
         </div>
     </div>
 
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="stat-card shadow">
+                <h5 class="text-muted text-uppercase small font-weight-bold">Daily Calorie Burn (BMR)</h5>
+                <div class="stat-value">{{ daily_bmr }} <span style="font-size: 1rem;">kcal</span></div>
+                <p class="text-muted small m-0">Calories burned per day at rest</p>
+            </div>
+        </div>
+    </div>
+
     <div class="chart-container mt-2 mb-4 shadow border-success" style="border-width: 2px;">
         <h5 class="mb-3 text-success font-weight-bold">Update Today's Progress</h5>
         <form method="POST" action="{% url 'update_stats' %}" class="form-inline">

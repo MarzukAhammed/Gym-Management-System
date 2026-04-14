@@ -1,52 +1,167 @@
+// --- PRELOADER MUST RUN FIRST ---
+(function () {
+    const preloader = document.querySelector(".preloader");
+    if (!preloader) return;
+
+    function hidePreloader() {
+        preloader.classList.add("preloader_hide");
+        setTimeout(function () {
+            try { preloader.remove(); } catch (e) {}
+        }, 700);
+    }
+
+    window.addEventListener("load", hidePreloader);
+    // Fail-safe: force hide even if some JS/plugin breaks.
+    setTimeout(function () {
+        if (!preloader.classList.contains("preloader_hide")) hidePreloader();
+    }, 3500);
+})();
+
 let isDeleting = false;
 
 /* --- SLIDERS & UI PLUGINS --- */
-$('.one_slide').slick({
-    infinite: true,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: false,
-    dots: true
-});
+try {
+    if (window.jQuery) {
+        // Slick sliders (guarded)
+        if (jQuery.isFunction(jQuery.fn.slick)) {
+            $('.one_slide').slick({
+                infinite: true,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                arrows: false,
+                dots: true
+            });
 
-$('.recon_main').slick({
-    infinite: true,
-    slidesToShow: 2,
-    slidesToScroll: 2,
-    arrows: false,
-    dots: true,
-});
+            $('.recon_main').slick({
+                infinite: true,
+                slidesToShow: 2,
+                slidesToScroll: 2,
+                arrows: false,
+                dots: true,
+            });
 
-$('.brand_slider').slick({
-    infinite: true,
-    slidesToShow: 5,
-    slidesToScroll: 2,
-    arrows: true,
-    dots: false,
-    prevArrow: '<i class="fa-solid fa-angle-left prev_arrow"></i>',
-    nextArrow: '<i class="fa-solid fa-angle-right next_arrow"></i>',
-});
+            $('.brand_slider').slick({
+                infinite: true,
+                slidesToShow: 5,
+                slidesToScroll: 2,
+                arrows: true,
+                dots: false,
+                prevArrow: '<i class="fa-solid fa-angle-left prev_arrow"></i>',
+                nextArrow: '<i class="fa-solid fa-angle-right next_arrow"></i>',
+            });
+        } else {
+            console.warn("Slick not loaded. Skipping sliders.");
+        }
 
-new VenoBox({
-    selector: ".venobox"
-});
+        // Star rating (guarded)
+        if (jQuery.isFunction(jQuery.fn.starRating)) {
+            $('.rating').starRating({
+                starIconEmpty: 'far fa-star',
+                starIconFull: 'fas fa-star',
+                starColorEmpty: 'lightgray',
+                starColorFull: '#FFC107',
+                starsSize: 1,
+                stars: 5,
+                showInfo: false,
+            });
+        }
 
-$('.rating').starRating({
-    starIconEmpty: 'far fa-star',
-    starIconFull: 'fas fa-star',
-    starColorEmpty: 'lightgray',
-    starColorFull: '#FFC107',
-    starsSize: 1,
-    stars: 5,
-    showInfo: false,
-});
+        // Counter up (guarded)
+        if (jQuery.isFunction(jQuery.fn.counterUp)) {
+            $('.counter').counterUp({
+                delay: 10,
+                time: 1000
+            });
+        }
+    }
 
-var mixer = mixitup('.class_down');
+    // MixItUp (guarded) - keep for old grid + new daily challenge grid
+    if (typeof mixitup === "function") {
+        if (document.querySelector(".class_down")) {
+            mixitup('.class_down');
+        }
+        if (document.querySelector(".challenge_grid")) {
+            mixitup('.challenge_grid');
+        }
+    }
 
-$('.counter').counterUp({
-    delay: 10,
-    time: 1000
-});
+    // VenoBox (guarded)
+    if (typeof VenoBox === "function") {
+        new VenoBox({ selector: ".venobox" });
+    }
+} catch (e) {
+    console.warn("UI plugins init error:", e);
+}
+
+/* --- LIVE DHAKA TIMER (365-day cycle) --- */
+(function () {
+    const daysEl = document.getElementById("dhakaDaysPassed");
+    const hoursEl = document.getElementById("dhakaHours");
+    const minutesEl = document.getElementById("dhakaMinutes");
+    const secondsEl = document.getElementById("dhakaSeconds");
+    const liveEl = document.getElementById("dhakaLiveTime");
+    if (!daysEl || !hoursEl || !minutesEl || !secondsEl || !liveEl) return;
+
+    const startIso = daysEl.getAttribute("data-cycle-start") || "";
+    const cycleStart = startIso ? new Date(startIso) : new Date();
+    const cycleMs = 365 * 24 * 60 * 60 * 1000;
+
+    const clockFmt12 = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+    });
+
+    const partsFmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Dhaka",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+    });
+
+    const dateTimeFmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Dhaka",
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    });
+
+    function tick() {
+        const now = new Date();
+        const elapsed = Math.max(0, now.getTime() - cycleStart.getTime());
+        // Cap at 365 days so it behaves like a "year cycle" timer.
+        const within = Math.min(elapsed, cycleMs);
+
+        const totalSeconds = Math.floor(within / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+
+        daysEl.textContent = String(days);
+        // Current Dhaka clock components (12-hour)
+        const parts = partsFmt.formatToParts(now);
+        const dhakaHour = parts.find(p => p.type === "hour")?.value || "--";
+        const dhakaMinute = parts.find(p => p.type === "minute")?.value || "--";
+        const dhakaSecond = parts.find(p => p.type === "second")?.value || "--";
+        hoursEl.textContent = String(dhakaHour);
+        minutesEl.textContent = String(dhakaMinute);
+        secondsEl.textContent = String(dhakaSecond);
+
+        // "Nanosecond" display (browser only gives ms; show ms live)
+        liveEl.textContent = String(now.getMilliseconds()).padStart(3, "0");
+        // Tooltip: full Dhaka time
+        liveEl.setAttribute("title", dateTimeFmt.format(now) + " (Asia/Dhaka)");
+        // Also show Dhaka time like 12.03 in the title (12-hour)
+        liveEl.setAttribute("data-dhaka-time", clockFmt12.format(now).replace(":", "."));
+    }
+
+    tick();
+    setInterval(tick, 50);
+})();
 
 /* --- NAVBAR & SCROLL --- */
 var navbar = document.getElementById("navbar");
@@ -56,22 +171,7 @@ window.addEventListener("scroll", function () {
     }
 });
 
-var preloader = document.querySelector(".preloader");
-
-// The standard way
-window.addEventListener("load", function () {
-    if (preloader) {
-        preloader.classList.add("preloader_hide");
-    }
-});
-
-// The Fail-safe: Force hide after 5 seconds if it's still stuck
-setTimeout(function() {
-    if (preloader && !preloader.classList.contains("preloader_hide")) {
-        console.warn("Preloader forced to hide due to timeout.");
-        preloader.classList.add("preloader_hide");
-    }
-}, 5000);
+// Preloader logic handled at top of file.
 
 var btn = $('#button');
 $(window).scroll(function () {
@@ -112,6 +212,10 @@ $(document).ready(function () {
  */
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Avoid double-binding: chatbox_partial.html defines its own handlers on most pages.
+    if (typeof window.sendToAI === "function" && typeof window.toggleChat === "function") {
+        return;
+    }
     const cat = document.getElementById('floating-cat-container');
     const catImg = document.querySelector('#cat-trigger img') || document.getElementById('cat-trigger');
     const chatBox = document.getElementById('premium-chatbox');
@@ -194,7 +298,9 @@ document.addEventListener("DOMContentLoaded", function() {
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
         cat.style.transition = 'all 0.3s ease';
-        setTimeout(() => { isDragging = false; isMoving = false; }, 100);
+        // Reset immediately to avoid "sticky drag" if mouseup fires late.
+        isDragging = false;
+        isMoving = false;
     }
 
     function runCatToLolonaText() {
@@ -564,8 +670,27 @@ function sendToAI() {
     messages.innerHTML += `<div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;"><div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px;">${userMsg}</div></div>`;
     input.value = "";
 
+    // Typing indicator (shown until reply arrives)
+    let typingEl = null;
+    try {
+        typingEl = document.createElement("div");
+        typingEl.className = "message-wrapper bot js-typing";
+        typingEl.style.cssText = "justify-content:flex-start; display:flex; margin-bottom:10px;";
+        typingEl.innerHTML = `
+          <div class="bot-msg typing-bubble" style="padding: 8px 15px; border-radius: 15px;">
+            <span style="color: rgba(255,255,255,0.9); font-weight: 700; font-size: 12px;">Lolona</span>
+            <span class="typing-dots" aria-label="Typing">
+              <span></span><span></span><span></span>
+            </span>
+          </div>
+        `;
+        messages.appendChild(typingEl);
+        messages.scrollTop = messages.scrollHeight;
+    } catch (e) {}
+
     // Logged-out mode: local grumpy replies without personalization.
     if (typeof isLoggedIn !== 'undefined' && isLoggedIn === "false") {
+        try { typingEl?.remove(); } catch (e) {}
         appendBotMessage(getGrumpyGuestReply(userMsg));
         return;
     }
@@ -588,6 +713,7 @@ function sendToAI() {
     })
     .then(res => res.json())
     .then(data => {
+        try { typingEl?.remove(); } catch (e) {}
         messages.innerHTML += `<div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;"><div class="bot-msg" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 15px;">${data.reply}</div></div>`;
         
         // Auto-save generated diet plans when request intent + response format match
@@ -632,6 +758,11 @@ function sendToAI() {
                 });
             }
         }
+        messages.scrollTop = messages.scrollHeight;
+    })
+    .catch(() => {
+        try { typingEl?.remove(); } catch (e) {}
+        messages.innerHTML += `<div class="message-wrapper bot" style="justify-content: flex-start; display: flex; margin-bottom: 10px;"><div class="bot-msg" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 15px;">Network issue. Try again.</div></div>`;
         messages.scrollTop = messages.scrollHeight;
     });
 }

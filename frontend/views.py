@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Plan, Trainer, Member, Review, SuccessStory, Profile, GalleryMember, DietPlan, Payment, TrainingSession, Notification, TrainingSlot
+from .models import Plan, Trainer, Member, Review, TrainerReview, SuccessStory, Profile, GalleryMember, DietPlan, Payment, TrainingSession, Notification, TrainingSlot, DailyChallenge, ChallengeSubmission, UserChallengeProfile, ChallengeVideoComment
 from frontend.models import Profile
-from .forms import MemberForm, SignupForm, JoinForm, ContactForm, ReviewForm, ProfileForm, SuccessStoryForm
+from .forms import MemberForm, SignupForm, JoinForm, ContactForm, ReviewForm, TrainerReviewForm, ProfileForm, SuccessStoryForm
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -18,9 +18,38 @@ import re
 from pathlib import Path
 from functools import lru_cache
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
+from django.urls import reverse
+
+def _user_has_verified_subscription(user):
+    """
+    Subscription = user has a Member plan AND a verified Payment for that username
+    (optionally matching phone when available).
+    """
+    try:
+        member = getattr(user, "member", None)
+        if not member or not getattr(member, "plan", None):
+            return False
+
+        payment_qs = Payment.objects.filter(verified=True, full_name__iexact=user.username)
+        phone = ""
+        try:
+            if getattr(member, "phone", None):
+                phone = member.phone
+            elif getattr(getattr(user, "profile", None), "phone", None):
+                phone = user.profile.phone
+        except Exception:
+            phone = ""
+
+        if phone:
+            return payment_qs.filter(phone=phone).exists()
+        return payment_qs.exists()
+    except Exception:
+        return False
 
 # Home Page
 def home(request):
@@ -30,10 +59,34 @@ def home(request):
     for review in reviews:
         review.member = getattr(review.user, "member", None)
     success_stories = SuccessStory.objects.order_by("-created_at")[:6]
-    return render(request, "index.html", {"plans": plans, "trainers": trainers, "reviews": reviews, "success_stories": success_stories})
+    today_idx = timezone.localdate().weekday()
+    todays_challenges = DailyChallenge.objects.filter(is_active=True, day_of_week=today_idx)
+    all_week_challenges = DailyChallenge.objects.filter(is_active=True).order_by("day_of_week", "id")
+    feed = (
+        ChallengeSubmission.objects
+        .select_related("user", "challenge")
+        .order_by("-created_at")[:10]
+    )
+    return render(request, "index.html", {
+        "plans": plans,
+        "trainers": trainers,
+        "reviews": reviews,
+        "success_stories": success_stories,
+        "todays_challenges": todays_challenges,
+        "all_week_challenges": all_week_challenges,
+        "today_idx": today_idx,
+        "challenge_feed": feed,
+    })
 
 # Signup
 def signup(request):
+    if request.user.is_authenticated:
+        if _user_has_verified_subscription(request.user):
+            messages.info(request, "You are already logged in and already have an active subscription.")
+            return redirect("profile")
+        messages.info(request, "You are already logged in.")
+        return redirect("home")
+
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -47,6 +100,17 @@ def signup(request):
 
 # Join Now
 def join_now(request):
+    if request.user.is_authenticated:
+        if _user_has_verified_subscription(request.user):
+            messages.info(request, "You are already logged in and already have an active subscription.")
+            return redirect("profile")
+        # If they already filled join details (Member exists + plan chosen), take them to payment.
+        existing_member = getattr(request.user, "member", None)
+        if existing_member and getattr(existing_member, "plan", None):
+            messages.info(request, "Complete payment to activate your subscription.")
+            return redirect("payment")
+        # Otherwise let them fill the join form (we can preselect plan from query param).
+
     if request.method == 'POST':
         form = JoinForm(request.POST, request.FILES)
         if form.is_valid():
@@ -64,7 +128,13 @@ def join_now(request):
                 messages.success(request, "🎉 You have successfully joined our gym!")
                 return redirect('payment')
     else:
-        form = JoinForm()
+        initial = {}
+        if request.user.is_authenticated and getattr(request.user, "email", None):
+            initial["email"] = request.user.email
+        plan_id = (request.GET.get("plan") or "").strip()
+        if plan_id.isdigit():
+            initial["plan"] = int(plan_id)
+        form = JoinForm(initial=initial)
         form.fields['plan'].queryset = Plan.objects.all()
     return render(request, 'join_now.html', {'form': form})
 
@@ -156,21 +226,163 @@ def profile(request):
 # About, Plans, Team, Gallery
 def about(request): return render(request, "about.html")
 def plans_page(request): return render(request, "plans.html", {"plans": Plan.objects.all()})
-def team(request): return render(request, "team.html", {"trainers": Trainer.objects.all()})
+@login_required
+def team(request):
+    q = (request.GET.get("q") or "").strip()
+    qs = (
+        ChallengeSubmission.objects
+        .select_related("user", "challenge")
+        .prefetch_related("comments", "comments__user")
+        .order_by("-created_at")
+    )
+    if q:
+        qs = qs.filter(
+            models.Q(user__username__icontains=q)
+            | models.Q(challenge__title__icontains=q)
+        )
+
+    paginator = Paginator(qs, 12)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "team.html", {
+        "page_obj": page_obj,
+        "q": q,
+    })
+
+
+@login_required
+@require_POST
+def add_challenge_video_comment(request, submission_id):
+    submission = get_object_or_404(ChallengeSubmission, id=submission_id)
+    text = (request.POST.get("text") or "").strip()
+    if not text:
+        messages.error(request, "Comment cannot be empty.")
+        return redirect(f"{reverse('team')}#video-{submission_id}")
+
+    comment = ChallengeVideoComment.objects.create(
+        submission=submission,
+        user=request.user,
+        text=text[:1000],
+    )
+    # Notify the video owner (if someone else commented)
+    if submission.user_id and submission.user_id != request.user.id:
+        Notification.objects.create(
+            user=submission.user,
+            level="info",
+            text=f"💬 {request.user.username} commented on your challenge video: “{comment.text[:120]}”.",
+            is_read=False,
+        )
+    messages.success(request, "Comment posted.")
+    return redirect(f"{reverse('team')}#video-{submission_id}")
+
+
+@login_required
+@require_POST
+def edit_challenge_video_comment(request, comment_id):
+    c = get_object_or_404(ChallengeVideoComment, id=comment_id)
+    if not (request.user.is_staff or c.user_id == request.user.id):
+        return JsonResponse({"status": "error", "message": "Not allowed"}, status=403)
+
+    text = (request.POST.get("text") or "").strip()
+    if not text:
+        return JsonResponse({"status": "error", "message": "Comment cannot be empty"}, status=400)
+
+    c.text = text[:1000]
+    c.save(update_fields=["text"])
+    return JsonResponse({"status": "success", "text": c.text})
+
+
+@login_required
+@require_POST
+def delete_challenge_video_comment(request, comment_id):
+    c = get_object_or_404(ChallengeVideoComment, id=comment_id)
+    if not (request.user.is_staff or c.user_id == request.user.id):
+        return JsonResponse({"status": "error", "message": "Not allowed"}, status=403)
+
+    submission_id = c.submission_id
+    c.delete()
+    return JsonResponse({"status": "success", "submission_id": submission_id})
 def gallery(request): return render(request, "gallery.html", {"members": GalleryMember.objects.all()})
 def privacy_policy(request): return render(request, "privacy_policy.html")
 def terms_conditions(request): return render(request, "terms_conditions.html")
 def refund_policy(request): return render(request, "refund_policy.html")
+
+
+@login_required
+def daily_challenge_record(request, challenge_id):
+    challenge = get_object_or_404(DailyChallenge, id=challenge_id, is_active=True)
+    today_idx = timezone.localdate().weekday()
+    if challenge.day_of_week != today_idx:
+        messages.error(request, "That challenge is not scheduled for today.")
+        return redirect("home")
+    return render(request, "daily_challenge_record.html", {"challenge": challenge})
+
+
+@login_required
+@require_POST
+def daily_challenge_submit(request, challenge_id):
+    challenge = get_object_or_404(DailyChallenge, id=challenge_id, is_active=True)
+    today = timezone.localdate()
+    if challenge.day_of_week != today.weekday():
+        return JsonResponse({"status": "error", "message": "Not today's challenge."}, status=400)
+
+    video = request.FILES.get("video")
+    if not video:
+        return JsonResponse({"status": "error", "message": "Video required."}, status=400)
+
+    prof, _ = UserChallengeProfile.objects.get_or_create(user=request.user)
+    # Prevent multiple submissions counting for streak in same day; still keep the submission for feed.
+    already_done_today = (prof.last_completed_date == today)
+
+    coins = 0 if already_done_today else int(challenge.coins_reward or 0)
+    submission = ChallengeSubmission.objects.create(
+        challenge=challenge,
+        user=request.user,
+        proof_video=video,
+        coins_granted=coins,
+    )
+
+    if not already_done_today:
+        if prof.last_completed_date == (today - datetime.timedelta(days=1)):
+            prof.current_streak += 1
+        else:
+            prof.current_streak = 1
+        prof.last_completed_date = today
+        # Streak updates immediately; coins require admin approval.
+        prof.save(update_fields=["current_streak", "last_completed_date"])
+
+        if coins > 0:
+            Notification.objects.create(
+                user=request.user,
+                level="info",
+                text=f"⏳ Submission received for '{challenge.title}'. Coins pending admin approval (+{coins}).",
+                is_read=False,
+            )
+
+    return JsonResponse({
+        "status": "success",
+        "submission_id": submission.id,
+        "coins_granted": 0,
+        "coins_pending": coins,
+        "current_streak": prof.current_streak,
+        "gym_coins": prof.gym_coins,
+    })
 
 def gallery_detail(request, id):
     member = get_object_or_404(GalleryMember, id=id)
     return render(request, "gallery_detail.html", {"member": member})
 
 def testimonial(request):
-    reviews = Review.objects.select_related("user").order_by("-created_at")
-    for review in reviews:
-        review.member = getattr(review.user, "member", None)
-    return render(request, "testimonial.html", {"reviews": reviews})
+    q = (request.GET.get("trainer") or "").strip()
+    qs = TrainerReview.objects.select_related("user", "trainer").all()
+    if q.isdigit():
+        qs = qs.filter(trainer_id=int(q))
+    trainers = Trainer.objects.all().order_by("name")
+    return render(request, "testimonial.html", {
+        "reviews": qs,
+        "trainers": trainers,
+        "active_trainer_id": int(q) if q.isdigit() else None,
+    })
 
 def contact(request):
     if request.method == "POST":
@@ -185,16 +397,23 @@ def contact(request):
 
 @login_required
 def add_review(request):
+    # Trainer reviews (1 per user per trainer)
     if request.method == "POST":
-        form = ReviewForm(request.POST)
+        form = TrainerReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
             review.user = request.user
-            review.rating = review.rating or 5
-            review.save()
-            messages.success(request, "✅ Review added!")
-            return redirect("home")
-    return render(request, "add_review.html", {"form": ReviewForm()})
+            review.rating = int(review.rating or 5)
+            try:
+                review.save()
+            except Exception:
+                # likely unique_together violation
+                TrainerReview.objects.filter(trainer=review.trainer, user=request.user).update(
+                    rating=review.rating, comment=review.comment
+                )
+            messages.success(request, "✅ Trainer review saved!")
+            return redirect("testimonial")
+    return render(request, "add_review.html", {"form": TrainerReviewForm()})
 
 def success_stories(request): return render(request, "success_stories.html", {"stories": SuccessStory.objects.all()})
 def success_detail(request, pk): return render(request, "success_detail.html", {"story": get_object_or_404(SuccessStory, pk=pk)})
@@ -485,13 +704,20 @@ def chat_with_ai(request):
     history_text = " | ".join(raw_history[-3:]) if raw_history else "None"
     site_context = _build_relevant_site_context(user_msg)
     profile_context = _build_profile_context(request)
+    auth_flag = "true" if request.user.is_authenticated else "false"
+    auth_line = f"Auth: logged_in={auth_flag}; username={request.user.username if request.user.is_authenticated else 'Guest'}"
     persona = (
         "You are Lolona AI — a grumpy, witty cat fitness assistant for M-Power Fitness Lab. "
         "Stay in character. Keep replies helpful and concise. "
         "Use light sarcasm, never rude or hateful. No robotic/automated tone. "
-        "If the user is not logged in, you can tease them about it."
+        "If the user is not logged in, you can tease them about it. "
+        "Never guess login status; trust the Auth line."
+        "Language rule: If the user asks to speak Bangla/Bengali or writes in Bangla (বাংলা), reply in proper Bangla script. "
+        "Otherwise reply in English. "
+        "Quality rule: Always respond in complete sentences. Do not leave sentences unfinished. "
+        "Do not output raw JSON or code blocks to the user."
     )
-    enriched_input = f"{persona}\n\nUser: {user_msg}\n\nUser Profile Context: {profile_context}"
+    enriched_input = f"{persona}\n\n{auth_line}\n\nUser: {user_msg}\n\nUser Profile Context: {profile_context}"
 
     # 3. Call Groq
     response_data = coach.generate_response(enriched_input, mem.ai_facts, history_text, site_context)
@@ -504,14 +730,36 @@ def chat_with_ai(request):
         elif raw_content.startswith("```"):
             raw_content = raw_content.replace("```", "", 1).replace("```", "", 1).strip()
 
-        ai_json = json.loads(raw_content)
+        def _extract_json_object(text):
+            text = (text or "").strip()
+            # If it's already JSON, parse directly.
+            try:
+                return json.loads(text)
+            except Exception:
+                pass
+            # Otherwise, try to extract the first {...} block.
+            try:
+                start = text.find("{")
+                end = text.rfind("}")
+                if start != -1 and end != -1 and end > start:
+                    return json.loads(text[start:end+1])
+            except Exception:
+                return None
+            return None
+
+        ai_json = _extract_json_object(raw_content)
+        if not isinstance(ai_json, dict):
+            # If model returns mixed text+json, show only the plain text part.
+            plain = re.sub(r"\{[\s\S]*\}$", "", raw_content).strip()
+            return JsonResponse({"reply": plain or "Meow."})
         
         # Handle Internet Search
         if ai_json.get("search_query"):
             search_info = coach.search_internet(ai_json["search_query"])
             search_prompt = f"Internet results for '{ai_json['search_query']}': {search_info}. Answer: {enriched_input}"
             response_data = coach.generate_response(search_prompt, mem.ai_facts, history_text, site_context)
-            ai_json = json.loads(response_data.strip().replace("```json", "").replace("```", "").strip())
+            cleaned = response_data.strip().replace("```json", "").replace("```", "").strip()
+            ai_json = _extract_json_object(cleaned) or {}
 
         # Update Facts
         if ai_json.get("new_facts"):
@@ -525,6 +773,9 @@ def chat_with_ai(request):
         request.session['chat_history_list'] = history[-10:] # Keep last 10 turns
         
         reply_text = ai_json.get('reply', "Meow!")
+        # If the model hallucinated login status, correct it.
+        if request.user.is_authenticated and ("not logged in" in reply_text.lower() or "login first" in reply_text.lower()):
+            reply_text = reply_text.replace("login first", "you’re already logged in")
         if _is_profile_related_query(user_msg):
             summary = _profile_usage_summary(request)
             if summary:
@@ -855,6 +1106,7 @@ def progress_dashboard(request):
         'current_weight': getattr(user_profile, 'weight', 0),
         'goal_weight': getattr(user_profile, 'goal_weight', 0),
         'user_height': getattr(user_profile, 'height', 0),
+        'daily_bmr': user_profile.calculate_daily_calories() if user_profile else 0,
         'total_calories': sum(calories),
         'dates_json': json.dumps(dates),
         'calories_json': json.dumps(calories),

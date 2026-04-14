@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | M-Power Fitness Lab Admin{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin_premium.css' %}">
+{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+      <span class="mp-admin-brand">
+        <span class="mp-admin-dot"></span>
+        <span class="mp-admin-text">M-Power Fitness Lab</span>
+        <span class="mp-admin-sub">Admin</span>
+      </span>
+    </a>
+  </h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+

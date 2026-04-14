@@ -1,5 +1,5 @@
 from django import forms
-from .models import Member, Plan, Profile, SuccessStory, Trainer
+from .models import Member, Plan, Profile, SuccessStory, Trainer, TrainerReview
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Contact
@@ -125,6 +125,17 @@ class ReviewForm(forms.ModelForm):
         widgets = {
             "rating": forms.NumberInput(attrs={"min": 1, "max": 5, "class": "form-control"}),
             "comment": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Write your feedback..."}),
+        }
+
+
+class TrainerReviewForm(forms.ModelForm):
+    class Meta:
+        model = TrainerReview
+        fields = ["trainer", "rating", "comment"]
+        widgets = {
+            "trainer": forms.Select(attrs={"class": "form-control"}),
+            "rating": forms.NumberInput(attrs={"min": 1, "max": 5, "class": "form-control"}),
+            "comment": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Write your review about this trainer..."}),
         }
 
 class ProfileForm(forms.ModelForm):

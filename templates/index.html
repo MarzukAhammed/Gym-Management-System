@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}M-Power Fitness Lab{% endblock %}
 
@@ -8,6 +8,46 @@
   <link rel="stylesheet" href="{% static 'css/slick.css' %}">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    /* Daily Challenge premium dark styling (so it doesn't blend into light sections) */
+    #daily-challenge {
+      background: radial-gradient(circle at top right, rgba(86, 193, 253, 0.12), transparent 35%),
+                  radial-gradient(circle at bottom left, rgba(92, 110, 240, 0.10), transparent 35%),
+                  #0b0f1a;
+      color: #fff;
+    }
+    #daily-challenge .heading_class h2 { color: #fff; }
+    #daily-challenge .heading_class p { color: rgba(255,255,255,0.72) !important; }
+    #daily-challenge .challenge-card {
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
+      border-radius: 16px;
+      padding: 18px;
+      color: #fff;
+      box-shadow: 0 16px 35px rgba(0,0,0,0.35);
+    }
+    #daily-challenge .challenge-card .meta {
+      color: rgba(255,255,255,0.72);
+      font-size: 13px;
+    }
+    #daily-challenge .challenge-card.locked {
+      background: rgba(255,255,255,0.05);
+      box-shadow: none;
+    }
+    #daily-challenge .filter-btn.btn-outline-light {
+      border-color: rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.9);
+    }
+    #daily-challenge .filter-btn.btn-outline-light:hover {
+      background: rgba(255,255,255,0.10);
+    }
+    #daily-challenge .filter-btn.btn-light {
+      background: #fff;
+      border-color: #fff;
+      color: #0b0f1a;
+      font-weight: 700;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -77,7 +117,7 @@
               <p class="mt-3">Your fitness journey starts today. Build strength, confidence, and discipline with us.</p>
               <div class="link mt-4">
                 <a href="{% url 'signup' %}" class="btn btn-gradient btn-lg me-2">Get Started</a>
-                <a href="{% url 'team' %}" class="btn btn-outline-light btn-lg">Meet Trainers</a>
+                <a href="#daily-challenge" class="btn btn-outline-light btn-lg">Daily Challenges</a>
               </div>
             </div>
           </div>
@@ -115,38 +155,45 @@
 </section>
 
    <!-- Banner PArt End -->
-   <!-- Video Part Start -->
-   <section id="video">
+   <!-- Community Challenge Proofs Start -->
+   <section id="challenge-proofs" style="padding: 70px 0; background: radial-gradient(circle at top right, rgba(86, 193, 253, 0.10), transparent 35%), radial-gradient(circle at bottom left, rgba(92, 110, 240, 0.08), transparent 35%), #0b0f1a;">
      <div class="container">
-       <div class="row">
-         <div class="col-lg-6">
-           <div class="image_part">
-            <img class="img-fluid w-100" src="{% static 'images/video-image.jpg' %}" alt="">
-             <div class="overlay">
-              <a class="venobox" data-vbtype="video" href="https://www.youtube.com/watch?v=eaRQF-7hhmo"><i class="fa-solid fa-play"></i></a>
+       <div class="text-center mb-4">
+         <h2 class="fw-bold">{% trans "Challenge Proof Highlights" %}</h2>
+         <img src="{% static 'images/icon.png' %}" alt="">
+         <p class="text-white-50 mt-3">{% trans "Real members. Real effort. Watch today’s streak proofs from the community." %}</p>
+       </div>
+
+       <div class="swiper challengeProofSwiper" style="border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; background: rgba(255,255,255,0.04); padding: 14px;">
+         <div class="swiper-wrapper">
+           {% for s in challenge_feed %}
+             <div class="swiper-slide" style="padding: 6px;">
+               <div style="border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; overflow: hidden; background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));">
+                 <div style="padding: 12px 12px 0 12px;">
+                   <div class="d-flex justify-content-between align-items-center">
+                     <div class="fw-bold">{{ s.user.username }}</div>
+                     <div class="text-white-50" style="font-size: 12px;">{{ s.created_at|date:"M d, h:i A" }}</div>
+                   </div>
+                   <div class="text-white-50" style="font-size: 13px;">{{ s.challenge.title }} • Coins: {{ s.coins_granted }}</div>
+                 </div>
+                 <video controls style="width: 100%; height: 260px; object-fit: cover; background:#000; margin-top: 10px;">
+                   <source src="{{ s.proof_video.url }}">
+                 </video>
+               </div>
              </div>
-           </div>
+           {% empty %}
+             <div class="swiper-slide">
+               <div class="text-center text-white-50 p-5">{% trans "No challenge proofs yet. Complete a Daily Challenge to appear here." %}</div>
+             </div>
+           {% endfor %}
          </div>
-         <div class="col-lg-6">
-           <div class="video_text text-center">
-             <h2>About Us</h2>
-             <img src="{% static 'images/icon.png' %}" alt="">
-             <p>Welcome to our Gym Management System – your all-in-one solution for efficiently managing gym operations. Designed with simplicity and power in mind, our system helps gym owners, trainers, and members stay organized, connected, and motivated.
-
-Our platform allows seamless management of memberships, schedules, payments, and attendance while providing a user-friendly interface that makes daily operations smooth and hassle-free. 
-            </p>
-            <p>Whether you run a small fitness studio or a large gym, our system ensures that every task, from member tracking to class management, is handled efficiently.
-
-We aim to empower gyms with modern technology to focus on what truly matters – helping members achieve their fitness goals. With features like easy membership registration, class scheduling, and detailed reports, our system bridges the gap between management and fitness, making your gym a well-oiled machine.
-
-Join us in revolutionizing gym management, where technology meets fitness for a smarter, stronger, and healthier community..</p>
-           </div>
-         </div>
+         <div class="swiper-pagination"></div>
+         <div class="swiper-button-prev"></div>
+         <div class="swiper-button-next"></div>
        </div>
      </div>
-
    </section>
-   <!-- Video Part End -->
+   <!-- Community Challenge Proofs End -->
    <!-- Gallery Part Start -->
 <!-- Gallery Part End -->
 
@@ -245,43 +292,70 @@ Join us in revolutionizing gym management, where technology meets fitness for a 
 </section>
     <!-- info Slide Part End -->
   <!-- MemberShip Part Start -->
-<section id="membership">
-  <div class="heading text-center">
-    <h2>MemberShip</h2>
-    <img src="{% static 'images/icon.png' %}" alt="">
-  </div>
+<section id="membership" style="padding: 80px 0;">
   <div class="container">
-    <div class="row">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">{% trans "Membership Plans" %}</h2>
+      <img src="{% static 'images/icon.png' %}" alt="">
+      <p class="text-white-50 mt-3" style="max-width: 760px; margin: 0 auto;">
+        {% trans "Choose a plan that matches your training style. Upgrade anytime. Premium experience, premium results." %}
+      </p>
+    </div>
+
+    <div class="row g-3 g-lg-4 align-items-stretch">
       {% for plan in plans %}
-      <div class="col-lg-4">
-        <div class="mem_item text-center">
-          <div class="up">
-            <h3>{{ plan.title }}</h3>
-          </div>
-          <div class="img">
-            {% if plan.image %}
-              <img class="img-fluid w-100" src="{{ plan.image.url }}" alt="{{ plan.title }}">
-            {% else %}
-              <img class="img-fluid w-100" src="{% static 'images/membership-1.jpg' %}" alt="{{ plan.title }}">
-            {% endif %}
-            <div class="overlay">
-              <h3>৳ {{ plan.price }}<span>/{{ plan.duration }}</span></h3>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="p-4 h-100"
+               style="border: 1px solid rgba(255,255,255,0.12);
+                      border-radius: 18px;
+                      background: radial-gradient(circle at top right, rgba(86,193,253,0.10), transparent 40%),
+                                  radial-gradient(circle at bottom left, rgba(255,106,0,0.10), transparent 40%),
+                                  linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
+                      box-shadow: 0 18px 40px rgba(0,0,0,0.30);">
+
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-white-50" style="font-size: 12px; letter-spacing: .35px;">M-POWER FITNESS LAB</div>
+                <h3 class="mt-2 mb-1" style="font-weight: 800;">{{ plan.title }}</h3>
+                <div class="text-white-50" style="font-size: 13px;">{{ plan.duration }}</div>
+              </div>
+              <div class="text-end">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.65);">{% trans "Starting at" %}</div>
+                <div style="font-size: 34px; font-weight: 900; line-height: 1;">
+                  ৳ {{ plan.price }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3" style="height: 1px; background: rgba(255,255,255,0.10);"></div>
+
+            <div class="mt-3 text-white-50" style="font-size: 14px;">
+              {{ plan.description|linebreaks }}
+            </div>
+
+            <ul class="mt-3 mb-0" style="list-style: none; padding-left: 0; color: rgba(255,255,255,0.82);">
+              <li class="mb-2"><i class="fa-solid fa-check me-2" style="color:#22c55e;"></i>{% trans "Daily Challenge streak + Gym Coins" %}</li>
+              <li class="mb-2"><i class="fa-solid fa-check me-2" style="color:#22c55e;"></i>{% trans "Premium dark UI + progress tracker" %}</li>
+              <li class="mb-2"><i class="fa-solid fa-check me-2" style="color:#22c55e;"></i>{% trans "Trainer support + Live Training option" %}</li>
+            </ul>
+
+            <div class="d-grid gap-2 mt-4">
+              <a href="{% url 'join' %}"
+                 class="btn"
+                 style="border:0;border-radius:999px;padding:12px 16px;font-weight:900;letter-spacing:.2px;color:#0b0f1a;
+                        background:linear-gradient(120deg,#fbbf24,#ff6a00);box-shadow:0 14px 26px rgba(0,0,0,0.35);">
+                {% trans "Join Now" %}
+              </a>
+              <a href="{% url 'plans' %}" class="btn btn-outline-light" style="border-radius:999px;padding:12px 16px;">
+                {% trans "View Details" %}
+              </a>
             </div>
           </div>
-          <div class="center">
-            {{ plan.description|linebreaks }}
-          </div>
-          <div class="down">
-             <a href="{% url 'join' %}">JOIN NOW</a>
-          </div>
         </div>
-      </div>
       {% endfor %}
     </div>
   </div>
 </section>
-
-
   <!-- MemberShip Part End -->
 <!-- Counter Part Start -->
 <section id="counter">
@@ -289,24 +363,24 @@ Join us in revolutionizing gym management, where technology meets fitness for a 
     <div class="container">
      <div class="count">
       <div class="counter_main text-center">
-        <h2 class="counter">261</h2>
-            <p>Cup Of Tea</p>
+        <h2 class="live-counter" id="dhakaDaysPassed" data-cycle-start="2026-01-01T00:00:00+06:00">0</h2>
+            <p>{% trans "Days Passed (365)" %}</p>
       </div>
       <div class="counter_main text-center">
-        <h2 class="counter">518</h2>
-            <p>Award Win</p>
+        <h2 class="live-counter" id="dhakaHours">0</h2>
+            <p>{% trans "Hour (Dhaka)" %}</p>
       </div>
       <div class="counter_main text-center">
-        <h2 class="counter">999</h2>
-            <p>Happy Clients</p>
+        <h2 class="live-counter" id="dhakaMinutes">0</h2>
+            <p>{% trans "Minute" %}</p>
       </div>
       <div class="counter_main text-center">
-        <h2 class="counter">369</h2>
-            <p>Course Complete</p>
+        <h2 class="live-counter" id="dhakaSeconds">0</h2>
+            <p>{% trans "Second" %}</p>
       </div>
       <div class="counter_main text-center">
-        <h2 class="counter">209</h2>
-            <p>Partner Gym</p>
+        <h2 class="live-counter" id="dhakaLiveTime">--.--</h2>
+            <p>{% trans "Nanosecond" %}</p>
       </div>
      </div>
     </div>
@@ -316,91 +390,71 @@ Join us in revolutionizing gym management, where technology meets fitness for a 
 <!-- Counter Part End -->
 
 <!-- Class Part Start -->
-<section id="class">
-  <div class="heading_class text-center">
-    <h2>Our Classes</h2>
-    <img src="{% static 'images/icon.png' %}" alt="">
-  </div>
+<section id="daily-challenge" style="padding: 70px 0;">
   <div class="container">
-    <div class="class_main">
-     <div class="row">
-     <div class="col-lg-11">
-      <div class="class_up d-flex text-center">
-        <button type="button" data-filter=".Monday">Monday</button>
-        <button type="button" data-filter=".Tuesday">Tuesday</button>
-        <button type="button" data-filter=".Wednesday">Wednesday</button>
-        <button type="button" data-filter=".Thursday">Thursday</button>
-        <button type="button" data-filter=".Friday">Friday</button>
-        <button type="button" data-filter=".Saturday">Saturday</button>
-      </div>
-     </div>
-     </div>
-      <div class="class_down">
-        <div class="class_item  mix Monday Wednesday Thursday text-center">
-          <h3>Push-Ups</h3>
-          <i class="fa-solid fa-child fa-beat"></i>
-          <p>09:00 a.m - 11:00 a.m.</p>
-        </div>
-        <div class="class_item mix Wednesday Monday Saturday Friday text-center">
-          <h3>Mountain Climbers</h3>
-          <i class="fa-solid fa-dumbbell"></i>
-          <p>11:00 a.m - 1:00 p.m.</p>
-        </div>
-        <div class="class_item mix Friday Monday Saturday Thursday Tuesday text-center">
-          <h3>Bodyweight Squats</h3>
-          <i class="fa-solid fa-bicycle"></i>
-          <p>1:00 p.m - 3:00 p.m.</p>
-        </div>
-        <div class="class_item mix Saturday Monday Thursday Friday text-center">
-          <h3>Burpees</h3>
-          <i class="fa-solid fa-person-dots-from-line"></i>
-          <p>3:00 p.m - 5:00 p.m.</p>
-        </div>
-        <div class="class_item mix Saturday Monday Friday Tuesday text-center">
-          <h3>Plank Core Hold</h3>
-          <i class="fa-solid fa-person-praying"></i>
-          <p>5:00 p.m - 7:00 p.m.</p>
-        </div>
-        <div class="class_item mix Wednesday  Monday Friday Thursday Saturday text-center">
-          <h3>Jumping Jacks</h3>
-          <i class="fa-solid fa-child"></i>
-          <p>09:00 a.m - 11:00 a.m.</p>
-        </div>
-        <div class="class_item  mix Wednesday Monday Tuesday text-center">
-          <h3>Glute Bridges</h3>
-          <i class="fa-solid fa-dumbbell"></i>
-          <p>11:00 a.m - 1:00 p.m.</p>
-        </div>
-        <div class="class_item mix Tuesday Monday Thursday Saturday text-center">
-          <h3>Lunges</h3>
-          <i class="fa-solid fa-bicycle"></i>
-          <p>1:00 p.m - 3:00 p.m.</p>
-        </div>
-        <div class="class_item mix Tuesday Monday Friday  Saturday text-center">
-          <h3>High Knees</h3>
-          <i class="fa-solid fa-person-dots-from-line"></i>
-          <p>3:00 p.m - 5:00 p.m.</p>
-        </div>
-        <div class="class_item  mix Saturday Monday Tuesday Friday text-center">
-          <h3>Russian Twists</h3>
-          <i class="fa-solid fa-person-praying"></i>
-          <p>5:00 p.m - 7:00 p.m.</p>
-        </div>
-     
-      </div>
+    <div class="heading_class text-center">
+      <h2>{% trans "Daily Challenge Streak" %}</h2>
+      <img src="{% static 'images/icon.png' %}" alt="">
+      <p class="mt-3 text-white-50">{% trans "Complete today’s challenge, upload proof, keep your streak alive, earn Gym Coins." %}</p>
     </div>
-    <div class="brand_slider">
-      <img src="{% static 'images/brand-logo.png' %}" alt="">
-      <img src="{% static 'images/brand-logo-2.png' %}" alt="">
-      <img src="{% static 'images/brand-logo-3.png' %}" alt="">
-      <img src="{% static 'images/brand-logo-4.png' %}" alt="">
-      <img src="{% static 'images/brand-logo-5.png' %}" alt="">
-      <img src="{% static 'images/brand-logo-3.png' %}" alt="">
-      <img src="{% static 'images/brand-logo-2.png' %}" alt="">
+
+    <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-0">Mon</button>
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-1">Tue</button>
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-2">Wed</button>
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-3">Thu</button>
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-4">Fri</button>
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-5">Sat</button>
+      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-6">Sun</button>
+      <button type="button" class="btn btn-light btn-sm filter-btn" data-filter="all">All</button>
     </div>
+
+    <div class="row g-3 mt-4 challenge_grid">
+      {% for c in all_week_challenges %}
+        <div class="col-12 col-md-6 col-lg-4 mix day-{{ c.day_of_week }}">
+          {% if c.day_of_week == today_idx and user.is_authenticated %}
+            <a href="{% url 'daily_challenge_record' c.id %}" class="d-block text-decoration-none challenge-card">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <h5 class="fw-bold mb-1">{{ c.title }}</h5>
+                  <div class="meta">{{ c.instruction }}</div>
+                </div>
+                <span class="badge bg-info" style="height: fit-content; color:#0b0f1a;">+{{ c.coins_reward }} coins</span>
+              </div>
+              <div class="mt-3 meta">
+                {% trans "Today" %} • {% trans "Click to record & submit proof" %} →
+              </div>
+            </a>
+          {% else %}
+            <div class="challenge-card locked" style="opacity: 0.92;">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <h5 class="fw-bold mb-1">{{ c.title }}</h5>
+                  <div class="meta">{{ c.instruction }}</div>
+                </div>
+                <span class="badge bg-secondary" style="height: fit-content;">
+                  {% if c.day_of_week == today_idx %}{% trans "Login to start" %}{% else %}{% trans "Locked" %}{% endif %}
+                </span>
+              </div>
+              <div class="mt-3 meta">
+                {% if c.day_of_week == today_idx %}
+                  {% trans "Available today (login required)." %}
+                {% else %}
+                  {% trans "Preview only" %} • {% trans "Available on its day." %}
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% empty %}
+        <div class="col-12">
+          <div class="text-center text-white-50">No challenges found. Run the seed command or add them in admin.</div>
+        </div>
+      {% endfor %}
+    </div>
+
   </div>
 </section>
-<!-- Class Part End -->
 
 {% include "chatbox_partial.html" %}
 {% endblock %}
@@ -437,6 +491,24 @@ Join us in revolutionizing gym management, where technology meets fitness for a 
       if (typeof justFlipIt === "function") {
         justFlipIt('.flip-card', { Click: true });
       }
+    });
+  </script>
+  <script>
+    // Challenge proof highlights slider
+    document.addEventListener("DOMContentLoaded", function () {
+      if (typeof Swiper === "undefined") return;
+      new Swiper(".challengeProofSwiper", {
+        slidesPerView: 1,
+        spaceBetween: 14,
+        loop: true,
+        autoplay: { delay: 4500, disableOnInteraction: false, pauseOnMouseEnter: true },
+        pagination: { el: ".challengeProofSwiper .swiper-pagination", clickable: true },
+        navigation: { nextEl: ".challengeProofSwiper .swiper-button-next", prevEl: ".challengeProofSwiper .swiper-button-prev" },
+        breakpoints: {
+          768: { slidesPerView: 2 },
+          992: { slidesPerView: 3 }
+        }
+      });
     });
   </script>
   <div id="global-user-context"

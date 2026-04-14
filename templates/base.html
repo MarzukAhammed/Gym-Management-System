@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -15,6 +15,61 @@
         body {
             transition: 0.4s ease-in-out;
         }
+
+        /* Global Premium Dark Theme (override legacy white sections) */
+        body {
+            background: #0b0f1a !important;
+            color: #ffffff !important;
+        }
+        /* Make text consistently readable on dark background */
+        body, p, li, label, small, span, div, strong, em, b, i, input, textarea, select, button {
+            color: inherit;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+        }
+        .text-muted, .text-secondary, .text-body-secondary, .text-body-tertiary, .text-body {
+            color: rgba(255,255,255,0.72) !important;
+        }
+        .lead {
+            color: rgba(255,255,255,0.82) !important;
+        }
+        .breadcrumb, .breadcrumb-item, .breadcrumb-item a {
+            color: rgba(255,255,255,0.75) !important;
+        }
+        .alert {
+            color: #fff;
+            border-color: rgba(255,255,255,0.14);
+        }
+        .alert a { color: #7bd7ff; }
+        section, main, header, .container-fluid {
+            background-color: transparent;
+        }
+        .bg-white, .bg-light, .text-bg-light {
+            background: rgba(255,255,255,0.06) !important;
+            color: #fff !important;
+        }
+        .text-dark {
+            color: #fff !important;
+        }
+        .card, .modal-content, .dropdown-menu {
+            background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96)) !important;
+            color: #fff !important;
+            border-color: rgba(255,255,255,0.12) !important;
+        }
+        .table {
+            color: #fff;
+        }
+        .form-control, .form-select {
+            background: rgba(255,255,255,0.08) !important;
+            border-color: rgba(255,255,255,0.18) !important;
+            color: #fff !important;
+        }
+        .form-control::placeholder {
+            color: rgba(255,255,255,0.55) !important;
+        }
+        a { color: rgba(123, 215, 255, 0.95); }
+        a:hover { color: #7bd7ff; }
 
         /* Dark Mode */
         html[data-theme='dark'] {
@@ -166,37 +221,37 @@
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">Platform</h5>
+                    <h5 class="footer-title">{% trans "Platform" %}</h5>
                     <a href="{% url 'home' %}" class="footer-link">Home</a>
                     <a href="{% url 'plans' %}" class="footer-link">Plans</a>
                     <a href="{% url 'live_training_dashboard' %}" class="footer-link">Live Training</a>
-                    <a href="/trainer/" class="footer-link">Trainer Portal</a>
-                    <a href="{% url 'profile' %}" class="footer-link">My Profile</a>
+                    <a href="/trainer/" class="footer-link">{% trans "Trainer Portal" %}</a>
+                    <a href="{% url 'profile' %}" class="footer-link">{% trans "My Profile" %}</a>
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">Support & Legal</h5>
-                    <a href="{% url 'contact' %}" class="footer-link">Contact Support</a>
-                    <a href="{% url 'about' %}" class="footer-link">About Us</a>
-                    <a href="{% url 'privacy_policy' %}" class="footer-link">Privacy Policy</a>
-                    <a href="{% url 'terms_conditions' %}" class="footer-link">Terms & Conditions</a>
-                    <a href="{% url 'refund_policy' %}" class="footer-link">Refund Policy</a>
+                    <h5 class="footer-title">{% trans "Support & Legal" %}</h5>
+                    <a href="{% url 'contact' %}" class="footer-link">{% trans "Contact Support" %}</a>
+                    <a href="{% url 'about' %}" class="footer-link">{% trans "About Us" %}</a>
+                    <a href="{% url 'privacy_policy' %}" class="footer-link">{% trans "Privacy Policy" %}</a>
+                    <a href="{% url 'terms_conditions' %}" class="footer-link">{% trans "Terms & Conditions" %}</a>
+                    <a href="{% url 'refund_policy' %}" class="footer-link">{% trans "Refund Policy" %}</a>
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">Newsletter</h5>
-                    <p class="footer-text">Get fitness tips and product updates weekly.</p>
+                    <h5 class="footer-title">{% trans "Newsletter" %}</h5>
+                    <p class="footer-text">{% trans "Get fitness tips and product updates weekly." %}</p>
                     <form onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
                         <div class="mb-2">
                             <input type="email" class="form-control newsletter-input" placeholder="Enter your email" required>
                         </div>
-                        <button type="submit" class="newsletter-btn w-100">Subscribe</button>
+                        <button type="submit" class="newsletter-btn w-100">{% trans "Subscribe" %}</button>
                     </form>
                 </div>
             </div>
 
             <div class="bd-news-box mt-4">
-                <h6 class="footer-title mb-2">Live BD News</h6>
+                <h6 class="footer-title mb-2">{% trans "Live BD News" %}</h6>
                 <ul id="bd-news-list" class="bd-news-list">
                     <li>Loading latest Bangladesh headlines...</li>
                 </ul>

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <style>
   /* Keep navbar look consistent on all pages */
   #navbar {
@@ -253,49 +253,75 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 main_menu">
-<li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'home' %}">{% trans "Home" %}</a></li>
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Explore
+        {% trans "Explore" %}
     </a>
     <ul class="dropdown-menu shadow feature-dropdown-menu" aria-labelledby="exploreDropdown">
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'about' %}">
                 <span class="feature-icon"><i class="fa-solid fa-circle-info"></i></span>
-                <span class="feature-label">About Us</span>
+                <span class="feature-label">{% trans "About Us" %}</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'team' %}">
-                <span class="feature-icon"><i class="fa-solid fa-people-group"></i></span>
-                <span class="feature-label">Team</span>
+                <span class="feature-icon"><i class="fa-solid fa-video"></i></span>
+                <span class="feature-label">{% trans "Video Gallery" %}</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'gallery' %}">
                 <span class="feature-icon"><i class="fa-regular fa-images"></i></span>
-                <span class="feature-label">Gallery</span>
+                <span class="feature-label">{% trans "Gallery" %}</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'testimonial' %}">
                 <span class="feature-icon"><i class="fa-solid fa-quote-left"></i></span>
-                <span class="feature-label">Testimonial</span>
+                <span class="feature-label">{% trans "Testimonial" %}</span>
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'contact' %}">
                 <span class="feature-icon"><i class="fa-regular fa-envelope"></i></span>
-                <span class="feature-label">Contact</span>
+                <span class="feature-label">{% trans "Contact" %}</span>
             </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li class="px-2">
+            <div class="text-white-50" style="font-size: 12px; padding: 4px 10px;">{% trans "Language" %}</div>
+        </li>
+        <li>
+            <form action="{% url 'set_language' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" name="language" value="en">
+                <button type="submit" class="dropdown-item feature-dropdown-item" style="width: 100%; background: transparent; border: 0;">
+                    <span class="feature-icon"><i class="fa-solid fa-language"></i></span>
+                    <span class="feature-label">{% trans "English" %}</span>
+                </button>
+            </form>
+        </li>
+        <li>
+            <form action="{% url 'set_language' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" name="language" value="bn">
+                <button type="submit" class="dropdown-item feature-dropdown-item" style="width: 100%; background: transparent; border: 0;">
+                    <span class="feature-icon"><i class="fa-solid fa-language"></i></span>
+                    <span class="feature-label">{% trans "Bangla" %}</span>
+                </button>
+            </form>
         </li>
     </ul>
 </li>
 
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Features
+        {% trans "Features" %}
     </a>
     <ul class="dropdown-menu shadow feature-dropdown-menu" aria-labelledby="featuresDropdown">
         <li>
@@ -327,7 +353,7 @@
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'live_training_dashboard' %}">
                 <span class="feature-icon"><i class="fa-solid fa-video"></i></span>
-                <span class="feature-label">Live Training</span>
+                <span class="feature-label">{% trans "Live Training" %}</span>
             </a>
         </li>
     </ul>
@@ -344,7 +370,7 @@
             {% endif %}
         </a>
         <ul class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationDropdown">
-            <li class="notification-title">Notifications</li>
+            <li class="notification-title">{% trans "Notifications" %}</li>
             <li><hr class="dropdown-divider"></li>
             {% for item in navbar_notifications %}
                 <li>
@@ -354,10 +380,10 @@
                     </a>
                 </li>
             {% empty %}
-                <li><span class="dropdown-item notification-item info">No new notifications</span></li>
+                <li><span class="dropdown-item notification-item info">{% trans "No new notifications" %}</span></li>
             {% endfor %}
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item notification-item info" href="{% url 'notification_history' %}">View all notifications</a></li>
+            <li><a class="dropdown-item notification-item info" href="{% url 'notification_history' %}">{% trans "View all notifications" %}</a></li>
         </ul>
     </li>
     <li class="nav-item d-flex align-items-center auth-user-item">
@@ -375,18 +401,18 @@
         {% if user.trainer_account %}
           <a href="{% url 'trainer_profile' %}" class="nav-link d-flex align-items-center me-3">
             <i class="fa-solid fa-user-tie me-2"></i>
-            <span class="d-none d-lg-inline">Trainer Profile</span>
+            <span class="d-none d-lg-inline">{% trans "Trainer Profile" %}</span>
           </a>
         {% endif %}
 
         <form action="{% url 'logout' %}" method="post" style="display: inline;">
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger">Logout</button>
+            <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Logout" %}</button>
         </form>
     </li>
 {% else %}
-    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 ms-2" href="{% url 'signup' %}">Sign Up</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
+    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 ms-2" href="{% url 'signup' %}">{% trans "Sign Up" %}</a></li>
 {% endif %}
 </ul>
       </div>
