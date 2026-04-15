@@ -560,11 +560,46 @@ function hasDeletePlanIntent(text) {
     return /(delete|remove|clear)\b/.test(text) && /(diet|meal)?\s*plan\b|diet\b|meal\b/.test(text);
 }
 
-function getDeleteScope(text) {
+/**
+ * Parse delete diet plan commands. Plan numbers match the Diet page: #1 = oldest, #N = newest.
+ * - "delete all / everything" → all
+ * - "delete latest / last" → latest
+ * - "delete plan 2", "remove #3", "delete 2nd plan" → index
+ * - vague "delete my diet plan" → latest only (safe default; never deletes all)
+ */
+function parseDeleteDietPayload(text) {
     const t = (text || "").toLowerCase();
-    if (/(latest|last|recent|newest)/.test(t)) return "latest";
-    if (/(all|everything|every|entire)/.test(t)) return "all";
-    return "all";
+
+    if (
+        /(all|everything|every|entire)\b/.test(t) &&
+        (/(diet|meal)\s*plan/.test(t) || /\bplans?\b/.test(t) || /\b(diets?|meals?)\b/.test(t))
+    ) {
+        return { scope: "all", index: null };
+    }
+    if (/(latest|last|recent|newest)\b/.test(t)) {
+        return { scope: "latest", index: null };
+    }
+
+    let m = t.match(/\b(?:plan|#)\s*(\d+)\b/);
+    if (m) return { scope: "index", index: parseInt(m[1], 10) };
+    m = t.match(/\b(\d+)(?:st|nd|rd|th)\s+(?:diet|meal)?\s*plan\b/);
+    if (m) return { scope: "index", index: parseInt(m[1], 10) };
+    m = t.match(/\b(?:delete|remove|clear)\s+(?:diet|meal)?\s*plan\s+(\d+)\b/);
+    if (m) return { scope: "index", index: parseInt(m[1], 10) };
+    m = t.match(/\b(?:delete|remove|clear)\s+(\d+)\b/);
+    if (m) return { scope: "index", index: parseInt(m[1], 10) };
+
+    const ordinals = {
+        first: 1, second: 2, third: 3, fourth: 4, fifth: 5,
+        sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10
+    };
+    for (const [word, num] of Object.entries(ordinals)) {
+        if (new RegExp(`\\b${word}\\s+(diet|meal)?\\s*plan\\b`).test(t)) {
+            return { scope: "index", index: num };
+        }
+    }
+
+    return { scope: "latest", index: null };
 }
 
 function hasCreatePlanIntent(text) {
@@ -662,7 +697,7 @@ function sendToAI() {
     if (hasDeletePlanIntent(userMsgLower)) {
         messages.innerHTML += `<div class="message-wrapper user" style="justify-content: flex-end; display: flex; margin-bottom: 10px;"><div class="user-msg" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 15px;">${userMsg}</div></div>`;
         input.value = "";
-        deleteDietPlan(getDeleteScope(userMsgLower));
+        deleteDietPlan(parseDeleteDietPayload(userMsgLower));
         return;
     }
 
@@ -782,9 +817,19 @@ function savePlanToAdmin(title, cals, bf, ln, dn) {
 
 // --- DELETE ---
 
-function deleteDietPlan(scope = "all") {
+function deleteDietPlan(arg) {
     // 1. Flag true kora jate auto-save bondho hoy
-    isDeleting = true; 
+    isDeleting = true;
+
+    let payload = { scope: "latest", index: null };
+    if (typeof arg === "string") {
+        payload.scope = arg;
+    } else if (arg && typeof arg === "object") {
+        payload = {
+            scope: arg.scope || "latest",
+            index: arg.index != null ? arg.index : null
+        };
+    }
 
     fetch('/delete-diet-plan-ai/', {
         method: 'POST',
@@ -792,7 +837,7 @@ function deleteDietPlan(scope = "all") {
             'X-CSRFToken': getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : ''),
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ scope: scope })
+        body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(data => {

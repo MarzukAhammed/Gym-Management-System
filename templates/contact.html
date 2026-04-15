@@ -1,59 +1,148 @@
 
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Contact Us</title>
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+{% block title %}Contact Us | M-Power Fitness Lab{% endblock %}
+
+{% block extra_css %}
   <style>
-    .btn-gradient {
-      background: linear-gradient(90deg, #ff7e5f, #feb47b);
-      border: none;
-      color: white;
-      font-weight: bold;
-      border-radius: 25px;
+    .contact-wrap {
+      max-width: 980px;
+      margin: 48px auto 28px;
+      padding: 0 12px;
+    }
+    .premium-card {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 22px;
+      background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
+      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.36);
+      overflow: hidden;
+    }
+    .premium-header {
+      padding: 30px 30px 12px 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .premium-header h2 {
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .premium-header p {
+      margin: 10px 0 0 0;
+      color: rgba(255, 255, 255, 0.72);
+      max-width: 640px;
+    }
+    .premium-body {
+      padding: 26px 30px 30px 30px;
+    }
+    .form-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .contact-wrap .form-control {
+      border-radius: 12px;
+      min-height: 48px;
+      padding: 12px 14px;
+    }
+    .contact-wrap .form-control:focus {
+      border-color: rgba(251, 191, 36, 0.7) !important;
+      box-shadow: 0 0 0 0.2rem rgba(251, 191, 36, 0.2);
+    }
+    .contact-wrap .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.58) !important;
+    }
+    .contact-wrap textarea.form-control {
+      min-height: 150px;
+      resize: vertical;
+    }
+    .btn-premium {
+      background: linear-gradient(120deg, #fbbf24, #ff6a00);
+      border: 0;
+      color: #0b0f1a;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 12px 20px;
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.3);
+    }
+    .btn-premium:hover {
+      color: #0b0f1a;
+      filter: brightness(1.03);
+    }
+    .premium-note {
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .field-error {
+      color: #ffb4b4;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .contact-success {
+      background: rgba(34, 197, 94, 0.16);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #dcfce7;
+      border-radius: 12px;
     }
   </style>
-</head>
-<body>
-{% include "navbar.html" %}
-  <div class="container mt-5" style="max-width:600px;">
-    <h2 class="text-center mb-4">📞 Contact Us</h2>
+{% endblock %}
 
+{% block content %}
+  <div class="contact-wrap">
     {% if messages %}
       {% for message in messages %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert contact-success alert-dismissible fade show mb-3" role="alert">
           {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
         </div>
       {% endfor %}
     {% endif %}
 
-    <form method="POST" class="card p-4 shadow">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-gradient w-100">Send Message</button>
-    </form>
+    <div class="premium-card">
+      <div class="premium-header">
+        <h2>Contact Us</h2>
+        <p>Need help with your plan, workouts, or account? Send us a message and our team will get back to you.</p>
+      </div>
+
+      <div class="premium-body">
+        <form method="POST" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.name.id_for_label }}">Your Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <div class="field-error">{{ form.name.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.email.id_for_label }}">Your Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <div class="field-error">{{ form.email.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label" for="{{ form.message.id_for_label }}">Your Message</label>
+            {{ form.message }}
+            {% if form.message.errors %}
+              <div class="field-error">{{ form.message.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="field-error mb-2">{{ form.non_field_errors|striptags }}</div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-premium w-100 mt-3">Send Message</button>
+          <div class="premium-note">We usually reply within 24 hours.</div>
+        </form>
+      </div>
+    </div>
   </div>
 
-  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-  <a href="{% url 'home' %}" 
-   style="
-     position: fixed;
-     bottom: 20px;
-     right: 20px;
-     background:#007bff;
-     padding:12px 18px;
-     border-radius: 50px;
-     color:white;
-     font-weight:bold;
-     text-decoration:none;
-     font-size:16px;
-     z-index: 9999;
-     box-shadow:0 4px 8px rgba(0,0,0,0.3);
-   ">
-   🏠 Home
-</a>
-{% include "chatbox_partial.html" %}
-</body>
-</html>
+  {% include "chatbox_partial.html" %}
+{% endblock %}

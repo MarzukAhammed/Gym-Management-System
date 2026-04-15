@@ -11,7 +11,7 @@ from django.http import StreamingHttpResponse
 from .camera import PushUpDetector
 from django.http import JsonResponse
 from .models import HealthMemory, MemberMemory, Exercise, UserProgress
-from .ai_engine import SmartCoach
+from .ai_engine import SmartCoach, detect_language_mode
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json, datetime
 import re
@@ -24,6 +24,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.urls import reverse
+from .challenges import ensure_active_challenges
 
 def _user_has_verified_subscription(user):
     """
@@ -53,6 +54,14 @@ def _user_has_verified_subscription(user):
 
 # Home Page
 def home(request):
+    # Auto-generate challenges on fresh DBs (e.g., switching PCs).
+    # Keeps the UI from showing "No challenges found" and removes the need to run seed manually.
+    try:
+        ensure_active_challenges(min_per_day=7)
+    except Exception:
+        # Never block homepage if generation fails for any reason.
+        pass
+
     plans = Plan.objects.all()
     trainers = Trainer.objects.all()
     reviews = Review.objects.select_related("user").order_by("-created_at")[:5]
@@ -452,7 +461,7 @@ def _compute_total_plan_calories(breakfast, lunch, dinner, fallback=2000):
 
 
 def diet(request):
-    plans = DietPlan.objects.all()
+    plans = DietPlan.objects.all().order_by("id")
     for plan in plans:
         # Always show computed calories from meal lines when available.
         plan.display_calories = _compute_total_plan_calories(
@@ -687,6 +696,7 @@ def chat_with_ai(request):
         return JsonResponse({'error': 'Post only'})
     
     user_msg = request.POST.get('text', '')
+    language_mode = detect_language_mode(user_msg)
     coach = SmartCoach(request.user)
     
     # 1. Retrieve Memory & Identity
@@ -701,26 +711,27 @@ def chat_with_ai(request):
 
     # 2. FIXED: History logic using sessions correctly
     raw_history = request.session.get('chat_history_list', [])
+    # Each "turn" is user line + assistant line; used so the cat warms up the longer they chat
+    prior_turns = max(0, len(raw_history) // 2)
     history_text = " | ".join(raw_history[-3:]) if raw_history else "None"
     site_context = _build_relevant_site_context(user_msg)
     profile_context = _build_profile_context(request)
     auth_flag = "true" if request.user.is_authenticated else "false"
     auth_line = f"Auth: logged_in={auth_flag}; username={request.user.username if request.user.is_authenticated else 'Guest'}"
-    persona = (
-        "You are Lolona AI — a grumpy, witty cat fitness assistant for M-Power Fitness Lab. "
-        "Stay in character. Keep replies helpful and concise. "
-        "Use light sarcasm, never rude or hateful. No robotic/automated tone. "
-        "If the user is not logged in, you can tease them about it. "
-        "Never guess login status; trust the Auth line."
-        "Language rule: If the user asks to speak Bangla/Bengali or writes in Bangla (বাংলা), reply in proper Bangla script. "
-        "Otherwise reply in English. "
-        "Quality rule: Always respond in complete sentences. Do not leave sentences unfinished. "
-        "Do not output raw JSON or code blocks to the user."
-    )
-    enriched_input = f"{persona}\n\n{auth_line}\n\nUser: {user_msg}\n\nUser Profile Context: {profile_context}"
+    # Context (auth, profile, site) is passed inside SmartCoach system prompt; user message stays clean
+    # so the model answers the actual question instead of fighting long duplicated instructions.
 
     # 3. Call Groq
-    response_data = coach.generate_response(enriched_input, mem.ai_facts, history_text, site_context)
+    response_data = coach.generate_response(
+        user_msg,
+        mem.ai_facts,
+        history_text,
+        site_context,
+        language_mode=language_mode,
+        auth_line=auth_line,
+        profile_context=profile_context,
+        rapport_level=prior_turns,
+    )
 
     try:
         # Clean AI response
@@ -744,20 +755,47 @@ def chat_with_ai(request):
                 if start != -1 and end != -1 and end > start:
                     return json.loads(text[start:end+1])
             except Exception:
-                return None
+                pass
+            # Last resort: pull "reply" field from partial / noisy output
+            m = re.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)"', text, flags=re.DOTALL)
+            if m:
+                inner = m.group(1).replace("\\n", "\n").replace('\\"', '"').replace("\\\\", "\\")
+                return {"reply": inner, "new_facts": {}, "search_query": None}
             return None
 
         ai_json = _extract_json_object(raw_content)
         if not isinstance(ai_json, dict):
             # If model returns mixed text+json, show only the plain text part.
             plain = re.sub(r"\{[\s\S]*\}$", "", raw_content).strip()
-            return JsonResponse({"reply": plain or "Meow."})
+            return JsonResponse({"reply": plain or "Hmph. Say that again in fewer tangled words."})
         
         # Handle Internet Search
         if ai_json.get("search_query"):
             search_info = coach.search_internet(ai_json["search_query"])
-            search_prompt = f"Internet results for '{ai_json['search_query']}': {search_info}. Answer: {enriched_input}"
-            response_data = coach.generate_response(search_prompt, mem.ai_facts, history_text, site_context)
+            try:
+                search_blob = json.dumps(search_info, ensure_ascii=False)
+            except Exception:
+                search_blob = str(search_info)
+            if len(search_blob) > 12000:
+                search_blob = search_blob[:12000] + "...(truncated)"
+            search_user_content = (
+                f"Internet search results for query '{ai_json['search_query']}':\n{search_blob}\n\n"
+                f"Recent conversation:\n{history_text}\n\n"
+                f"User's original message:\n{user_msg}\n\n"
+                "Use the search results when helpful. Answer in the same language mode as the user's message. "
+                "Output STRICT JSON as defined in the system instructions."
+            )
+            response_data = coach.generate_response(
+                user_msg,
+                mem.ai_facts,
+                history_text,
+                site_context,
+                language_mode=language_mode,
+                auth_line=auth_line,
+                profile_context=profile_context,
+                user_content_override=search_user_content,
+                rapport_level=prior_turns,
+            )
             cleaned = response_data.strip().replace("```json", "").replace("```", "").strip()
             ai_json = _extract_json_object(cleaned) or {}
 
@@ -772,20 +810,23 @@ def chat_with_ai(request):
         history.append(f"Lolona: {ai_json.get('reply', '')}")
         request.session['chat_history_list'] = history[-10:] # Keep last 10 turns
         
-        reply_text = ai_json.get('reply', "Meow!")
+        reply_text = ai_json.get('reply', "Hmph. Meow. Ask something useful.")
         # If the model hallucinated login status, correct it.
         if request.user.is_authenticated and ("not logged in" in reply_text.lower() or "login first" in reply_text.lower()):
             reply_text = reply_text.replace("login first", "you’re already logged in")
         if _is_profile_related_query(user_msg):
             summary = _profile_usage_summary(request)
             if summary:
-                reply_text = f"Using your profile data ({summary}). {reply_text}"
+                if language_mode == "english":
+                    reply_text = f"Fine, I'm peeking at your profile ({summary}). {reply_text}"
+                else:
+                    reply_text = f"Tch, profile dekhe bolchi ({summary}). {reply_text}"
 
         return JsonResponse({'reply': reply_text})
 
     except Exception as e:
         print(f"Error: {e}")
-        return JsonResponse({'reply': response_data if response_data else "I'm still learning! Try again."})
+        return JsonResponse({'reply': response_data if response_data else "Tch. Something broke. Try again before I nap."})
 
 
 @login_required
@@ -1221,31 +1262,67 @@ def delete_diet_plan_ai(request):
     if request.method == 'POST':
         try:
             payload = json.loads(request.body or "{}")
-            scope = str(payload.get("scope", "all")).lower()
+            scope = str(payload.get("scope", "latest")).lower()
+            plan_index = payload.get("index")
             has_user_field = any(field.name == 'user' for field in DietPlan._meta.fields)
 
             if has_user_field:
                 if not request.user.is_authenticated:
                     return JsonResponse({'status': 'error', 'message': 'User not logged in'})
-                qs = DietPlan.objects.filter(user=request.user).order_by('-id')
+                base_qs = DietPlan.objects.filter(user=request.user)
             else:
-                # For current schema (no user column), operate on all plans.
-                qs = DietPlan.objects.all().order_by('-id')
+                base_qs = DietPlan.objects.all()
 
-            if scope == "latest":
-                latest_plan = qs.first()
-                if latest_plan:
-                    deleted_count, _ = latest_plan.delete()
-                else:
+            # Stable numbering: Plan #1 = oldest (lowest id), same order as diet page.
+            plans_ordered = list(base_qs.order_by("id"))
+            total = len(plans_ordered)
+
+            deleted_count = 0
+
+            if scope == "all":
+                deleted_count, _ = base_qs.delete()
+                message = f"Deleted all {deleted_count} diet plan(s)."
+            elif scope == "index":
+                try:
+                    n = int(plan_index)
+                except (TypeError, ValueError):
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Invalid plan number. Send a positive integer (e.g. delete plan 2).',
+                    }, status=400)
+                if n < 1 or n > total:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Plan #{n} does not exist. You have {total} saved plan(s) (numbered 1–{total}).',
+                    }, status=400)
+                plan = plans_ordered[n - 1]
+                title = plan.title
+                plan.delete()
+                deleted_count = 1
+                message = f'Deleted plan #{n}: "{title}".'
+            elif scope == "latest":
+                if not plans_ordered:
                     deleted_count = 0
+                else:
+                    plan = plans_ordered[-1]
+                    title = plan.title
+                    plan.delete()
+                    deleted_count = 1
+                    message = f'Deleted latest plan: "{title}" (was #{total}).'
             else:
-                deleted_count, _ = qs.delete()
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid scope. Use "latest", "all", or "index" with a number.',
+                }, status=400)
 
             # Keep AI memory/session aligned after deletion.
             if request.user.is_authenticated:
                 mem, _ = MemberMemory.objects.get_or_create(user=request.user)
                 facts = mem.ai_facts or {}
-                facts["diet_plan_exists"] = False
+                if has_user_field:
+                    facts["diet_plan_exists"] = DietPlan.objects.filter(user=request.user).exists()
+                else:
+                    facts["diet_plan_exists"] = DietPlan.objects.exists()
                 mem.ai_facts = facts
                 mem.save()
             request.session['chat_history_list'] = []
@@ -1253,7 +1330,7 @@ def delete_diet_plan_ai(request):
             if deleted_count > 0:
                 return JsonResponse({
                     'status': 'success',
-                    'message': f'{deleted_count} plan(s) deleted successfully'
+                    'message': message
                 })
             else:
                 return JsonResponse({

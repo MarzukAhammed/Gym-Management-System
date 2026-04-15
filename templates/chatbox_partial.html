@@ -152,6 +152,28 @@
     line-height: 1;
     background: rgba(255,255,255,0.12);
 }
+
+/* Cross-page entrance: cat slides in from beyond the viewport (like it followed you) */
+#floating-cat-container.lolona-cross-prep {
+    pointer-events: none;
+}
+#floating-cat-container.lolona-cross-from-outside {
+    transform: translate3d(200px, 90px, 0) scale(0.88);
+    opacity: 0;
+    transition: none !important;
+}
+#floating-cat-container.lolona-cross-from-outside.lolona-from-left {
+    transform: translate3d(-200px, 70px, 0) scale(0.88);
+}
+#floating-cat-container.lolona-cross-from-outside.lolona-from-bottom {
+    transform: translate3d(40px, 160px, 0) scale(0.88);
+}
+#floating-cat-container.lolona-cross-settle {
+    transform: translate3d(0, 0, 0) scale(1) !important;
+    opacity: 1 !important;
+    transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease !important;
+    will-change: transform;
+}
 </style>
 <div id="floating-cat-container">
     <div id="cat-trigger">
@@ -161,6 +183,9 @@
             data-run-src="{% static 'images/cat_run.gif' %}"
             data-wave-src="{% static 'images/cat_wave.gif' %}"
             data-sit-src="{% static 'images/cat_sit.gif' %}"
+            data-edge-hold-src="{% static 'images/cat_hold_edge.gif' %}"
+            data-sleep-src="{% static 'images/cat_sleep.gif' %}"
+            data-play-src="{% static 'images/cat_play.gif' %}"
             id="main-cat-img"
             alt="Lolona"
         >
@@ -207,6 +232,15 @@ const chatUserName = "{{ user.username|default:'' }}";
     const csrfInput = document.querySelector("[name=csrfmiddlewaretoken]");
 
     if (!cat || !chatBox || !input || !messages) return;
+
+    // --- Easy behavior tuning (milliseconds) ---
+    // You can tweak these values without touching core logic.
+    const LOLONA_CONFIG = {
+        inactivitySleepDelayMs: 38000, // no user activity -> sleep starts
+        sleepPhaseMs: 6500,            // how long sleep gif stays before play gif
+        playPhaseMs: 3000,             // how long play gif stays before idle
+        crossPageSettleFallbackMs: 1300 // failsafe cleanup for entrance transition
+    };
 
     function appendMessage(type, text) {
         const align = type === "user" ? "flex-end" : "flex-start";
@@ -277,6 +311,18 @@ const chatUserName = "{{ user.username|default:'' }}";
     if (catImg && catImg.dataset && catImg.dataset.runSrc) {
         const preload = new Image();
         preload.src = catImg.dataset.runSrc;
+    }
+    if (catImg && catImg.dataset && catImg.dataset.edgeHoldSrc) {
+        const preloadEdge = new Image();
+        preloadEdge.src = catImg.dataset.edgeHoldSrc;
+    }
+    if (catImg && catImg.dataset && catImg.dataset.sleepSrc) {
+        const preloadSleep = new Image();
+        preloadSleep.src = catImg.dataset.sleepSrc;
+    }
+    if (catImg && catImg.dataset && catImg.dataset.playSrc) {
+        const preloadPlay = new Image();
+        preloadPlay.src = catImg.dataset.playSrc;
     }
     let canUseSitGif = false;
     if (catImg && catImg.dataset && catImg.dataset.sitSrc) {
@@ -354,6 +400,54 @@ const chatUserName = "{{ user.username|default:'' }}";
         };
         cat.addEventListener("transitionend", switchToSit);
         setTimeout(switchToSit, 1200);
+    }
+
+    // --- Inactivity behavior: sleep, then play, then idle ---
+    const IDLE_SLEEP_MS = LOLONA_CONFIG.inactivitySleepDelayMs;
+    let inactivityTimer = null;
+    let playTimer = null;
+    let sleepTimer = null;
+    let isIdleAnimating = false;
+
+    function clearIdleTimers() {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        if (playTimer) clearTimeout(playTimer);
+        if (sleepTimer) clearTimeout(sleepTimer);
+        inactivityTimer = null;
+        playTimer = null;
+        sleepTimer = null;
+    }
+
+    function resetToIdleGif() {
+        if (!catImg) return;
+        setCatImg(catImg.dataset.idleSrc || catImg.dataset.waveSrc);
+        isIdleAnimating = false;
+    }
+
+    function runIdleCycle() {
+        if (!catImg || isDragging || isMoving) return;
+        if (chatBox.style.display === "flex") return; // don't run sleep/play while actively chatting
+        isIdleAnimating = true;
+        setCatImg(catImg.dataset.sleepSrc || catImg.dataset.sitSrc || catImg.dataset.idleSrc);
+        playTimer = setTimeout(function () {
+            if (!catImg) return;
+            setCatImg(catImg.dataset.playSrc || catImg.dataset.waveSrc || catImg.dataset.idleSrc);
+            sleepTimer = setTimeout(function () {
+                resetToIdleGif();
+                scheduleIdleCycle();
+            }, LOLONA_CONFIG.playPhaseMs);
+        }, LOLONA_CONFIG.sleepPhaseMs);
+    }
+
+    function scheduleIdleCycle() {
+        clearIdleTimers();
+        inactivityTimer = setTimeout(runIdleCycle, IDLE_SLEEP_MS);
+    }
+
+    function markActivity() {
+        clearIdleTimers();
+        if (isIdleAnimating) resetToIdleGif();
+        scheduleIdleCycle();
     }
 
     let isDragging = false;
@@ -520,11 +614,13 @@ const chatUserName = "{{ user.username|default:'' }}";
                 setCatImg(catImg.dataset.idleSrc || catImg.dataset.waveSrc);
             }, 1200);
         }
+        scheduleIdleCycle();
     });
 
     window.sendToAI = window.sendToAI || async function () {
         const text = input.value.trim();
         if (!text) return;
+        markActivity();
         appendMessage("user", text);
         input.value = "";
         showTyping();
@@ -548,7 +644,7 @@ const chatUserName = "{{ user.username|default:'' }}";
             });
             const data = await response.json();
             hideTyping();
-            appendMessage("bot", data.reply || "Meow.");
+            appendMessage("bot", data.reply || "Hmph. Ask again, human.");
         } catch (e) {
             hideTyping();
             appendMessage("bot", "Network issue. Try again.");
@@ -561,5 +657,86 @@ const chatUserName = "{{ user.username|default:'' }}";
             window.sendToAI();
         }
     });
+
+    ["mousemove", "keydown", "scroll", "touchstart", "pointerdown"].forEach(function (evt) {
+        window.addEventListener(evt, markActivity, { passive: true });
+    });
+    cat.addEventListener("click", markActivity);
+})();
+
+/**
+ * Lolona cross-page travel: next page load, she enters from outside the viewport
+ * (sessionStorage set when user follows an internal link).
+ */
+(function lolonaCrossPageTravel() {
+    var STORAGE = "lolona_nav_internal";
+    var EDGE = "lolona_nav_edge";
+
+    document.addEventListener("click", function (e) {
+        var a = e.target.closest && e.target.closest("a[href]");
+        if (!a) return;
+        var href = a.getAttribute("href");
+        if (!href || href === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.getAttribute("download") != null) return;
+        if (a.target === "_blank" || a.target === "_parent") return;
+        try {
+            var next = new URL(a.href, window.location.href);
+            if (next.origin !== window.location.origin) return;
+            sessionStorage.setItem(STORAGE, "1");
+            var edges = ["", "lolona-from-left", "lolona-from-bottom"];
+            sessionStorage.setItem(EDGE, edges[Math.floor(Math.random() * edges.length)]);
+        } catch (err) {}
+    }, true);
+
+    function run() {
+        var cat = document.getElementById("floating-cat-container");
+        var catImg = document.getElementById("main-cat-img");
+        if (!cat) return;
+        if (sessionStorage.getItem(STORAGE) !== "1") return;
+        sessionStorage.removeItem(STORAGE);
+        var edge = sessionStorage.getItem(EDGE) || "";
+        sessionStorage.removeItem(EDGE);
+
+        if (catImg && catImg.dataset && catImg.dataset.edgeHoldSrc) {
+            // User can replace this file with their custom "holding screen edge" GIF.
+            var edgeSrc = catImg.dataset.edgeHoldSrc;
+            catImg.src = edgeSrc + (edgeSrc.indexOf("?") > -1 ? "&" : "?") + "v=" + Date.now();
+        }
+
+        cat.classList.add("lolona-cross-prep", "lolona-cross-from-outside");
+        if (edge) cat.classList.add(edge);
+
+        var cleaned = false;
+        function cleanup() {
+            if (cleaned) return;
+            cleaned = true;
+            cat.classList.remove(
+                "lolona-cross-prep",
+                "lolona-cross-from-outside",
+                "lolona-cross-settle",
+                "lolona-from-left",
+                "lolona-from-bottom"
+            );
+            cat.style.willChange = "";
+            if (catImg && catImg.dataset && catImg.dataset.idleSrc) {
+                catImg.src = catImg.dataset.idleSrc;
+            }
+        }
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                cat.style.willChange = "transform, opacity";
+                cat.classList.add("lolona-cross-settle");
+                cat.addEventListener("transitionend", cleanup, { once: true });
+                setTimeout(cleanup, LOLONA_CONFIG.crossPageSettleFallbackMs);
+            });
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", run);
+    } else {
+        run();
+    }
 })();
 </script>
