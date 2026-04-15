@@ -1514,20 +1514,20 @@ background: #dddddd;
 
 #floating-cat-container:active { cursor: grabbing; }
 
-/* Lolona cross-page entrance (see chatbox_partial.html) */
-#floating-cat-container.lolona-cross-prep { pointer-events: none; }
-#floating-cat-container.lolona-cross-from-outside {
+/* Elina cross-page entrance (see chatbox_partial.html) */
+#floating-cat-container.elina-cross-prep { pointer-events: none; }
+#floating-cat-container.elina-cross-from-outside {
     transform: translate3d(200px, 90px, 0) scale(0.88);
     opacity: 0;
     transition: none !important;
 }
-#floating-cat-container.lolona-cross-from-outside.lolona-from-left {
+#floating-cat-container.elina-cross-from-outside.elina-from-left {
     transform: translate3d(-200px, 70px, 0) scale(0.88);
 }
-#floating-cat-container.lolona-cross-from-outside.lolona-from-bottom {
+#floating-cat-container.elina-cross-from-outside.elina-from-bottom {
     transform: translate3d(40px, 160px, 0) scale(0.88);
 }
-#floating-cat-container.lolona-cross-settle {
+#floating-cat-container.elina-cross-settle {
     transform: translate3d(0, 0, 0) scale(1) !important;
     opacity: 1 !important;
     transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease !important;

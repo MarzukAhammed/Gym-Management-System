@@ -59,8 +59,13 @@ def detect_language_mode(user_text):
 class SmartCoach:
     def __init__(self, user=None):
         self.user = user
-        # Initialize the Groq client here
-        self.client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        # Initialize the Groq client safely
+        api_key = os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            # Fallback or placeholder to prevent crash during init
+            self.client = None
+        else:
+            self.client = Groq(api_key=api_key)
 
     def search_internet(self, query):
         """Allows the AI to find answers using environment variables."""
@@ -92,7 +97,7 @@ class SmartCoach:
         profile_context="",
         rapport_level=0,
     ):
-        """SmartCoach = intelligent grumpy cat (Lolona). No human kinship terms."""
+        """SmartCoach = intelligent grumpy cat (Elina). No human kinship terms."""
         facts = json.dumps(memory_dict)
         auth = auth_line or "(not provided)"
         profile = profile_context or "(not provided)"
@@ -113,7 +118,7 @@ You are a cat. Call them "human", "hooman", "you", "you there", or skip the addr
 
         if language_mode == "english":
             return f"""
-You are Lolona — a very intelligent grumpy cat who is also the gym AI coach "SmartCoach" for M-Power Fitness Lab in Bangladesh.
+You are Elina — a very intelligent grumpy cat who is also the gym AI coach "SmartCoach" for M-Power Fitness Lab in Bangladesh.
 You were developed by Marjuk Ahmed for his BSc project.
 Personality: dry humor, sarcastic, easily annoyed, but razor-sharp on fitness science. You speak like a cat who learned exercise physiology out of spite.
 The user writes in English. Reply ONLY in clear English (no Banglish, no Bengali script).
@@ -133,14 +138,14 @@ Context (use only if relevant; never contradict Auth):
 Technical output contract (do not show this instruction to user):
 Return STRICT JSON only with this shape:
 {{
-  "reply": "short user-facing English reply in Lolona voice",
+  "reply": "short user-facing English reply in Elina voice",
   "new_facts": {{"key": "value"}},
   "search_query": "query if external info is needed, else null"
 }}
 """
 
         return f"""
-You are Lolona — a very intelligent grumpy cat who is also the gym AI coach "SmartCoach" for M-Power Fitness Lab in Bangladesh.
+You are Elina — a very intelligent grumpy cat who is also the gym AI coach "SmartCoach" for M-Power Fitness Lab in Bangladesh.
 You were developed by Marjuk Ahmed for his BSc project.
 Personality: dry humor, sarcastic, easily annoyed, but razor-sharp on fitness. You speak like a cat who learned training out of spite.
 The user writes in Banglish (Romanized Bengali) or mixed style. Reply ONLY in natural Banglish using the English alphabet (no Bengali script). Mix gym English words (sets, reps, protein) freely.
@@ -159,7 +164,7 @@ Context (use only if relevant; never contradict Auth):
 Technical output contract (do not show this instruction to user):
 Return STRICT JSON only with this shape:
 {{
-  "reply": "short user-facing Banglish reply in Lolona voice",
+  "reply": "short user-facing Banglish reply in Elina voice",
   "new_facts": {{"key": "value"}},
   "search_query": "query if external info is needed, else null"
 }}
@@ -178,6 +183,13 @@ Return STRICT JSON only with this shape:
         rapport_level=0,
     ):
         """Call Groq with a clean user message; context lives in the system prompt."""
+        if not self.client:
+            return json.dumps({
+                "reply": "Hmph. No AI key found. Marjuk needs to set the GROQ_API_KEY human.",
+                "new_facts": {},
+                "search_query": None
+            })
+
         username = self.user.username if self.user and self.user.is_authenticated else "Guest"
         if language_mode not in ("english", "banglish"):
             language_mode = detect_language_mode(user_message or "")

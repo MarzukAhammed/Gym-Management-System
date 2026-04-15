@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", function() {
         isMoving = false;
     }
 
-    function runCatToLolonaText() {
+    function runCatToElinaText() {
         const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
         if (!aiText) return;
 
@@ -391,7 +391,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const willOpen = chatBox.style.display !== "flex";
         toggleChat();
         if (willOpen) {
-            setTimeout(runCatToLolonaText, 40);
+            setTimeout(runCatToElinaText, 40);
         }
     });
 
@@ -484,10 +484,10 @@ function getGrumpyGuestReply(userMsg) {
 
     if (m.includes("who are you") || m.includes("your name")) {
         return pick([
-            `${catMood} I am Lolona AI. 20% fluff, 80% sarcasm, 100% results.`,
-            `${catMood} Name: Lolona. Profession: judging form and fixing excuses.`,
+            `${catMood} I am Elina AI. 20% fluff, 80% sarcasm, 100% results.`,
+            `${catMood} Name: Elina. Profession: judging form and fixing excuses.`,
             `${catMood} I am your grumpy cat coach until you log in and become my problem.`,
-            `${catMood} Lolona AI. I purr for progress, hiss at laziness.`
+            `${catMood} Elina AI. I purr for progress, hiss at laziness.`
         ]);
     }
 
@@ -711,7 +711,7 @@ function sendToAI() {
         typingEl.style.cssText = "justify-content:flex-start; display:flex; margin-bottom:10px;";
         typingEl.innerHTML = `
           <div class="bot-msg typing-bubble" style="padding: 8px 15px; border-radius: 15px;">
-            <span style="color: rgba(255,255,255,0.9); font-weight: 700; font-size: 12px;">Lolona</span>
+            <span style="color: rgba(255,255,255,0.9); font-weight: 700; font-size: 12px;">Elina</span>
             <span class="typing-dots" aria-label="Typing">
               <span></span><span></span><span></span>
             </span>

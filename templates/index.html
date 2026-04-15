@@ -436,9 +436,9 @@
                 </div>
                 <span class="badge bg-info" style="height: fit-content; color:#0b0f1a;">+{{ c.coins_reward }} coins</span>
               </div>
-              <div class="mt-3 meta">
-                {% trans "Today" %} • {% trans "Click to record & submit proof" %} →
-              </div>
+            <div class="mt-3 meta">
+              <i class="fa-solid fa-calendar-day me-1"></i> {% trans "Today" %} • {% trans "Click to record & submit proof" %} →
+            </div>
             </a>
           {% else %}
             <div class="challenge-card locked" style="opacity: 0.92;">
@@ -453,9 +453,9 @@
               </div>
               <div class="mt-3 meta">
                 {% if c.day_of_week == today_idx %}
-                  {% trans "Available today (login required)." %}
+                  <i class="fa-solid fa-lock me-1"></i> {% trans "Available today (login required)." %}
                 {% else %}
-                  {% trans "Preview only" %} • {% trans "Available on its day." %}
+                  <i class="fa-solid fa-lock me-1"></i> {% trans "Preview only" %} • {% trans "Available on its day." %}
                 {% endif %}
               </div>
             </div>

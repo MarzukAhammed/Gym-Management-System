@@ -49,8 +49,8 @@
 
 .user-info { display:flex; align-items:center; gap:10px; }
 .ai-meta { display:flex; flex-direction:column; line-height:1.15; }
-.ai-name { font-weight:700; letter-spacing:0.2px; color:#fff; }
-.ai-tagline { color: rgba(255,255,255,0.78); font-size:11px; }
+.ai-name { font-weight:700; font-size: 15px; letter-spacing:0.2px; color:#fff; }
+.ai-tagline { color: rgba(255,255,255,0.7); font-size:12px; }
 
 .status-dot {
     width: 10px;
@@ -154,21 +154,21 @@
 }
 
 /* Cross-page entrance: cat slides in from beyond the viewport (like it followed you) */
-#floating-cat-container.lolona-cross-prep {
+#floating-cat-container.elina-cross-prep {
     pointer-events: none;
 }
-#floating-cat-container.lolona-cross-from-outside {
+#floating-cat-container.elina-cross-from-outside {
     transform: translate3d(200px, 90px, 0) scale(0.88);
     opacity: 0;
     transition: none !important;
 }
-#floating-cat-container.lolona-cross-from-outside.lolona-from-left {
+#floating-cat-container.elina-cross-from-outside.elina-from-left {
     transform: translate3d(-200px, 70px, 0) scale(0.88);
 }
-#floating-cat-container.lolona-cross-from-outside.lolona-from-bottom {
+#floating-cat-container.elina-cross-from-outside.elina-from-bottom {
     transform: translate3d(40px, 160px, 0) scale(0.88);
 }
-#floating-cat-container.lolona-cross-settle {
+#floating-cat-container.elina-cross-settle {
     transform: translate3d(0, 0, 0) scale(1) !important;
     opacity: 1 !important;
     transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.2s ease !important;
@@ -187,7 +187,7 @@
             data-sleep-src="{% static 'images/cat_sleep.gif' %}"
             data-play-src="{% static 'images/cat_play.gif' %}"
             id="main-cat-img"
-            alt="Lolona"
+            alt="Elina"
         >
     </div>
 </div>
@@ -202,7 +202,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         <div class="user-info">
             <div class="status-dot"></div>
             <div class="ai-meta">
-                <span class="ai-name">Lolona AI</span>
+                <span class="ai-name">Elina AI</span>
                 <small class="ai-tagline">Premium fitness assistant</small>
             </div>
         </div>
@@ -235,7 +235,7 @@ const chatUserName = "{{ user.username|default:'' }}";
 
     // --- Easy behavior tuning (milliseconds) ---
     // You can tweak these values without touching core logic.
-    const LOLONA_CONFIG = {
+    const ELINA_CONFIG = {
         inactivitySleepDelayMs: 38000, // no user activity -> sleep starts
         sleepPhaseMs: 6500,            // how long sleep gif stays before play gif
         playPhaseMs: 3000,             // how long play gif stays before idle
@@ -258,7 +258,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         wrap.style.cssText = "justify-content:flex-start; display:flex; margin-bottom:10px;";
         wrap.innerHTML = `
           <div class="bot-msg typing-bubble" style="padding: 8px 15px; border-radius: 15px;">
-            <span style="color: rgba(255,255,255,0.9); font-weight: 700; font-size: 12px;">Lolona</span>
+            <span style="color: rgba(255,255,255,0.9); font-weight: 700; font-size: 12px;">Elina</span>
             <span class="typing-dots" aria-label="Typing">
               <span></span><span></span><span></span>
             </span>
@@ -332,7 +332,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         preloadSit.src = catImg.dataset.sitSrc;
     }
 
-    function runCatToLolonaTextFallback() {
+    function runCatToElinaTextFallback() {
         const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
         if (!aiText) return;
         // Any time the cat moves, show run GIF.
@@ -365,7 +365,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         const aiText = chatBox.querySelector('.ai-name') || chatBox.querySelector('.chat-header .user-info span');
         if (!aiText) return;
         if (catImg && catImg.dataset.runSrc) setCatImg(catImg.dataset.runSrc);
-        runCatToLolonaTextFallback();
+        runCatToElinaTextFallback();
         setTimeout(function () {
             // Switch immediately to sitting after run ends.
             if (catImg && catImg.dataset.sitSrc && canUseSitGif) setCatImg(catImg.dataset.sitSrc);
@@ -403,7 +403,7 @@ const chatUserName = "{{ user.username|default:'' }}";
     }
 
     // --- Inactivity behavior: sleep, then play, then idle ---
-    const IDLE_SLEEP_MS = LOLONA_CONFIG.inactivitySleepDelayMs;
+    const IDLE_SLEEP_MS = ELINA_CONFIG.inactivitySleepDelayMs;
     let inactivityTimer = null;
     let playTimer = null;
     let sleepTimer = null;
@@ -435,8 +435,8 @@ const chatUserName = "{{ user.username|default:'' }}";
             sleepTimer = setTimeout(function () {
                 resetToIdleGif();
                 scheduleIdleCycle();
-            }, LOLONA_CONFIG.playPhaseMs);
-        }, LOLONA_CONFIG.sleepPhaseMs);
+            }, ELINA_CONFIG.playPhaseMs);
+        }, ELINA_CONFIG.sleepPhaseMs);
     }
 
     function scheduleIdleCycle() {
@@ -474,7 +474,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         window.toggleChat();
         if (willOpen) {
             // On open: cat moves to header -> must use run GIF.
-            setTimeout(runCatToLolonaTextFallback, 40);
+            setTimeout(runCatToElinaTextFallback, 40);
             // Ensure greeting appears even if chat is opened without toggleChat (long-press fallback)
             setTimeout(maybeSendGreetingOnOpen, 60);
         }
@@ -665,13 +665,13 @@ const chatUserName = "{{ user.username|default:'' }}";
 })();
 
 /**
- * Lolona cross-page travel: next page load, she enters from outside the viewport
+ * Elina cross-page travel: next page load, she enters from outside the viewport
  * (sessionStorage set when user follows an internal link).
  */
-(function lolonaCrossPageTravel() {
-    var STORAGE = "lolona_nav_internal";
-    var EDGE = "lolona_nav_edge";
-    var PLAYED_KEY = "lolona_entrance_played_ever";
+(function elinaCrossPageTravel() {
+    var STORAGE = "elina_nav_internal";
+    var EDGE = "elina_nav_edge";
+    var PLAYED_KEY = "elina_entrance_played_ever";
 
     document.addEventListener("click", function (e) {
         // If it already played once ever, don't trigger it again
@@ -687,7 +687,7 @@ const chatUserName = "{{ user.username|default:'' }}";
             var next = new URL(a.href, window.location.href);
             if (next.origin !== window.location.origin) return;
             sessionStorage.setItem(STORAGE, "1");
-            var edges = ["", "lolona-from-left", "lolona-from-bottom"];
+            var edges = ["", "elina-from-left", "elina-from-bottom"];
             sessionStorage.setItem(EDGE, edges[Math.floor(Math.random() * edges.length)]);
         } catch (err) {}
     }, true);
@@ -708,7 +708,7 @@ const chatUserName = "{{ user.username|default:'' }}";
             catImg.src = edgeSrc + (edgeSrc.indexOf("?") > -1 ? "&" : "?") + "v=" + Date.now();
         }
 
-        cat.classList.add("lolona-cross-prep", "lolona-cross-from-outside");
+        cat.classList.add("elina-cross-prep", "elina-cross-from-outside");
         if (edge) cat.classList.add(edge);
 
         var cleaned = false;
@@ -716,16 +716,20 @@ const chatUserName = "{{ user.username|default:'' }}";
             if (cleaned) return;
             cleaned = true;
             cat.classList.remove(
-                "lolona-cross-prep",
-                "lolona-cross-from-outside",
-                "lolona-cross-settle",
-                "lolona-from-left",
-                "lolona-from-bottom"
+                "elina-cross-prep",
+                "elina-cross-from-outside",
+                "elina-cross-settle",
+                "elina-from-left",
+                "elina-from-bottom"
             );
             cat.style.willChange = "";
-            if (catImg && catImg.dataset && catImg.dataset.idleSrc) {
-                catImg.src = catImg.dataset.idleSrc;
-            }
+            // Keep the edgeHoldSrc for a bit longer even after classes are removed
+            // by delaying the switch to idleSrc
+            setTimeout(function() {
+                if (catImg && catImg.dataset && catImg.dataset.idleSrc) {
+                    catImg.src = catImg.dataset.idleSrc;
+                }
+            }, 500);
             // Mark as played so it never happens again for this user.
             localStorage.setItem(PLAYED_KEY, "1");
         }
@@ -733,10 +737,10 @@ const chatUserName = "{{ user.username|default:'' }}";
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
                 cat.style.willChange = "transform, opacity";
-                cat.classList.add("lolona-cross-settle");
+                cat.classList.add("elina-cross-settle");
                 // Remove transitionend listener and just use the fallback timeout
                 // to ensure it stays as edgeHoldSrc for exactly crossPageSettleFallbackMs.
-                setTimeout(cleanup, LOLONA_CONFIG.crossPageSettleFallbackMs);
+                setTimeout(cleanup, ELINA_CONFIG.crossPageSettleFallbackMs);
             });
         });
     }

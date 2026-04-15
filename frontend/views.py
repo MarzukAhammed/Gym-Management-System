@@ -781,18 +781,19 @@ def chat_with_ai(request):
             cleaned = response_data.strip().replace("```json", "").replace("```", "").strip()
             ai_json = _extract_json_object(cleaned) or {}
 
-        # Update Facts
-        if ai_json.get("new_facts"):
+        # Update Facts (only for logged-in users with memory)
+        if ai_json and ai_json.get("new_facts") and mem:
             mem.ai_facts.update(ai_json["new_facts"])
             mem.save()
         
         # FIXED: Update session history so she remembers next time
         history = request.session.get('chat_history_list', [])
         history.append(f"User: {user_msg}")
-        history.append(f"Lolona: {ai_json.get('reply', '')}")
+        reply_to_store = ai_json.get('reply', '') if ai_json else "Hmph. Brain lag."
+        history.append(f"Elina: {reply_to_store}")
         request.session['chat_history_list'] = history[-10:] # Keep last 10 turns
         
-        reply_text = ai_json.get('reply', "Hmph. Meow. Ask something useful.")
+        reply_text = ai_json.get('reply', "Hmph. Meow. Ask something useful.") if ai_json else "Hmph. Meow. Ask something useful."
         # If the model hallucinated login status, correct it.
         if request.user.is_authenticated and ("not logged in" in reply_text.lower() or "login first" in reply_text.lower()):
             reply_text = reply_text.replace("login first", "you’re already logged in")
