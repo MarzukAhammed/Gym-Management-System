@@ -145,56 +145,18 @@ def generate_week(seed_date: datetime.date | None = None, per_day: int = 7) -> l
 def ensure_active_challenges(min_per_day: int = 7) -> int:
     """
     Ensures the database has a reasonable set of active challenges.
-    Returns number of challenges created.
+    Uses a deterministic week generation so it's consistent across PCs.
     """
-    created = 0
-
-    # If completely empty (common when switching PCs / new DB), generate everything.
-    if not DailyChallenge.objects.filter(is_active=True).exists():
+    # Always check if we have challenges for the whole week
+    existing_days = DailyChallenge.objects.filter(is_active=True).values_list('day_of_week', flat=True).distinct()
+    
+    if len(existing_days) < 7:
+        # If any day is missing, generate the whole week to be safe and consistent
         rows = generate_week(per_day=min_per_day)
+        # Clear existing ones to prevent weird mixed states on fresh setup
+        DailyChallenge.objects.all().delete()
         DailyChallenge.objects.bulk_create([DailyChallenge(**r) for r in rows])
         return len(rows)
-
-    # Otherwise, top up days that are missing or underfilled.
-    existing_counts = (
-        DailyChallenge.objects
-        .filter(is_active=True)
-        .values("day_of_week")
-        .order_by("day_of_week")
-    )
-    counts = {d: 0 for d in range(7)}
-    for row in existing_counts:
-        counts[int(row["day_of_week"])] = counts.get(int(row["day_of_week"]), 0) + 1
-
-    # If the counts query above didn't aggregate (values only), do a real count per day.
-    for d in range(7):
-        counts[d] = DailyChallenge.objects.filter(is_active=True, day_of_week=d).count()
-
-    if all(v >= min_per_day for v in counts.values()):
-        return 0
-
-    generated = generate_week(per_day=min_per_day)
-    to_create: list[DailyChallenge] = []
-    for d in range(7):
-        need = max(0, min_per_day - counts.get(d, 0))
-        if need <= 0:
-            continue
-        candidates = [r for r in generated if r["day_of_week"] == d]
-        # Avoid exact duplicates by title within day.
-        existing_titles = set(
-            DailyChallenge.objects.filter(is_active=True, day_of_week=d).values_list("title", flat=True)
-        )
-        for r in candidates:
-            if need <= 0:
-                break
-            if r["title"] in existing_titles:
-                continue
-            to_create.append(DailyChallenge(**r))
-            existing_titles.add(r["title"])
-            need -= 1
-
-    if to_create:
-        DailyChallenge.objects.bulk_create(to_create)
-        created = len(to_create)
-    return created
+    
+    return 0
 

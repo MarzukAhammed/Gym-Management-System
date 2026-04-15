@@ -291,6 +291,7 @@ class DietPlan(models.Model):
 
 
 class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments", null=True, blank=True)
     full_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     amount = models.IntegerField()
@@ -348,24 +349,6 @@ class MemberMemory(models.Model):
         return f"Memory for {self.user.username if self.user else self.session_key}"
 
 class Exercise(models.Model):
-    DIFFICULTY_CHOICES = [
-        ('Beginner', 'Beginner'),
-        ('Intermediate', 'Intermediate'),
-        ('Expert', 'Expert'),
-    ]
-    
-    name = models.CharField(max_length=100)
-    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
-    description = models.TextField()
-    animation_url = models.URLField(help_text="Link to exercise GIF or Lottie animation")
-    calories_per_minute = models.IntegerField(default=5)
-    calories_per_rep = models.FloatField(default=0.5)
-
-    def __str__(self):
-        return f"{self.name} ({self.difficulty})"
-from django.db import models
-
-class Exercise(models.Model):
     MUSCLE_CHOICES = [
         ('Chest', 'Chest'),
         ('Back', 'Back'),
@@ -382,17 +365,11 @@ class Exercise(models.Model):
     ]
 
     name = models.CharField(max_length=100)
-    # Ensure this field exists for your intensity filtering
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='Beginner')
     muscle_group = models.CharField(max_length=50, choices=MUSCLE_CHOICES, default='Full Body')
-    
-    # Description for the exercises you mentioned (e.g., "Targets upper chest")
     description = models.TextField(blank=True, null=True)
-    
-    # URL or path for the exercise-specific GIF (e.g., a push-up animation)
-    animation_url = models.URLField(max_length=500, blank=True, null=True)
-    
-    # For calorie calculation
+    animation_url = models.URLField(max_length=500, blank=True, null=True, help_text="Link to exercise GIF or animation")
+    calories_per_minute = models.IntegerField(default=5)
     calories_per_rep = models.FloatField(default=0.1)
 
     def __str__(self):

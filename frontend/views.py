@@ -28,27 +28,18 @@ from .challenges import ensure_active_challenges
 
 def _user_has_verified_subscription(user):
     """
-    Subscription = user has a Member plan AND a verified Payment for that username
-    (optionally matching phone when available).
+    Subscription = user has a Member plan AND a verified Payment.
     """
     try:
         member = getattr(user, "member", None)
         if not member or not getattr(member, "plan", None):
             return False
 
-        payment_qs = Payment.objects.filter(verified=True, full_name__iexact=user.username)
-        phone = ""
-        try:
-            if getattr(member, "phone", None):
-                phone = member.phone
-            elif getattr(getattr(user, "profile", None), "phone", None):
-                phone = user.profile.phone
-        except Exception:
-            phone = ""
-
-        if phone:
-            return payment_qs.filter(phone=phone).exists()
-        return payment_qs.exists()
+        # Check for verified payment directly linked to user or matching username
+        return Payment.objects.filter(
+            models.Q(user=user) | models.Q(full_name__iexact=user.username),
+            verified=True
+        ).exists()
     except Exception:
         return False
 
@@ -184,17 +175,14 @@ def edit_profile(request):
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
     member = getattr(request.user, 'member', None)
-    payment_qs = Payment.objects.filter(verified=True, full_name__iexact=request.user.username)
-    user_phone = ""
-    if member and getattr(member, "phone", None):
-        user_phone = member.phone
-    elif profile and getattr(profile, "phone", None):
-        user_phone = profile.phone
-
-    if user_phone:
-        verified_payment = payment_qs.filter(phone=user_phone).exists()
-    else:
-        verified_payment = payment_qs.exists()
+    
+    # NEW logic: use the direct user link for payment verification.
+    # We still fallback to username-based match for legacy payments if needed,
+    # but the primary check is the user ForeignKey.
+    verified_payment = Payment.objects.filter(
+        models.Q(user=request.user) | models.Q(full_name__iexact=request.user.username),
+        verified=True
+    ).exists()
 
     def _resolve_plan_name(raw_plan_value):
         if not raw_plan_value:
@@ -211,15 +199,6 @@ def profile(request):
         return raw
 
     def _friendly_plan_name(raw_name):
-        if not raw_name:
-            return raw_name
-        n = raw_name.strip().lower()
-        if "basic" in n or "starter" in n:
-            return "Starter (Basic)"
-        if "standard" in n or "pro" in n:
-            return "Pro (Standard)"
-        if "premium" in n or "elite" in n:
-            return "Elite (Premium)"
         return raw_name
 
     clean_plan_name = _resolve_plan_name(member.plan) if member else None
@@ -483,11 +462,14 @@ def payment(request):
             messages.error(request, "Please fill all required payment details.")
             return redirect("payment")
 
-        # Use authenticated username as authoritative payment owner.
+        # Use authenticated user as authoritative payment owner.
+        user = None
         if request.user.is_authenticated:
-            reference_username = request.user.username
+            user = request.user
+            reference_username = user.username
 
         Payment.objects.create(
+            user=user,
             full_name=reference_username,
             phone=sender_number,
             amount=amount,

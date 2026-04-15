@@ -89,14 +89,6 @@ class JoinForm(forms.ModelForm):
 
     @staticmethod
     def _plan_label(plan):
-        title = (getattr(plan, "title", "") or "").strip().lower()
-        if "basic" in title or "starter" in title:
-            return "Starter (Basic)"
-        if "standard" in title or "pro" in title:
-            return "Pro (Standard)"
-        if "premium" in title or "elite" in title:
-            return "Elite (Premium)"
-        # Fallback for any other plan title
         return f"{plan.title} ({plan.duration})"
 
 class MemberUpdateForm(forms.ModelForm):

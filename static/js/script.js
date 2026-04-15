@@ -75,14 +75,12 @@ try {
         }
     }
 
-    // MixItUp (guarded) - keep for old grid + new daily challenge grid
+    // MixItUp (guarded) - keep for old grid
     if (typeof mixitup === "function") {
         if (document.querySelector(".class_down")) {
             mixitup('.class_down');
         }
-        if (document.querySelector(".challenge_grid")) {
-            mixitup('.challenge_grid');
-        }
+        // NOTE: .challenge_grid is handled in index.html to ensure current-day filtering.
     }
 
     // VenoBox (guarded)

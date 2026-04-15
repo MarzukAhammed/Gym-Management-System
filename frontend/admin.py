@@ -72,9 +72,38 @@ class PaymentAdmin(ActionAdmin):
     mark_received_button.short_description = "Payment Received"
 
     def mark_payment_received(self, request, queryset):
-        updated = queryset.update(verified=True)
-        self.message_user(request, f"{updated} payment(s) marked as received.")
+        from .models import Notification
+        updated = 0
+        for payment in queryset.filter(verified=False):
+            payment.verified = True
+            payment.save(update_fields=['verified'])
+            updated += 1
+            if payment.user:
+                Notification.objects.create(
+                    user=payment.user,
+                    level="success",
+                    text=f"✅ Your payment of {payment.amount} BDT has been verified. Welcome to our gym!",
+                    is_read=False,
+                )
+        self.message_user(request, f"{updated} payment(s) marked as received and users notified.")
     mark_payment_received.short_description = "Mark selected payments as received"
+
+    def save_model(self, request, obj, form, change):
+        from .models import Notification
+        
+        # Check if verified status is changing from False to True
+        if change:
+            old_obj = Payment.objects.filter(pk=obj.pk).first()
+            if old_obj and not old_obj.verified and obj.verified:
+                if obj.user:
+                    Notification.objects.create(
+                        user=obj.user,
+                        level="success",
+                        text=f"✅ Your payment of {obj.amount} BDT has been verified. Welcome to our gym!",
+                        is_read=False,
+                    )
+        
+        super().save_model(request, obj, form, change)
 
 @admin.register(Review)
 class ReviewAdmin(ActionAdmin):

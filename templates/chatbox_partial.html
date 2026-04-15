@@ -171,7 +171,7 @@
 #floating-cat-container.lolona-cross-settle {
     transform: translate3d(0, 0, 0) scale(1) !important;
     opacity: 1 !important;
-    transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease !important;
+    transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.2s ease !important;
     will-change: transform;
 }
 </style>
@@ -239,7 +239,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         inactivitySleepDelayMs: 38000, // no user activity -> sleep starts
         sleepPhaseMs: 6500,            // how long sleep gif stays before play gif
         playPhaseMs: 3000,             // how long play gif stays before idle
-        crossPageSettleFallbackMs: 1300 // failsafe cleanup for entrance transition
+        crossPageSettleFallbackMs: 6000 // failsafe cleanup for entrance transition (staying for 6s total)
     };
 
     function appendMessage(type, text) {
@@ -671,8 +671,12 @@ const chatUserName = "{{ user.username|default:'' }}";
 (function lolonaCrossPageTravel() {
     var STORAGE = "lolona_nav_internal";
     var EDGE = "lolona_nav_edge";
+    var PLAYED_KEY = "lolona_entrance_played_ever";
 
     document.addEventListener("click", function (e) {
+        // If it already played once ever, don't trigger it again
+        if (localStorage.getItem(PLAYED_KEY)) return;
+
         var a = e.target.closest && e.target.closest("a[href]");
         if (!a) return;
         var href = a.getAttribute("href");
@@ -693,6 +697,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         var catImg = document.getElementById("main-cat-img");
         if (!cat) return;
         if (sessionStorage.getItem(STORAGE) !== "1") return;
+        if (localStorage.getItem(PLAYED_KEY)) return;
         sessionStorage.removeItem(STORAGE);
         var edge = sessionStorage.getItem(EDGE) || "";
         sessionStorage.removeItem(EDGE);
@@ -721,13 +726,16 @@ const chatUserName = "{{ user.username|default:'' }}";
             if (catImg && catImg.dataset && catImg.dataset.idleSrc) {
                 catImg.src = catImg.dataset.idleSrc;
             }
+            // Mark as played so it never happens again for this user.
+            localStorage.setItem(PLAYED_KEY, "1");
         }
 
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
                 cat.style.willChange = "transform, opacity";
                 cat.classList.add("lolona-cross-settle");
-                cat.addEventListener("transitionend", cleanup, { once: true });
+                // Remove transitionend listener and just use the fallback timeout
+                // to ensure it stays as edgeHoldSrc for exactly crossPageSettleFallbackMs.
                 setTimeout(cleanup, LOLONA_CONFIG.crossPageSettleFallbackMs);
             });
         });

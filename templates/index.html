@@ -33,6 +33,18 @@
     #daily-challenge .challenge-card.locked {
       background: rgba(255,255,255,0.05);
       box-shadow: none;
+      border-color: rgba(255,255,255,0.05);
+      position: relative;
+    }
+    #daily-challenge .challenge-card.locked::after {
+      content: "\f023"; /* fa-lock */
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: rgba(255,255,255,0.2);
+      font-size: 20px;
     }
     #daily-challenge .filter-btn.btn-outline-light {
       border-color: rgba(255,255,255,0.22);
@@ -46,6 +58,9 @@
       border-color: #fff;
       color: #0b0f1a;
       font-weight: 700;
+    }
+    .challenge_grid.loading .mix {
+      display: none;
     }
   </style>
 {% endblock %}
@@ -399,19 +414,19 @@
     </div>
 
     <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-0">Mon</button>
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-1">Tue</button>
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-2">Wed</button>
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-3">Thu</button>
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-4">Fri</button>
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-5">Sat</button>
-      <button type="button" class="btn btn-outline-light btn-sm filter-btn" data-filter=".day-6">Sun</button>
-      <button type="button" class="btn btn-light btn-sm filter-btn" data-filter="all">All</button>
+      <button type="button" class="btn {% if today_idx == 0 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-0" data-filter=".day-0">Mon</button>
+      <button type="button" class="btn {% if today_idx == 1 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-1" data-filter=".day-1">Tue</button>
+      <button type="button" class="btn {% if today_idx == 2 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-2" data-filter=".day-2">Wed</button>
+      <button type="button" class="btn {% if today_idx == 3 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-3" data-filter=".day-3">Thu</button>
+      <button type="button" class="btn {% if today_idx == 4 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-4" data-filter=".day-4">Fri</button>
+      <button type="button" class="btn {% if today_idx == 5 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-5" data-filter=".day-5">Sat</button>
+      <button type="button" class="btn {% if today_idx == 6 %}btn-light{% else %}btn-outline-light{% endif %} btn-sm filter-btn" id="btn-day-6" data-filter=".day-6">Sun</button>
     </div>
 
-    <div class="row g-3 mt-4 challenge_grid">
+    <div class="row g-3 mt-4 challenge_grid loading">
       {% for c in all_week_challenges %}
-        <div class="col-12 col-md-6 col-lg-4 mix day-{{ c.day_of_week }}">
+        <div class="col-12 col-md-6 col-lg-4 mix day-{{ c.day_of_week }}" 
+             style="display: {% if c.day_of_week == today_idx %}block{% else %}none{% endif %};">
           {% if c.day_of_week == today_idx and user.is_authenticated %}
             <a href="{% url 'daily_challenge_record' c.id %}" class="d-block text-decoration-none challenge-card">
               <div class="d-flex justify-content-between align-items-start gap-3">
@@ -470,7 +485,6 @@
   <script src="{% static 'js/venobox.min.js' %}"></script>
   <script src="{% static 'js/script.js' %}"></script>
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-CSS3-Powered-Flip-Animations-justFlipIt/js/jquery.justflipit.min.js"></script>
   <script src="https://unpkg.com/@simhub2/justflipit/dist/justFlipIt-modern.min.js"></script>
   <script>
@@ -491,6 +505,29 @@
       if (typeof justFlipIt === "function") {
         justFlipIt('.flip-card', { Click: true });
       }
+
+      // Auto-filter challenges to current day
+      const todayIdx = {{ today_idx }};
+      $('.challenge_grid').removeClass('loading');
+      try {
+        const mixer = mixitup('.challenge_grid', {
+          load: {
+            filter: '.day-' + todayIdx
+          },
+          animation: {
+            duration: 300
+          }
+        });
+      } catch (e) {
+        console.error("MixItUp failed to load, falling back to basic display");
+        // Fallback: show current day manually if mixitup fails
+        $('.mix.day-' + todayIdx).show();
+      }
+
+      $('.filter-btn').on('click', function() {
+        $('.filter-btn').removeClass('btn-light').addClass('btn-outline-light');
+        $(this).removeClass('btn-outline-light').addClass('btn-light');
+      });
     });
   </script>
   <script>
