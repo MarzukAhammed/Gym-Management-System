@@ -87,9 +87,9 @@
       <div class="head">
         <div>
           <h3 class="title">{{ trainer.name }} <span class="badge-soft">Bookings: {{ booking_count }}</span></h3>
-          <div class="sub">{{ trainer.specialty }} · Trainer Tools</div>
+          <div class="sub">{{ trainer.specialty }} · <span data-i18n="Trainer Tools">Trainer Tools</span></div>
         </div>
-        <a class="btn-outline-soft" href="{% url 'trainer_logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Trainer Logout</a>
+        <a class="btn-outline-soft" href="{% url 'trainer_logout' %}"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="Trainer Logout">Trainer Logout</span></a>
       </div>
 
       <div class="p-3">
@@ -103,15 +103,15 @@
           <div class="col-12 col-lg-5">
             <div class="p-3" style="border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; background: rgba(255,255,255,0.03);">
               <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
-                <strong>Create Live Slot</strong>
-                <span class="muted" style="font-size: 12px;">Users will book from your slots</span>
+                <strong data-i18n="Create Live Slot">Create Live Slot</strong>
+                <span class="muted" style="font-size: 12px;" data-i18n="Users will book from your slots">Users will book from your slots</span>
               </div>
               <form method="post" action="{% url 'trainer_create_slot' %}">
                 {% csrf_token %}
                 <div class="mb-2">
                   <input type="datetime-local" name="session_time" class="form-control" required>
                 </div>
-                <button class="btn-premium w-100" type="submit"><i class="fa-solid fa-plus"></i> Add Slot</button>
+                <button class="btn-premium w-100" type="submit"><i class="fa-solid fa-plus"></i> <span data-i18n="Add Slot">Add Slot</span></button>
               </form>
             </div>
           </div>
@@ -119,16 +119,16 @@
           <div class="col-12 col-lg-7">
             <div class="p-3" style="border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; background: rgba(255,255,255,0.03);">
               <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                <strong>Upcoming Slots</strong>
-                <span class="muted" style="font-size: 12px;">Activate when you’re ready</span>
+                <strong data-i18n="Upcoming Slots">Upcoming Slots</strong>
+                <span class="muted" style="font-size: 12px;" data-i18n="Activate when you're ready">Activate when you're ready</span>
               </div>
               <div class="mt-2">
                 {% for s in upcoming %}
                   <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap py-2" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
                     <div>
-                      <div><strong>{{ s.session_time|date:"M d, Y - h:i A" }}</strong></div>
+                      <div><strong data-i18n="Session Time">{{ s.session_time|date:"M d, Y - h:i A" }}</strong></div>
                       <div class="muted" style="font-size: 12px;">
-                        {% if s.is_booked %}Booked by: <strong>{{ s.booked_by.username }}</strong>{% else %}Not booked yet{% endif %}
+                        {% if s.is_booked %}<span data-i18n="Booked by:">Booked by:</span> <strong>{{ s.booked_by.username }}</strong>{% else %}<span data-i18n="Not booked yet">Not booked yet</span>{% endif %}
                       </div>
                     </div>
                     <div class="d-flex gap-2">
@@ -136,16 +136,16 @@
                         {% csrf_token %}
                         <input type="hidden" name="is_active" value="{% if s.is_active %}false{% else %}true{% endif %}">
                         <button class="{% if s.is_active %}btn-outline-soft{% else %}btn-premium{% endif %}" type="submit" style="padding:8px 10px; font-size: 13px;">
-                          {% if s.is_active %}<i class="fa-regular fa-circle-pause"></i> Deactivate{% else %}<i class="fa-solid fa-circle-play"></i> Activate{% endif %}
+                          {% if s.is_active %}<i class="fa-regular fa-circle-pause"></i> <span data-i18n="Deactivate">Deactivate</span>{% else %}<i class="fa-solid fa-circle-play"></i> <span data-i18n="Activate">Activate</span>{% endif %}
                         </button>
                       </form>
                       <a class="btn-outline-soft" href="{% url 'trainer_start_session' s.id %}" style="padding:8px 10px; font-size: 13px;">
-                        <i class="fa-solid fa-video"></i> Start Session
+                        <i class="fa-solid fa-video"></i> <span data-i18n="Start Session">Start Session</span>
                       </a>
                     </div>
                   </div>
                 {% empty %}
-                  <div class="muted mt-2">No upcoming slots yet.</div>
+                  <div class="muted mt-2" data-i18n="No upcoming slots yet.">No upcoming slots yet.</div>
                 {% endfor %}
               </div>
             </div>
@@ -157,18 +157,18 @@
     <div class="glass">
       <div class="head">
         <div>
-          <h4 class="title">All Slots</h4>
-          <div class="sub">See bookings and manage status</div>
+          <h4 class="title" data-i18n="All Slots">All Slots</h4>
+          <div class="sub" data-i18n="See bookings and manage status">See bookings and manage status</div>
         </div>
       </div>
       <div class="table-responsive">
         <table class="table table-dark table-darkish mb-0">
           <thead>
             <tr>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Booked By</th>
-              <th style="width: 220px;">Actions</th>
+              <th data-i18n="Time">Time</th>
+              <th data-i18n="Status">Status</th>
+              <th data-i18n="Booked By">Booked By</th>
+              <th style="width: 220px;" data-i18n="Actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -176,8 +176,8 @@
               <tr>
                 <td>{{ s.session_time|date:"M d, Y - h:i A" }}</td>
                 <td>
-                  {% if s.is_active %}<span class="badge-soft">Active</span>{% else %}<span class="badge-soft" style="opacity:0.7;">Inactive</span>{% endif %}
-                  {% if s.is_booked %}<span class="badge-soft" style="border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08);">Booked</span>{% endif %}
+                  {% if s.is_active %}<span class="badge-soft" data-i18n="Active">Active</span>{% else %}<span class="badge-soft" style="opacity:0.7;" data-i18n="Inactive">Inactive</span>{% endif %}
+                  {% if s.is_booked %}<span class="badge-soft" style="border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08);" data-i18n="Booked">Booked</span>{% endif %}
                 </td>
                 <td>{% if s.booked_by %}{{ s.booked_by.username }}{% else %}<span class="muted">—</span>{% endif %}</td>
                 <td class="d-flex gap-2">
@@ -185,16 +185,16 @@
                     {% csrf_token %}
                     <input type="hidden" name="is_active" value="{% if s.is_active %}false{% else %}true{% endif %}">
                     <button class="btn-outline-soft" type="submit" style="padding:8px 10px; font-size: 13px;">
-                      {% if s.is_active %}Deactivate{% else %}Activate{% endif %}
+                      {% if s.is_active %}<span data-i18n="Deactivate">Deactivate</span>{% else %}<span data-i18n="Activate">Activate</span>{% endif %}
                     </button>
                   </form>
                   <a class="btn-outline-soft" href="{% url 'trainer_start_session' s.id %}" style="padding:8px 10px; font-size: 13px;">
-                    Start
+                    <span data-i18n="Start">Start</span>
                   </a>
                 </td>
               </tr>
             {% empty %}
-              <tr><td colspan="4" class="muted">No slots.</td></tr>
+              <tr><td colspan="4" class="muted" data-i18n="No slots.">No slots.</td></tr>
             {% endfor %}
           </tbody>
         </table>

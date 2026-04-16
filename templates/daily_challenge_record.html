@@ -11,7 +11,7 @@
         <h3 class="fw-bold mb-1">{{ challenge.title }}</h3>
         <div class="text-white-50" style="font-size: 13px;">{{ challenge.instruction }}</div>
       </div>
-      <a href="{% url 'home' %}" class="btn btn-outline-light">Back</a>
+      <a href="{% url 'home' %}" class="btn btn-outline-light" data-i18n="Back">Back</a>
     </div>
 
     <hr class="border-secondary my-4">
@@ -19,28 +19,28 @@
     <div class="row g-3">
       <div class="col-12 col-lg-7">
         <div class="p-3" style="border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.04);">
-          <div class="fw-bold mb-2">Record workout proof</div>
+          <div class="fw-bold mb-2" data-i18n="Record workout proof">Record workout proof</div>
           <video id="preview" playsinline autoplay muted style="width:100%; border-radius: 12px; background:#000;"></video>
           <video id="playback" controls style="display:none; width:100%; margin-top: 10px; border-radius: 12px; background:#000;"></video>
 
           <div class="d-flex gap-2 flex-wrap mt-3">
-            <button id="btnStart" class="btn btn-primary">Start Recording</button>
-            <button id="btnStop" class="btn btn-warning" disabled>Stop</button>
-            <button id="btnSubmit" class="btn btn-success" disabled>Upload & Submit</button>
+            <button id="btnStart" class="btn btn-primary" data-i18n="Start Recording">Start Recording</button>
+            <button id="btnStop" class="btn btn-warning" disabled data-i18n="Stop">Stop</button>
+            <button id="btnSubmit" class="btn btn-success" disabled data-i18n="Upload & Submit">Upload & Submit</button>
           </div>
-          <div id="status" class="text-white-50 mt-2" style="font-size: 13px;">Ready.</div>
+          <div id="status" class="text-white-50 mt-2" style="font-size: 13px;" data-i18n="Ready.">Ready.</div>
         </div>
       </div>
       <div class="col-12 col-lg-5">
         <div class="p-3" style="border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.04);">
-          <div class="fw-bold mb-2">Rules</div>
+          <div class="fw-bold mb-2" data-i18n="Rules">Rules</div>
           <ul class="text-white-75" style="font-size: 13px;">
-            <li>Record yourself clearly performing the challenge.</li>
-            <li>Keep the camera stable and well-lit.</li>
-            <li>Upload after recording to update your streak and earn coins.</li>
+            <li data-i18n="Record yourself clearly performing the challenge.">Record yourself clearly performing the challenge.</li>
+            <li data-i18n="Keep the camera stable and well-lit.">Keep the camera stable and well-lit.</li>
+            <li data-i18n="Upload after recording to update your streak and earn coins.">Upload after recording to update your streak and earn coins.</li>
           </ul>
           <div class="mt-3">
-            <span class="badge bg-info text-dark">Reward: {{ challenge.coins_reward }} Gym Coins</span>
+            <span class="badge bg-info text-dark"><span data-i18n="Reward:">Reward:</span> {{ challenge.coins_reward }} <span data-i18n="Gym Coins">Gym Coins</span></span>
           </div>
         </div>
       </div>
@@ -66,7 +66,32 @@
     let chunks = [];
     let recordedBlob = null;
 
-    function setStatus(t) { status.textContent = t; }
+    function setStatus(t) {
+      status.textContent = t;
+      status.setAttribute('data-i18n', t);
+      const lang = localStorage.getItem('language') || 'en';
+      const trans = {
+        en: {
+          "Ready.": "Ready.",
+          "Recording ready to upload.": "Recording ready to upload.",
+          "Recording...": "Recording...",
+          "Camera error. Please allow camera/mic permissions.": "Camera error. Please allow camera/mic permissions.",
+          "Uploading...": "Uploading...",
+          "Upload failed.": "Upload failed."
+        },
+        bn: {
+          "Ready.": "প্রস্তুত।",
+          "Recording ready to upload.": "রেকর্ডিং আপলোডের জন্য প্রস্তুত।",
+          "Recording...": "রেকর্ডিং হচ্ছে...",
+          "Camera error. Please allow camera/mic permissions.": "ক্যামেরা ত্রুটি। অনুগ্রহ করে ক্যামেরা/মাইক অনুমতি দিন।",
+          "Uploading...": "আপলোড হচ্ছে...",
+          "Upload failed.": "আপলোড ব্যর্থ হয়েছে।"
+        }
+      };
+      if (trans[lang] && trans[lang][t]) {
+        status.textContent = trans[lang][t];
+      }
+    }
 
     async function initCamera() {
       stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -88,14 +113,14 @@
           playback.src = URL.createObjectURL(recordedBlob);
           playback.style.display = "block";
           btnSubmit.disabled = false;
-          setStatus("Recording ready to upload.");
+          setStatus("Recording ready to upload."); // data-i18n handled in JS
         };
         recorder.start();
         btnStart.disabled = true;
         btnStop.disabled = false;
-        setStatus("Recording...");
+        setStatus("Recording..."); // data-i18n handled in JS
       } catch (e) {
-        setStatus("Camera error. Please allow camera/mic permissions.");
+        setStatus("Camera error. Please allow camera/mic permissions."); // data-i18n handled in JS
       }
     });
 
@@ -110,7 +135,7 @@
     btnSubmit.addEventListener("click", async () => {
       if (!recordedBlob) return;
       btnSubmit.disabled = true;
-      setStatus("Uploading...");
+      setStatus("Uploading..."); // data-i18n handled in JS
 
       const form = new FormData();
       form.append("video", recordedBlob, "proof.webm");
@@ -122,15 +147,15 @@
       });
       const data = await res.json();
       if (!res.ok || data.status !== "success") {
-        setStatus(data.message || "Upload failed.");
+        setStatus(data.message || "Upload failed."); // data-i18n handled in JS
         btnSubmit.disabled = false;
         return;
       }
       const pending = Number(data.coins_pending || 0);
       if (pending > 0) {
-        setStatus(`Submitted! +${pending} coins pending admin approval. Streak: ${data.current_streak}.`);
+        setStatus(`Submitted! +${pending} coins pending admin approval. Streak: ${data.current_streak}.`); // data-i18n handled in JS
       } else {
-        setStatus(`Submitted! Streak: ${data.current_streak}.`);
+        setStatus(`Submitted! Streak: ${data.current_streak}.`); // data-i18n handled in JS
       }
       setTimeout(() => { window.location.href = "{% url 'home' %}"; }, 1100);
     });

@@ -14,7 +14,7 @@ def detect_language_mode(user_text):
     or clear English-only, so SmartCoach can match reply language.
     """
     if not user_text or not str(user_text).strip():
-        return "banglish"
+        return "english"
 
     t = str(user_text).strip()
     tl = t.lower()
@@ -37,23 +37,8 @@ def detect_language_mode(user_text):
     if any(m in tl for m in banglish_markers):
         return "banglish"
 
-    # Mostly English: longer message with common English question phrasing
-    words = re.findall(r"[A-Za-z]+", tl)
-    if len(words) >= 4:
-        english_phrases = (
-            "what ", "how ", "why ", "when ", "where ", "can you", "could you", "please",
-            "i want", "i need", "tell me", "give me", "suggest", "explain", "workout",
-            "routine", "diet plan", "protein", "calories", "should i", "do you",
-            "hello", "hi ", "hey ", "thanks", "thank you",
-        )
-        if any(p in tl for p in english_phrases):
-            return "english"
-
-    # Short English greetings / one-liners
-    if tl in ("hi", "hello", "hey", "thanks", "thank you", "ok", "okay", "yes", "no"):
-        return "english"
-
-    return "banglish"
+    # Default to English for everything else - only switch to Banglish if we detect Banglish markers
+    return "english"
 
 
 class SmartCoach:

@@ -50,23 +50,23 @@
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
       <div>
         <div class="text-white-50" style="font-size: 13px; letter-spacing: .35px;">M-POWER FITNESS LAB</div>
-        <h2 class="mt-2 mb-2 fw-bold">{% trans "Trainer Reviews" %}</h2>
-        <div class="text-white-50">{% trans "Review our trainers and help members choose the best coach." %}</div>
+        <h2 class="mt-2 mb-2 fw-bold" data-i18n="Trainer Reviews">{% trans "Trainer Reviews" %}</h2>
+        <div class="text-white-50" data-i18n="Review our trainers and help members choose the best coach.">{% trans "Review our trainers and help members choose the best coach." %}</div>
       </div>
       <div class="d-flex gap-2 flex-wrap">
         <form method="get" class="d-flex gap-2">
           <select name="trainer" class="form-control" style="min-width: 240px;">
-            <option value="">{% trans "All trainers" %}</option>
+            <option value="" data-i18n="All trainers">{% trans "All trainers" %}</option>
             {% for t in trainers %}
               <option value="{{ t.id }}" {% if active_trainer_id == t.id %}selected{% endif %}>{{ t.name }}</option>
             {% endfor %}
           </select>
-          <button class="btn btn-outline-light" type="submit">{% trans "Filter" %}</button>
+          <button class="btn btn-outline-light" type="submit" data-i18n="Filter">{% trans "Filter" %}</button>
         </form>
         {% if user.is_authenticated %}
-          <a href="{% url 'add_review' %}" class="btn btn-cta">{% trans "Add Trainer Review" %}</a>
+          <a href="{% url 'add_review' %}" class="btn btn-cta" data-i18n="Add Trainer Review">{% trans "Add Trainer Review" %}</a>
         {% else %}
-          <a href="{% url 'login' %}" class="btn btn-outline-light" style="border-radius:999px;padding:12px 16px;">{% trans "Login to review" %}</a>
+          <a href="{% url 'login' %}" class="btn btn-outline-light" style="border-radius:999px;padding:12px 16px;" data-i18n="Login to review">{% trans "Login to review" %}</a>
         {% endif %}
       </div>
     </div>
@@ -106,15 +106,15 @@
             “{{ review.comment }}”
           </div>
           <div class="mt-3 text-white-50" style="font-size: 12px;">
-            {% trans "By" %} <span class="text-white">{{ review.user.username }}</span>
+            <span data-i18n="By">{% trans "By" %}</span> <span class="text-white">{{ review.user.username }}</span>
           </div>
         </div>
       </div>
     {% empty %}
       <div class="col-12">
         <div class="reviews-hero text-center p-5">
-          <h4 class="mb-2">{% trans "No trainer reviews yet." %}</h4>
-          <div class="text-white-50">{% trans "Be the first to review a trainer." %}</div>
+          <h4 class="mb-2" data-i18n="No trainer reviews yet.">{% trans "No trainer reviews yet." %}</h4>
+          <div class="text-white-50" data-i18n="Be the first to review a trainer.">{% trans "Be the first to review a trainer." %}</div>
         </div>
       </div>
     {% endfor %}

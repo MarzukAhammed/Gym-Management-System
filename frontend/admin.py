@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.urls import reverse
 from .models import Plan, Trainer, Member, Review, TrainerReview, Contact, GalleryMember, SuccessStory, Payment, TrainingSession, Notification, TrainingSlot, DailyChallenge, ChallengeSubmission, UserChallengeProfile, ChallengeVideoComment
-from .forms import TrainerCreateForm
+from .forms import TrainerCreateForm, TrainerAdminForm
 
 admin.site.unregister(Group)
 
@@ -38,16 +38,13 @@ admin.ModelAdmin.Media = type('Media', (), {
 
 @admin.register(Trainer)
 class TrainerAdmin(ActionAdmin):
-    list_display = ('name', 'specialty', 'delete_button') # ID bad diye 'name'
-    search_fields = ('name', 'specialty') # Protita section-e search bar
-    add_form = TrainerCreateForm
+    list_display = ('name', 'specialty', 'get_email', 'delete_button') # ID bad diye 'name'
+    search_fields = ('name', 'specialty', 'user__email') # Protita section-e search bar
+    form = TrainerAdminForm
 
-    def get_form(self, request, obj=None, **kwargs):
-        defaults = {}
-        if obj is None:
-            defaults["form"] = self.add_form
-        defaults.update(kwargs)
-        return super().get_form(request, obj, **defaults)
+    def get_email(self, obj):
+        return obj.user.email if obj.user else "No Email"
+    get_email.short_description = 'Email'
 
 @admin.register(Plan)
 class PlanAdmin(ActionAdmin):
@@ -105,11 +102,6 @@ class PaymentAdmin(ActionAdmin):
         
         super().save_model(request, obj, form, change)
 
-@admin.register(Review)
-class ReviewAdmin(ActionAdmin):
-    list_display = ("user", "rating", "delete_button")
-    search_fields = ("user__username", "comment")
-
 @admin.register(GalleryMember)
 class GalleryMemberAdmin(ActionAdmin):
     list_display = ('id', 'delete_button') 
@@ -120,39 +112,6 @@ class ContactAdmin(ActionAdmin):
     # Subject field-e error chilo tai ota bad deya holo
     list_display = ('name', 'email', 'delete_button') 
     search_fields = ('name', 'email')
-
-@admin.register(SuccessStory)
-class SuccessStoryAdmin(ActionAdmin):
-    list_display = ('title', 'delete_button')
-    search_fields = ('title',)
-
-@admin.register(TrainerReview)
-class TrainerReviewAdmin(ActionAdmin):
-    list_display = ("trainer", "user", "rating", "created_at", "delete_button")
-    search_fields = ("trainer__name", "user__username", "comment")
-    list_filter = ("rating", "trainer")
-
-
-@admin.register(TrainingSession)
-class TrainingSessionAdmin(ActionAdmin):
-    list_display = ("trainer", "user", "session_time", "is_active", "delete_button")
-    search_fields = ("trainer__name", "user__username", "meeting_link")
-    list_filter = ("is_active", "trainer")
-
-
-@admin.register(TrainingSlot)
-class TrainingSlotAdmin(ActionAdmin):
-    list_display = ("trainer", "session_time", "is_active", "is_booked", "booked_by", "delete_button")
-    search_fields = ("trainer__name", "meeting_link", "booked_by__username")
-    list_filter = ("is_active", "is_booked", "trainer")
-
-
-@admin.register(Notification)
-class NotificationAdmin(ActionAdmin):
-    list_display = ("user", "level", "is_read", "created_at", "delete_button")
-    search_fields = ("user__username", "text")
-    list_filter = ("level", "is_read")
-
 
 @admin.register(DailyChallenge)
 class DailyChallengeAdmin(ActionAdmin):
@@ -282,16 +241,3 @@ class ChallengeSubmissionAdmin(ActionAdmin):
 
             obj.coins_approved_at = None
             obj.save(update_fields=["coins_approved_at"])
-
-
-@admin.register(UserChallengeProfile)
-class UserChallengeProfileAdmin(ActionAdmin):
-    list_display = ("user", "current_streak", "gym_coins", "last_completed_date", "delete_button")
-    search_fields = ("user__username",)
-
-
-@admin.register(ChallengeVideoComment)
-class ChallengeVideoCommentAdmin(ActionAdmin):
-    list_display = ("submission", "user", "created_at", "delete_button")
-    search_fields = ("user__username", "text")
-    list_filter = ("created_at",)

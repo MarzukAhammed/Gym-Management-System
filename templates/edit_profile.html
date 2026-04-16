@@ -1,8 +1,7 @@
+{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
-{% include "navbar.html" %}
-
 <style>
 .profile-container {
     max-width: 900px;
@@ -32,80 +31,83 @@ label { font-weight:600; margin-bottom:5px; color: #00ff99; } /* Subtle color fo
 
 <div class="profile-container">
 
-    <h2 class="text-center mb-4">✨ Edit Full Profile</h2>
+    <h2 class="text-center mb-4" data-i18n="✨ Edit Full Profile">✨ Edit Full Profile</h2>
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <label>Full Name</label>
+        <label data-i18n="Full Name">Full Name</label>
         <input type="text" name="name" value="{{ request.user.get_full_name }}" class="custom-input">
 
-        <label>Email</label>
+        <label data-i18n="Email">Email</label>
         <input type="email" name="email" value="{{ request.user.email }}" class="custom-input">
 
         <div class="row">
             <div class="col-md-6">
-                <label>Phone</label>
+                <label data-i18n="Phone">Phone</label>
                 <input type="text" name="phone" value="{{ profile.phone }}" class="custom-input">
             </div>
 
             <div class="col-md-6">
-                <label>Date of Birth</label>
+                <label data-i18n="Date of Birth">Date of Birth</label>
                 <input type="date" name="date_of_birth" value="{{ profile.date_of_birth }}" class="custom-input">
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <label>Weight (kg)</label>
+                <label data-i18n="Weight (kg)">Weight (kg)</label>
                 <input type="number" step="0.1" name="weight" value="{{ profile.weight }}" class="custom-input" placeholder="e.g. 75.5">
             </div>
 
             <div class="col-md-6">
-                <label>Height (cm)</label>
+                <label data-i18n="Height (cm)">Height (cm)</label>
                 <input type="number" step="0.1" name="height" value="{{ profile.height }}" class="custom-input" placeholder="e.g. 175.0">
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <label>Age</label>
+                <label data-i18n="Age">Age</label>
                 <input type="number" name="age" value="{{ profile.age }}" class="custom-input">
             </div>
 
             <div class="col-md-6">
-                <label>Gender</label>
+                <label data-i18n="Gender">Gender</label>
                 <select name="gender" class="custom-select">
-                    <option value="">Select</option>
-                    <option value="male" {% if profile.gender|lower == "male" %}selected{% endif %}>Male</option>
-                    <option value="female" {% if profile.gender|lower == "female" %}selected{% endif %}>Female</option>
-                    <option value="other" {% if profile.gender|lower == "other" %}selected{% endif %}>Other</option>
+                    <option value="" data-i18n="Select">Select</option>
+                    <option value="male" {% if profile.gender|lower == "male" %}selected{% endif %} data-i18n="Male">Male</option>
+                    <option value="female" {% if profile.gender|lower == "female" %}selected{% endif %} data-i18n="Female">Female</option>
+                    <option value="other" {% if profile.gender|lower == "other" %}selected{% endif %} data-i18n="Other">Other</option>
                 </select>
             </div>
         </div>
 
-        <label>Fitness Goal / Plan</label>
+        <label data-i18n="Fitness Goal / Plan">Fitness Goal / Plan</label>
         <input type="text" name="fitness_goal" value="{{ profile.fitness_goal }}" class="custom-input">
 
-        <label>Facebook</label>
+        <label data-i18n="Facebook">Facebook</label>
         <input type="text" name="facebook" value="{{ profile.facebook }}" class="custom-input">
 
-        <label>Instagram</label>
+        <label data-i18n="Instagram">Instagram</label>
         <input type="text" name="instagram" value="{{ profile.instagram }}" class="custom-input">
 
-        <label>Address</label>
+        <label data-i18n="Address">Address</label>
         <textarea name="address" class="custom-input">{{ profile.address }}</textarea>
 
-        <label>Bio</label>
+        <label data-i18n="Bio">Bio</label>
         <textarea name="bio" class="custom-input">{{ profile.bio }}</textarea>
 
-        <label>Profile Photo</label>
+        <label data-i18n="Profile Photo">Profile Photo</label>
         <input type="file" name="photo" class="custom-input">
 
-        <button type="submit" class="custom-btn">Save Changes</button>
+        <button type="submit" class="custom-btn" data-i18n="Save Changes">Save Changes</button>
 
     </form>
 
 </div>
 {% include "chatbox_partial.html" %}
+{% endblock %}
+
+{% block footer %}
 {% endblock %}

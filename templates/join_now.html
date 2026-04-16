@@ -93,8 +93,8 @@
 <div class="join-shell">
   <div class="join-card">
     <div class="join-head">
-      <h2>Join Premium Membership</h2>
-      <p>Pick your plan and complete your member details.</p>
+      <h2 data-i18n="Join Premium Membership">Join Premium Membership</h2>
+      <p data-i18n="Pick your plan and complete your member details.">Pick your plan and complete your member details.</p>
     </div>
     <div class="join-body">
       {% if messages %}
@@ -110,24 +110,24 @@
         {% csrf_token %}
         <div class="row g-3">
           <div class="col-12">
-            <label for="id_plan" class="form-label">Select Plan</label>
+            <label for="id_plan" class="form-label" data-i18n="Select Plan">Select Plan</label>
             {{ form.plan }}
           </div>
           <div class="col-md-6">
-            <label for="id_phone" class="form-label">Phone Number</label>
+            <label for="id_phone" class="form-label" data-i18n="Phone Number">Phone Number</label>
             {{ form.phone }}
           </div>
           <div class="col-md-6">
-            <label for="id_email" class="form-label">Email</label>
+            <label for="id_email" class="form-label" data-i18n="Email">Email</label>
             {{ form.email }}
           </div>
           <div class="col-12">
-            <label for="id_address" class="form-label">Address</label>
+            <label for="id_address" class="form-label" data-i18n="Address">Address</label>
             {{ form.address }}
           </div>
           <div class="col-12">
-            <button type="submit" class="btn btn-join w-100">Continue Membership</button>
-            <p class="muted-note mt-2 mb-0">You can complete payment after membership submission.</p>
+            <button type="submit" class="btn btn-join w-100" data-i18n="Continue Membership">Continue Membership</button>
+            <p class="muted-note mt-2 mb-0" data-i18n="You can complete payment after membership submission.">You can complete payment after membership submission.</p>
           </div>
         </div>
       </form>
@@ -151,23 +151,6 @@
 </div>
 
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-<a href="{% url 'home' %}" 
-   style="
-     position: fixed;
-     bottom: 20px;
-     right: 20px;
-     background:#007bff;
-     padding:12px 18px;
-     border-radius: 50px;
-     color:white;
-     font-weight:bold;
-     text-decoration:none;
-     font-size:16px;
-     z-index: 9999;
-     box-shadow:0 4px 8px rgba(0,0,0,0.3);
-   ">
-   🏠 Home
-</a>
 {% include "chatbox_partial.html" %}
 </body>
 </html>

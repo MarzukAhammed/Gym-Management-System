@@ -61,20 +61,20 @@
     <div class="glass">
       <div class="head">
         <div>
-          <h4 class="title">Live Room</h4>
+          <h4 class="title" data-i18n="Live Room">Live Room</h4>
           <div class="sub">
-            Slot: {{ slot.session_time|date:"M d, Y - h:i A" }} ·
-            {% if slot.is_booked %}Booked by <strong>{{ slot.booked_by.username }}</strong>{% else %}Not booked yet{% endif %}
+            <span data-i18n="Slot:">Slot:</span> {{ slot.session_time|date:"M d, Y - h:i A" }} ·
+            {% if slot.is_booked %}<span data-i18n="Booked by">Booked by</span> <strong>{{ slot.booked_by.username }}</strong>{% else %}<span data-i18n="Not booked yet">Not booked yet</span>{% endif %}
           </div>
         </div>
         <a class="btn-outline-soft" href="{% url 'trainer_dashboard' %}">
-          <i class="fa-solid fa-arrow-left"></i> Back
+          <i class="fa-solid fa-arrow-left"></i> <span data-i18n="Back">Back</span>
         </a>
       </div>
 
       <div class="p-3">
         <div class="mb-2 text-white-50" style="font-size: 12px;">
-          Meeting: <code>{{ slot.meeting_link }}</code>
+          <span data-i18n="Meeting:">Meeting:</span> <code>{{ slot.meeting_link }}</code>
         </div>
         <div id="jitsi-container"></div>
       </div>

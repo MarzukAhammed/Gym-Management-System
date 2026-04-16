@@ -6,6 +6,44 @@ from .models import Contact
 from .models import Review
 
 
+class TrainerAdminForm(forms.ModelForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "form-control"}))
+    password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={"class": "form-control"}), help_text="Leave blank to keep current password")
+
+    class Meta:
+        model = Trainer
+        fields = ["name", "specialty", "bio", "photo", "facebook", "twitter", "linkedin"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.user:
+            self.fields["email"].initial = self.instance.user.email
+
+    def save(self, commit=True):
+        trainer = super().save(commit=False)
+        email = self.cleaned_data["email"]
+        password = self.cleaned_data.get("password")
+
+        if trainer.user:
+            user = trainer.user
+            user.email = email
+            if password:
+                user.set_password(password)
+            user.save()
+        else:
+            username = email.split("@")[0]
+            base = username
+            i = 1
+            while User.objects.filter(username=username).exists():
+                i += 1
+                username = f"{base}{i}"
+            user = User.objects.create_user(username=username, email=email, password=password)
+            trainer.user = user
+
+        if commit:
+            trainer.save()
+        return trainer
+
 class TrainerCreateForm(forms.ModelForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "form-control"}))
     password1 = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control"}))

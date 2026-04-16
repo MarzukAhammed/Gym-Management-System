@@ -1,11 +1,11 @@
 
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Gallery</title>
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <style>
+
+{% block title %}Gallery | M-Power Fitness Lab{% endblock %}
+
+{% block extra_css %}
+<style>
         body {
             background: #f5f6fa;
         }
@@ -40,12 +40,11 @@
             letter-spacing: 0.4px;
         }
     </style>
-</head>
-<body>
-{% include "navbar.html" %}
+{% endblock %}
 
+{% block content %}
 <div class="container mt-5">
-    <h2 class="text-center fw-bold mb-4">🏋️ Our Gym Gallery</h2>
+    <h2 class="text-center fw-bold mb-4" data-i18n="🏋️ Our Gym Gallery">🏋️ Our Gym Gallery</h2>
 
     <div class="row">
         {% for member in members %}
@@ -58,28 +57,10 @@
             </a>
         </div>
         {% empty %}
-        <p class="text-center">No gallery items added yet.</p>
+        <p class="text-center" data-i18n="No gallery items added yet.">No gallery items added yet.</p>
         {% endfor %}
     </div>
 </div>
 
-<!-- Floating home button -->
-<a href="{% url 'home' %}"
-   style="
-     position: fixed;
-     bottom: 20px;
-     right: 20px;
-     background:#007bff;
-     padding:12px 18px;
-     border-radius: 50px;
-     color:white;
-     font-weight:bold;
-     text-decoration:none;
-     font-size:16px;
-     box-shadow:0 4px 12px rgba(0,0,0,0.3);
-   ">
-   🏠 Home
-</a>
 {% include "chatbox_partial.html" %}
-</body>
-</html>
+{% endblock %}

@@ -6,45 +6,45 @@
 {% block content %}
 <div class="container" style="padding-top: 110px; padding-bottom: 40px;">
   <div class="p-4 p-md-5" style="border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(165deg, rgba(16, 26, 44, 0.86), rgba(7, 12, 24, 0.92)); border-radius: 18px; color: #fff;">
-    <h2 class="fw-bold mb-2">Privacy Policy</h2>
-    <div class="text-white-50 mb-4" style="font-size: 13px;">Last updated: {% now "F j, Y" %}</div>
+    <h2 class="fw-bold mb-2" data-i18n="Privacy Policy">Privacy Policy</h2>
+    <div class="text-white-50 mb-4" style="font-size: 13px;"><span data-i18n="Last updated:">Last updated:</span> {% now "F j, Y" %}</div>
 
-    <p class="text-white-75">
+    <p class="text-white-75" data-i18n="At M-Power Fitness Lab, we respect your privacy. This policy explains what we collect, why we collect it, and how we protect it.">
       At <strong>M-Power Fitness Lab</strong>, we respect your privacy. This policy explains what we collect, why we collect it, and how we protect it.
     </p>
 
-    <h5 class="fw-bold mt-4">Information we collect</h5>
+    <h5 class="fw-bold mt-4" data-i18n="Information we collect">Information we collect</h5>
     <ul class="text-white-75">
-      <li>Account details (username, email).</li>
-      <li>Profile details you choose to add (photo, height, weight, age, fitness goal).</li>
-      <li>Usage data (pages visited, actions like booking a session).</li>
+      <li data-i18n="Account details (username, email).">Account details (username, email).</li>
+      <li data-i18n="Profile details you choose to add (photo, height, weight, age, fitness goal).">Profile details you choose to add (photo, height, weight, age, fitness goal).</li>
+      <li data-i18n="Usage data (pages visited, actions like booking a session).">Usage data (pages visited, actions like booking a session).</li>
     </ul>
 
-    <h5 class="fw-bold mt-4">How we use your information</h5>
+    <h5 class="fw-bold mt-4" data-i18n="How we use your information">How we use your information</h5>
     <ul class="text-white-75">
-      <li>To provide features like live training, progress tracking, and personalized recommendations.</li>
-      <li>To improve the platform experience and security.</li>
-      <li>To contact you about important account or service updates.</li>
+      <li data-i18n="To provide features like live training, progress tracking, and personalized recommendations.">To provide features like live training, progress tracking, and personalized recommendations.</li>
+      <li data-i18n="To improve the platform experience and security.">To improve the platform experience and security.</li>
+      <li data-i18n="To contact you about important account or service updates.">To contact you about important account or service updates.</li>
     </ul>
 
-    <h5 class="fw-bold mt-4">Data sharing</h5>
-    <p class="text-white-75">
+    <h5 class="fw-bold mt-4" data-i18n="Data sharing">Data sharing</h5>
+    <p class="text-white-75" data-i18n="We do not sell your personal data. We may share limited information only when required for service delivery (e.g., live session access) or when legally required.">
       We do not sell your personal data. We may share limited information only when required for service delivery (e.g., live session access) or when legally required.
     </p>
 
-    <h5 class="fw-bold mt-4">Cookies</h5>
-    <p class="text-white-75">
+    <h5 class="fw-bold mt-4" data-i18n="Cookies">Cookies</h5>
+    <p class="text-white-75" data-i18n="We use cookies/session storage for login sessions and to keep the site working properly. You can control cookies in your browser settings.">
       We use cookies/session storage for login sessions and to keep the site working properly. You can control cookies in your browser settings.
     </p>
 
-    <h5 class="fw-bold mt-4">Security</h5>
-    <p class="text-white-75">
+    <h5 class="fw-bold mt-4" data-i18n="Security">Security</h5>
+    <p class="text-white-75" data-i18n="We use standard security practices to protect your data, but no online system can guarantee 100% security.">
       We use standard security practices to protect your data, but no online system can guarantee 100% security.
     </p>
 
-    <h5 class="fw-bold mt-4">Contact</h5>
-    <p class="text-white-75 mb-0">
-      For privacy questions, contact us via the <a href="{% url 'contact' %}" class="text-info text-decoration-none">Contact</a> page.
+    <h5 class="fw-bold mt-4" data-i18n="Contact">Contact</h5>
+    <p class="text-white-75 mb-0" data-i18n="For privacy questions, contact us via the Contact page.">
+      For privacy questions, contact us via the <a href="{% url 'contact' %}" class="text-info text-decoration-none" data-i18n="Contact">Contact</a> page.
     </p>
   </div>
 </div>

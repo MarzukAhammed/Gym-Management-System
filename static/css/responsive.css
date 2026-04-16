@@ -119,6 +119,9 @@
     .team_item {
         margin-bottom: 92px;
     }
+    .team_item .image {
+        height: 200px; /* Reduced height for mobile */
+    }
     .team_item .text .new_p {
         padding: 0;
     }

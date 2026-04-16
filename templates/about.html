@@ -1,14 +1,10 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>About Us</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+{% block title %}About Us | M-Power Fitness Lab{% endblock %}
 
-  <style>
+{% block extra_css %}
+<style>
     body {
       background: #0f0f0f;
       color: #eaeaea;
@@ -122,21 +118,21 @@
       color: #fff;
     }
   </style>
-</head>
-<body>
-{% include "navbar.html" %}
+{% endblock %}
+
+{% block content %}
 
 <!-- HERO -->
 <section class="hero">
   <div>
-    <h1>ABOUT OUR GYM</h1>
-    <p>Where discipline, strength & technology meet</p>
+    <h1 data-i18n="ABOUT OUR GYM">ABOUT OUR GYM</h1>
+    <p data-i18n="Where discipline, strength & technology meet">Where discipline, strength & technology meet</p>
   </div>
 </section>
 
 <!-- FOUNDER -->
 <div class="container my-5">
-  <h2 class="section-title">The Visionary</h2>
+  <h2 class="section-title" data-i18n="The Visionary">The Visionary</h2>
 
   <div class="row align-items-center g-5">
     <div class="col-md-4 text-center">
@@ -146,7 +142,7 @@
     <div class="col-md-8">
       <div class="glass-card">
         <div class="founder-name">Marjuk Ahmed</div>
-        <div class="founder-role">Founder • Technologist • Fitness Enthusiast</div>
+        <div class="founder-role" data-i18n="Founder • Technologist • Fitness Enthusiast">Founder • Technologist • Fitness Enthusiast</div>
 
         <p>
           Born on <strong>May 10, 2000</strong>, I am a <strong>CSE graduate from Bangladesh</strong>,
@@ -161,7 +157,7 @@
 
         <p>
           My mission is simple:
-          <em>Build bodies, sharpen minds, and create unstoppable confidence.</em>
+          <em data-i18n="Build bodies, sharpen minds, and create unstoppable confidence.">Build bodies, sharpen minds, and create unstoppable confidence.</em>
         </p>
       </div>
     </div>
@@ -170,13 +166,13 @@
 
 <!-- MISSION & VISION -->
 <div class="container my-5">
-  <h2 class="section-title">Our Purpose</h2>
+  <h2 class="section-title" data-i18n="Our Purpose">Our Purpose</h2>
 
   <div class="row g-4">
     <div class="col-md-6">
       <div class="glass-card icon-box">
-        <h4>🎯 Mission</h4>
-        <p>
+        <h4 data-i18n="🎯 Mission">🎯 Mission</h4>
+        <p data-i18n="To transform lives through fitness, discipline, and a strong mindset — helping individuals become the strongest version of themselves.">
           To transform lives through fitness, discipline, and a strong mindset —
           helping individuals become the strongest version of themselves.
         </p>
@@ -185,8 +181,8 @@
 
     <div class="col-md-6">
       <div class="glass-card icon-box">
-        <h4>🚀 Vision</h4>
-        <p>
+        <h4 data-i18n="🚀 Vision">🚀 Vision</h4>
+        <p data-i18n="To build a premium gym ecosystem where fitness meets technology, creating a global community driven by growth and excellence.">
           To build a premium gym ecosystem where fitness meets technology,
           creating a global community driven by growth and excellence.
         </p>
@@ -195,7 +191,5 @@
   </div>
 </div>
 
-<a href="{% url 'home' %}" class="home-btn">🏠 Home</a>
 {% include "chatbox_partial.html" %}
-</body>
-</html>
+{% endblock %}

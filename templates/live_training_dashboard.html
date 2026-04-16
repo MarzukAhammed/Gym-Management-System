@@ -104,8 +104,8 @@
   {% include "navbar.html" %}
 
   <div class="container page-wrap">
-    <h2 class="page-title">Live Training Sessions</h2>
-    <div class="page-subtitle">Choose a trainer, book a slot, and join the live stream once it’s activated.</div>
+    <h2 class="page-title" data-i18n="Live Training Sessions">Live Training Sessions</h2>
+    <div class="page-subtitle" data-i18n="Choose a trainer, book a slot, and join the live stream once it's activated.">Choose a trainer, book a slot, and join the live stream once it's activated.</div>
 
     <div class="row g-3">
       {% for card in trainer_cards %}
@@ -128,28 +128,28 @@
 
             <div class="trainer-body">
               <div class="trainer-bio">
-                {{ trainer.bio|default:"Premium trainer available for live sessions." }}
+                {{ trainer.bio|default:_("Premium trainer available for live sessions.") }}
               </div>
 
               <div class="mt-3 session-row">
                 {% if latest %}
                   {% if latest.is_active %}
-                    <span class="badge-soft active"><i class="fa-solid fa-circle-play"></i> Your booking active</span>
+                    <span class="badge-soft active"><i class="fa-solid fa-circle-play"></i> <span data-i18n="Your booking active">Your booking active</span></span>
                   {% else %}
-                    <span class="badge-soft pending"><i class="fa-regular fa-clock"></i> Your booking pending</span>
+                    <span class="badge-soft pending"><i class="fa-regular fa-clock"></i> <span data-i18n="Your booking pending">Your booking pending</span></span>
                   {% endif %}
                   <span class="session-time">
                     <i class="fa-regular fa-calendar"></i>
                     {{ latest.session_time|date:"M d, Y - h:i A" }}
                   </span>
                 {% else %}
-                  <span class="badge-soft"><i class="fa-regular fa-circle"></i> No booking yet</span>
+                  <span class="badge-soft"><i class="fa-regular fa-circle"></i> <span data-i18n="No booking yet">No booking yet</span></span>
                 {% endif %}
               </div>
 
               <div class="mt-3">
                 {% if latest and latest.is_active %}
-                  <a class="btn btn-premium w-100" href="{% url 'live_training_room' latest.id %}">
+                  <a class="btn btn-premium w-100" href="{% url 'live_training_room' latest.id %}" data-i18n="Join Live Session">
                     Join Live Session
                   </a>
                 {% else %}
@@ -163,18 +163,18 @@
                           {% endfor %}
                         </select>
                       </div>
-                      <button class="btn btn-outline-soft w-100" type="submit">
+                      <button class="btn btn-outline-soft w-100" type="submit" data-i18n="Book Selected Slot">
                         Book Selected Slot
                       </button>
                     </form>
                   {% else %}
-                    <div class="text-white-50" style="font-size: 13px;">
+                    <div class="text-white-50" style="font-size: 13px;" data-i18n="No available slots right now. Please check again later.">
                       No available slots right now. Please check again later.
                     </div>
                   {% endif %}
 
                   {% if latest and not latest.is_active %}
-                    <div class="mt-2 text-white-50" style="font-size: 12px;">
+                    <div class="mt-2 text-white-50" style="font-size: 12px;" data-i18n="Join button will appear when the trainer activates the session.">
                       Join button will appear when the trainer activates the session.
                     </div>
                   {% endif %}
@@ -187,7 +187,7 @@
       {% empty %}
         <div class="col-12">
           <div class="alert alert-dark border-0" style="background: rgba(255,255,255,0.06); color: #fff;">
-            No trainers found. Add trainers from the admin panel.
+            <span data-i18n="No trainers found. Add trainers from the admin panel.">No trainers found. Add trainers from the admin panel.</span>
           </div>
         </div>
       {% endfor %}

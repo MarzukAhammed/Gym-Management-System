@@ -22,34 +22,47 @@
   --secondary: #ff6a00;
   --link-fg: #7bd7ff;
   --link-hover-color: #b9ecff;
-  --body-bg: var(--mp-bg);
-  --body-fg: var(--mp-text);
-  --body-quiet-color: var(--mp-muted);
-  --hairline-color: var(--mp-border);
-  --border-color: var(--mp-border);
-  --header-bg: rgba(8, 12, 24, 0.92);
-  --header-color: #fff;
-  --breadcrumbs-bg: rgba(255,255,255,0.04);
-  --breadcrumbs-fg: rgba(255,255,255,0.8);
+  --body-bg: #0b0f1a;
+  --body-fg: #ffffff;
+  --body-quiet-color: rgba(255,255,255,0.7);
+  --hairline-color: rgba(255,255,255,0.15);
+  --border-color: rgba(255,255,255,0.15);
+  --header-bg: #080c18;
+  --header-color: #ffffff;
+  --breadcrumbs-bg: #111827;
+  --breadcrumbs-fg: #ffffff;
   --breadcrumbs-link-fg: #7bd7ff;
   --breadcrumbs-link-hover-fg: #b9ecff;
-  --button-bg: linear-gradient(120deg, #fbbf24, #ff6a00);
+  --button-bg: #4cc2ff;
   --button-fg: #0b0f1a;
-  --button-hover-bg: linear-gradient(120deg, #ffd35a, #ff8a3a);
-  --default-button-bg: rgba(255,255,255,0.08);
-  --default-button-hover-bg: rgba(255,255,255,0.12);
-  --close-button-bg: rgba(255,255,255,0.08);
+  --button-hover-bg: #7bd7ff;
+  --default-button-bg: #1f2937;
+  --default-button-hover-bg: #374151;
+  --close-button-bg: #374151;
+  --message-success-bg: #064e3b;
+  --message-warning-bg: #78350f;
+  --message-error-bg: #7f1d1d;
 }
 
 html, body {
-  background: var(--mp-bg) !important;
+  background: #0b0f1a !important;
+  color: #ffffff !important;
+}
+
+/* Ensure all text is white */
+#content, #content-main, .module h2, .module caption, .add-row a, .delete-row a, .form-row, label, .help, .readonly, .stats, .dashboard .module table th, .dashboard .module table td, #changelist-filter h2, #changelist-filter h3, #changelist-filter ul li, .selector-chosen h2, .selector-available h2 {
+  color: #ffffff !important;
 }
 
 /* Header */
 #header {
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--mp-border);
-  box-shadow: var(--mp-shadow);
+  background: #080c18 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+#header a {
+  color: #ffffff !important;
 }
 
 /* Branding */
@@ -62,94 +75,104 @@ html, body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--mp-accent);
+  background: #4cc2ff;
   box-shadow: 0 0 14px rgba(76,194,255,0.75);
 }
 .mp-admin-text {
   font-weight: 900;
   letter-spacing: 0.2px;
+  color: #ffffff !important;
 }
 .mp-admin-sub {
   margin-left: 6px;
   font-size: 12px;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid var(--mp-border);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.82);
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: #ffffff !important;
 }
 
 /* Main containers */
-#content, .dashboard #content, .module, .app-auth.module, .app-frontend.module {
-  color: var(--mp-text);
-}
-
 .module, .inline-group, .results, .submit-row, .object-tools {
-  background: var(--mp-panel);
-  border: 1px solid var(--mp-border);
-  border-radius: 16px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
-}
-
-/* App list blocks on dashboard */
-.dashboard .module table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-/* Forms */
-input, select, textarea {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(255,255,255,0.16) !important;
-  color: #fff !important;
+  background: #111827 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
   border-radius: 12px !important;
-}
-
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(76,194,255,0.25);
-}
-
-/* Buttons */
-.button, input[type=submit], input[type=button], .submit-row input, a.button {
-  border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.16) !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.2px;
-}
-
-.button.default, input[type=submit].default {
-  border: 0 !important;
-  color: #0b0f1a !important;
-  box-shadow: 0 14px 26px rgba(0,0,0,0.35);
 }
 
 /* Tables */
 #changelist table thead th {
-  background: rgba(255,255,255,0.05);
-  border-bottom: 1px solid var(--mp-border);
-}
-#changelist table tbody tr {
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-#changelist table tbody tr:hover {
-  background: rgba(255,255,255,0.04);
+  background: #1f2937 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
 }
 
-/* Messages */
-ul.messagelist li.success { background: rgba(34,197,94,0.14); border: 1px solid rgba(34,197,94,0.25); }
-ul.messagelist li.warning { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.22); }
-ul.messagelist li.error { background: rgba(255,77,77,0.12); border: 1px solid rgba(255,77,77,0.22); }
+#changelist table thead th a {
+  color: #ffffff !important;
+}
+
+#changelist table tbody tr {
+  background: #111827 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+#changelist table tbody tr:hover {
+  background: #1f2937 !important;
+}
+
+#changelist table tbody td, #changelist table tbody th {
+  color: #ffffff !important;
+}
+
+/* Forms */
+input, select, textarea {
+  background: #1f2937 !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #4cc2ff !important;
+}
 
 /* Sidebar filter */
 #changelist-filter {
-  background: var(--mp-panel);
-  border: 1px solid var(--mp-border);
-  border-radius: 16px;
-  overflow: hidden;
+  background: #111827 !important;
+  border-left: 1px solid rgba(255,255,255,0.1) !important;
 }
 
-/* Links */
-a:link, a:visited { color: var(--link-fg); }
-a:hover { color: var(--link-hover-color); }
+#changelist-filter a {
+  color: #7bd7ff !important;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  background: #080c18 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.breadcrumbs a {
+  color: #7bd7ff !important;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: #4cc2ff !important;
+  color: #0b0f1a !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, a.button:hover {
+  background: #7bd7ff !important;
+}
+
+.button.default, input[type=submit].default {
+  background: #22c55e !important;
+  color: #ffffff !important;
+}
+
 

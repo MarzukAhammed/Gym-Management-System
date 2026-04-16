@@ -38,8 +38,8 @@
 <div class="container py-4">
   <div class="review-hero mb-4">
     <div class="text-white-50" style="font-size: 13px; letter-spacing: .35px;">M-POWER FITNESS LAB</div>
-    <h2 class="mt-2 mb-2 fw-bold">{% trans "Review a Trainer" %}</h2>
-    <div class="text-white-50">{% trans "Pick a trainer and share honest feedback to help other members choose the right coach." %}</div>
+    <h2 class="mt-2 mb-2 fw-bold" data-i18n="Review a Trainer">{% trans "Review a Trainer" %}</h2>
+    <div class="text-white-50" data-i18n="Pick a trainer and share honest feedback to help other members choose the right coach.">{% trans "Pick a trainer and share honest feedback to help other members choose the right coach." %}</div>
   </div>
 
   <div class="review-card p-4 p-md-5">
@@ -52,28 +52,28 @@
 
       <div class="row g-3">
         <div class="col-12">
-          <label class="form-label">{% trans "Trainer" %}</label>
+          <label class="form-label" data-i18n="Trainer">{% trans "Trainer" %}</label>
           {{ form.trainer }}
           {{ form.trainer.errors }}
         </div>
 
         <div class="col-12 col-md-4">
-          <label class="form-label">{% trans "Rating (1–5)" %}</label>
+          <label class="form-label" data-i18n="Rating (1–5)">{% trans "Rating (1–5)" %}</label>
           {{ form.rating }}
           {{ form.rating.errors }}
         </div>
 
         <div class="col-12">
-          <label class="form-label">{% trans "Your comment" %}</label>
+          <label class="form-label" data-i18n="Your comment">{% trans "Your comment" %}</label>
           {{ form.comment }}
           {{ form.comment.errors }}
         </div>
       </div>
 
       <div class="d-grid d-sm-flex gap-2 mt-4">
-        <button type="submit" class="btn btn-cta">{% trans "Submit Review" %}</button>
+        <button type="submit" class="btn btn-cta" data-i18n="Submit Review">{% trans "Submit Review" %}</button>
         <a href="{% url 'testimonial' %}" class="btn btn-outline-light" style="border-radius: 999px; padding: 12px 16px;">
-          {% trans "Back to Reviews" %}
+          <span data-i18n="Back to Reviews">{% trans "Back to Reviews" %}</span>
         </a>
       </div>
     </form>

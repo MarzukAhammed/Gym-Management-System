@@ -83,10 +83,10 @@
     <div class="container-fluid main-content">
         
         <div class="container text-center mb-5">
-            <h1 class="display-4" style="font-weight: 800;">
-                WELCOME, <span style="color: #28a745;">{{ request.user.username|upper }}</span>!
+            <h1 class="display-4" style="font-weight: 800;" data-i18n="WELCOME, ...!">
+                <span data-i18n="WELCOME">WELCOME</span>, <span style="color: #28a745;">{{ request.user.username|upper }}</span>!
             </h1>
-            <p class="lead text-muted">Customize your session by muscle group and intensity.</p>
+            <p class="lead text-muted" data-i18n="Customize your session by muscle group and intensity.">Customize your session by muscle group and intensity.</p>
             <div class="mx-auto" style="width: 100px; height: 5px; background: #28a745; border-radius: 5px;"></div>
         </div>
 
@@ -99,36 +99,36 @@
                                  src="https://cdn-icons-png.flaticon.com/512/822/822143.png" 
                                  style="height: 100%; filter: invert(1) drop-shadow(0 0 15px #28a745); transition: 0.3s;">
                         </div>
-                        <p id="target-text" class="small text-success mt-2 font-weight-bold" style="letter-spacing: 2px; text-transform: uppercase;">Ready to Train</p>
+                        <p id="target-text" class="small text-success mt-2 font-weight-bold" style="letter-spacing: 2px; text-transform: uppercase;" data-i18n="Ready to Train">Ready to Train</p>
                     </div>
                 </div>
 
-                <p class="section-title mb-3">Step 1: Target Muscle Group</p>
+                <p class="section-title mb-3" data-i18n="Step 1: Target Muscle Group">Step 1: Target Muscle Group</p>
                 <div class="d-flex justify-content-center flex-wrap" style="gap: 12px;">
-                    <button class="btn muscle-btn active" data-filter="all">All Muscles</button>
-                    <button class="btn muscle-btn" data-filter="chest">Chest</button>
-                    <button class="btn muscle-btn" data-filter="back">Back</button>
-                    <button class="btn muscle-btn" data-filter="legs">Legs</button>
-                    <button class="btn muscle-btn" data-filter="arms">Arms</button>
-                    <button class="btn muscle-btn" data-filter="core">Core</button>
+                    <button class="btn muscle-btn active" data-filter="all" data-i18n="All Muscles">All Muscles</button>
+                    <button class="btn muscle-btn" data-filter="chest" data-i18n="Chest">Chest</button>
+                    <button class="btn muscle-btn" data-filter="back" data-i18n="Back">Back</button>
+                    <button class="btn muscle-btn" data-filter="legs" data-i18n="Legs">Legs</button>
+                    <button class="btn muscle-btn" data-filter="arms" data-i18n="Arms">Arms</button>
+                    <button class="btn muscle-btn" data-filter="core" data-i18n="Core">Core</button>
                 </div>
             </div>
 
             <div class="text-center mb-5">
-                <p class="section-title mb-3">Step 2: Training Intensity</p>
+                <p class="section-title mb-3" data-i18n="Step 2: Training Intensity">Step 2: Training Intensity</p>
                 <div class="d-flex justify-content-center" style="gap: 15px;">
-                    <button class="btn diff-btn active intensity-btn" data-intensity="beginner"><i class="fas fa-leaf mr-2"></i> Beginner</button>
-                    <button class="btn diff-btn intensity-btn" data-intensity="intermediate"><i class="fas fa-fire mr-2"></i> Intermediate</button>
-                    <button class="btn diff-btn intensity-btn" data-intensity="expert"><i class="fas fa-skull-crossbones mr-2"></i> Expert</button>
+                    <button class="btn diff-btn active intensity-btn" data-intensity="beginner"><i class="fas fa-leaf mr-2"></i> <span data-i18n="Beginner">Beginner</span></button>
+                    <button class="btn diff-btn intensity-btn" data-intensity="intermediate"><i class="fas fa-fire mr-2"></i> <span data-i18n="Intermediate">Intermediate</span></button>
+                    <button class="btn diff-btn intensity-btn" data-intensity="expert"><i class="fas fa-skull-crossbones mr-2"></i> <span data-i18n="Expert">Expert</span></button>
                 </div>
             </div>
 
             <div id="routine-slider" class="mb-5 p-4 shadow-lg" style="background: #1a1a1a; border: 2px solid #28a745; border-radius: 20px; display: none;">
-                <h3 class="text-success font-weight-bold mb-4 text-center" id="routine-title">ROUTINE</h3>
+                <h3 class="text-success font-weight-bold mb-4 text-center" id="routine-title" data-i18n="ROUTINE">ROUTINE</h3>
                 <div id="exercise-list" class="list-group list-group-flush"></div>
                 <div class="text-center mt-4 d-flex justify-content-center" style="gap: 15px;">
-                    <button class="btn btn-outline-secondary px-4" style="border-radius: 20px;" onclick="document.getElementById('routine-slider').style.display='none'">Close</button>
-                    <button class="btn btn-success px-5 font-weight-bold" style="border-radius: 20px;" onclick="startTrainingSession()">START TRAINING</button>
+                    <button class="btn btn-outline-secondary px-4" style="border-radius: 20px;" onclick="document.getElementById('routine-slider').style.display='none'" data-i18n="Close">Close</button>
+                    <button class="btn btn-success px-5 font-weight-bold" style="border-radius: 20px;" onclick="startTrainingSession()" data-i18n="START TRAINING">START TRAINING</button>
                 </div>
             </div>
 
@@ -142,7 +142,7 @@
                         <div class="p-3 text-center">
                             <video autoplay loop muted playsinline class="exercise-video-fluid">
                                 <source src="{% if ex.video_url.url %}{{ ex.video_url.url }}{% else %}{{ ex.video_url }}{% endif %}" type="video/mp4">
-                                Your browser does not support the video tag.
+                                <span data-i18n="Your browser does not support the video tag.">Your browser does not support the video tag.</span>
                             </video>
                         </div>
                         <div class="card-body">
@@ -155,9 +155,9 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="exercise_id" value="{{ ex.id }}">
                                 <div class="input-group">
-                                    <input type="number" name="reps" class="form-control bg-secondary text-white border-0" placeholder="Reps" required>
+                                    <input type="number" name="reps" class="form-control bg-secondary text-white border-0" placeholder="Reps" required data-i18n-placeholder="Reps">
                                     <div class="input-group-append">
-                                        <button class="btn btn-success px-3" type="submit">LOG</button>
+                                        <button class="btn btn-success px-3" type="submit" data-i18n="LOG">LOG</button>
                                     </div>
                                 </div>
                             </form>
@@ -378,7 +378,7 @@
             secSpan.innerText = count < 10 ? "0" + count : count;
             if (count <= 0) {
                 clearInterval(timer);
-                alert("Set Complete!");
+                alert("Set Complete!"); // data-i18n handled in JS
             }
         }, 1000);
     }
@@ -395,11 +395,10 @@
             localStorage.setItem('routineTitle', `${activeMuscle.toUpperCase()} ROUTINE (${activeIntensity.toUpperCase()})`);
             window.location.href = "{% url 'training_session' %}"; 
         } else {
-            alert("This routine isn't ready yet!");
+            alert("This routine isn't ready yet!"); // data-i18n handled in JS
         }
     }
 </script>
-<a href="{% url 'home' %}" class="home-btn">🏠 Home</a>
 {% include "chatbox_partial.html" %}
 </body>
 </html>

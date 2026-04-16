@@ -155,7 +155,8 @@
 
 /* Cross-page entrance: cat slides in from beyond the viewport (like it followed you) */
 #floating-cat-container.elina-cross-prep {
-    pointer-events: none;
+    /* removed pointer-events: none to allow interaction during entrance */
+    pointer-events: auto;
 }
 #floating-cat-container.elina-cross-from-outside {
     transform: translate3d(200px, 90px, 0) scale(0.88);
@@ -239,7 +240,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         inactivitySleepDelayMs: 38000, // no user activity -> sleep starts
         sleepPhaseMs: 6500,            // how long sleep gif stays before play gif
         playPhaseMs: 3000,             // how long play gif stays before idle
-        crossPageSettleFallbackMs: 6000 // failsafe cleanup for entrance transition (staying for 6s total)
+        crossPageSettleFallbackMs: 2500 // match direct page load timing for consistency
     };
 
     function appendMessage(type, text) {
@@ -428,15 +429,28 @@ const chatUserName = "{{ user.username|default:'' }}";
         if (!catImg || isDragging || isMoving) return;
         if (chatBox.style.display === "flex") return; // don't run sleep/play while actively chatting
         isIdleAnimating = true;
-        setCatImg(catImg.dataset.sleepSrc || catImg.dataset.sitSrc || catImg.dataset.idleSrc);
-        playTimer = setTimeout(function () {
-            if (!catImg) return;
+        
+        // Randomly choose between sleep and play
+        const useSleep = Math.random() < 0.5;
+        
+        if (useSleep && catImg.dataset.sleepSrc) {
+            setCatImg(catImg.dataset.sleepSrc);
+            playTimer = setTimeout(function () {
+                if (!catImg) return;
+                setCatImg(catImg.dataset.playSrc || catImg.dataset.idleSrc);
+                sleepTimer = setTimeout(function () {
+                    resetToIdleGif();
+                    scheduleIdleCycle();
+                }, ELINA_CONFIG.playPhaseMs);
+            }, ELINA_CONFIG.sleepPhaseMs);
+        } else {
+            // Start with play if sleep not available or randomly chosen
             setCatImg(catImg.dataset.playSrc || catImg.dataset.waveSrc || catImg.dataset.idleSrc);
             sleepTimer = setTimeout(function () {
                 resetToIdleGif();
                 scheduleIdleCycle();
             }, ELINA_CONFIG.playPhaseMs);
-        }, ELINA_CONFIG.sleepPhaseMs);
+        }
     }
 
     function scheduleIdleCycle() {
@@ -445,6 +459,9 @@ const chatUserName = "{{ user.username|default:'' }}";
     }
 
     function markActivity() {
+        // If they interact while still in the "following" animation, cleanup immediately.
+        if (typeof window.elinaCleanupEntrance === "function") window.elinaCleanupEntrance();
+
         clearIdleTimers();
         if (isIdleAnimating) resetToIdleGif();
         scheduleIdleCycle();
@@ -605,14 +622,35 @@ const chatUserName = "{{ user.username|default:'' }}";
 
     // Prevent duplicated click handlers (pointerup/mouseup handles click behavior).
 
-    // On page load: wave once, then return to idle.
+    // On page load: different behavior for homepage vs other pages
     document.addEventListener("DOMContentLoaded", function () {
         if (!catImg) return;
-        if (catImg.dataset.waveSrc) {
-            setCatImg(catImg.dataset.waveSrc);
-            setTimeout(function () {
-                setCatImg(catImg.dataset.idleSrc || catImg.dataset.waveSrc);
-            }, 1200);
+        
+        const isHomepage = window.location.pathname === '/' || window.location.pathname === '/home/';
+        
+        // Always show entrance animation, but handle cross-page differently
+        if (sessionStorage.getItem("elina_nav_internal") === "1") {
+            // Cross-page navigation: let crossPageTravel handle it
+            return;
+        }
+
+        // Direct page load (not internal navigation)
+        if (isHomepage) {
+            // Homepage: wave once, then return to idle
+            if (catImg.dataset.waveSrc) {
+                setCatImg(catImg.dataset.waveSrc);
+                setTimeout(function () {
+                    setCatImg(catImg.dataset.idleSrc);
+                }, 2000); // 2 seconds for wave animation
+            }
+        } else {
+            // Other pages: hold edge, then return to idle
+            if (catImg.dataset.edgeHoldSrc) {
+                setCatImg(catImg.dataset.edgeHoldSrc);
+                setTimeout(function () {
+                    setCatImg(catImg.dataset.idleSrc);
+                }, 2500); // 2.5 seconds for hold edge animation
+            }
         }
         scheduleIdleCycle();
     });
@@ -671,12 +709,8 @@ const chatUserName = "{{ user.username|default:'' }}";
 (function elinaCrossPageTravel() {
     var STORAGE = "elina_nav_internal";
     var EDGE = "elina_nav_edge";
-    var PLAYED_KEY = "elina_entrance_played_ever";
 
     document.addEventListener("click", function (e) {
-        // If it already played once ever, don't trigger it again
-        if (localStorage.getItem(PLAYED_KEY)) return;
-
         var a = e.target.closest && e.target.closest("a[href]");
         if (!a) return;
         var href = a.getAttribute("href");
@@ -697,13 +731,12 @@ const chatUserName = "{{ user.username|default:'' }}";
         var catImg = document.getElementById("main-cat-img");
         if (!cat) return;
         if (sessionStorage.getItem(STORAGE) !== "1") return;
-        if (localStorage.getItem(PLAYED_KEY)) return;
         sessionStorage.removeItem(STORAGE);
         var edge = sessionStorage.getItem(EDGE) || "";
         sessionStorage.removeItem(EDGE);
 
+        // For cross-page navigation, always use edge hold animation
         if (catImg && catImg.dataset && catImg.dataset.edgeHoldSrc) {
-            // User can replace this file with their custom "holding screen edge" GIF.
             var edgeSrc = catImg.dataset.edgeHoldSrc;
             catImg.src = edgeSrc + (edgeSrc.indexOf("?") > -1 ? "&" : "?") + "v=" + Date.now();
         }
@@ -712,7 +745,7 @@ const chatUserName = "{{ user.username|default:'' }}";
         if (edge) cat.classList.add(edge);
 
         var cleaned = false;
-        function cleanup() {
+        window.elinaCleanupEntrance = function () {
             if (cleaned) return;
             cleaned = true;
             cat.classList.remove(
@@ -723,24 +756,25 @@ const chatUserName = "{{ user.username|default:'' }}";
                 "elina-from-bottom"
             );
             cat.style.willChange = "";
-            // Keep the edgeHoldSrc for a bit longer even after classes are removed
-            // by delaying the switch to idleSrc
+            cat.style.transition = ""; // let normal dragging transition take over
+
+            // After cross-page entrance, always return to idle after animation
             setTimeout(function() {
                 if (catImg && catImg.dataset && catImg.dataset.idleSrc) {
                     catImg.src = catImg.dataset.idleSrc;
                 }
-            }, 500);
-            // Mark as played so it never happens again for this user.
-            localStorage.setItem(PLAYED_KEY, "1");
-        }
+                // Start idle cycle after returning to idle
+                scheduleIdleCycle();
+            }, 500); // Small delay to ensure smooth transition
+        };
 
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
                 cat.style.willChange = "transform, opacity";
                 cat.classList.add("elina-cross-settle");
-                // Remove transitionend listener and just use the fallback timeout
+                // Remove transitionend listener and just use fallback timeout
                 // to ensure it stays as edgeHoldSrc for exactly crossPageSettleFallbackMs.
-                setTimeout(cleanup, ELINA_CONFIG.crossPageSettleFallbackMs);
+                setTimeout(window.elinaCleanupEntrance, ELINA_CONFIG.crossPageSettleFallbackMs);
             });
         });
     }

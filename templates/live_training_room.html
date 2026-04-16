@@ -83,14 +83,14 @@
     <div class="glass">
       <div class="room-header">
         <div>
-          <h4 class="room-title">Live Session with {{ session.trainer.name }}</h4>
+          <h4 class="room-title"><span data-i18n="Live Session with">Live Session with</span> {{ session.trainer.name }}</h4>
           <div class="room-sub">
-            Scheduled: {{ session.session_time|date:"M d, Y - h:i A" }}
+            <span data-i18n="Scheduled:">Scheduled:</span> {{ session.session_time|date:"M d, Y - h:i A" }}
           </div>
         </div>
         <div class="d-flex gap-2">
           <a class="btn-outline-soft" href="{% url 'live_training_dashboard' %}">
-            <i class="fa-solid fa-arrow-left"></i> Back
+            <i class="fa-solid fa-arrow-left"></i> <span data-i18n="Back">Back</span>
           </a>
         </div>
       </div>
@@ -101,10 +101,10 @@
         </div>
       {% else %}
         <div class="waiting">
-          <h4 class="mb-2">Waiting for trainer activation…</h4>
-          <p>The Join experience will appear here automatically once the trainer marks this session as active.</p>
+          <h4 class="mb-2" data-i18n="Waiting for trainer activation…">Waiting for trainer activation…</h4>
+          <p data-i18n="The Join experience will appear here automatically once the trainer marks this session as active.">The Join experience will appear here automatically once the trainer marks this session as active.</p>
           <div class="meta-line">
-            Status: <strong class="text-warning">Pending</strong> · Meeting: <code>{{ session.meeting_link }}</code>
+            <span data-i18n="Status:">Status:</span> <strong class="text-warning" data-i18n="Pending">Pending</strong> · <span data-i18n="Meeting:">Meeting:</span> <code>{{ session.meeting_link }}</code>
           </div>
         </div>
       {% endif %}

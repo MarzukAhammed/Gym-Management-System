@@ -61,8 +61,8 @@
         <div class="auth-card p-4 p-md-5">
           <div class="text-center mb-4">
             <div class="text-white-50" style="font-size: 13px; letter-spacing: .4px;">M-POWER FITNESS LAB</div>
-            <h2 class="mt-2 mb-1">{% trans "Welcome back" %}</h2>
-            <div class="text-white-50">{% trans "Login to continue your training." %}</div>
+            <h2 class="mt-2 mb-1" data-i18n="Welcome back">{% trans "Welcome back" %}</h2>
+            <div class="text-white-50" data-i18n="Login to continue your training.">{% trans "Login to continue your training." %}</div>
           </div>
 
           {% if form.non_field_errors %}
@@ -75,23 +75,23 @@
             {% csrf_token %}
 
             <div class="mb-3">
-              <label for="{{ form.username.id_for_label }}" class="form-label">{% trans "Username" %}</label>
+              <label for="{{ form.username.id_for_label }}" class="form-label" data-i18n="Username">{% trans "Username" %}</label>
               {{ form.username }}
               {{ form.username.errors }}
             </div>
 
             <div class="mb-2">
-              <label for="{{ form.password.id_for_label }}" class="form-label">{% trans "Password" %}</label>
+              <label for="{{ form.password.id_for_label }}" class="form-label" data-i18n="Password">{% trans "Password" %}</label>
               {{ form.password }}
               {{ form.password.errors }}
             </div>
 
-            <button type="submit" class="btn-premium-auth w-100 mt-3">{% trans "Login" %}</button>
+            <button type="submit" class="btn-premium-auth w-100 mt-3" data-i18n="Login">{% trans "Login" %}</button>
           </form>
 
           <div class="text-center mt-4 text-white-50">
-            {% trans "Don’t have an account?" %}
-            <a href="{% url 'signup' %}" class="fw-bold">{% trans "Sign up" %}</a>
+            <span data-i18n="Don't have an account?">{% trans "Don't have an account?" %}</span>
+            <a href="{% url 'signup' %}" class="fw-bold" data-i18n="Sign up">{% trans "Sign up" %}</a>
           </div>
         </div>
       </div>

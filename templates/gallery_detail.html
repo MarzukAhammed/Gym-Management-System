@@ -52,26 +52,26 @@
                 <h3>{{ member.name }}</h3>
 
                 {% if member.role %}
-                <p class="info-item"><strong>Role:</strong> {{ member.role }}</p>
+                <p class="info-item"><strong data-i18n="Role:">Role:</strong> {{ member.role }}</p>
                 {% endif %}
 
                 {% if member.joined_year %}
-                <p class="info-item"><strong>Joined Year:</strong> {{ member.joined_year }}</p>
+                <p class="info-item"><strong data-i18n="Joined Year:">Joined Year:</strong> {{ member.joined_year }}</p>
                 {% endif %}
 
                 {% if member.specialty %}
-                <p class="info-item"><strong>Specialty:</strong> {{ member.specialty }}</p>
+                <p class="info-item"><strong data-i18n="Specialty:">Specialty:</strong> {{ member.specialty }}</p>
                 {% endif %}
 
                 {% if member.program %}
-                <p class="info-item"><strong>Program:</strong> {{ member.program }}</p>
+                <p class="info-item"><strong data-i18n="Program:">Program:</strong> {{ member.program }}</p>
                 {% endif %}
 
                 {% if member.experience %}
-                <p class="info-item"><strong>Experience:</strong> {{ member.experience }}</p>
+                <p class="info-item"><strong data-i18n="Experience:">Experience:</strong> {{ member.experience }}</p>
                 {% endif %}
 
-                <a href="{% url 'gallery' %}" class="btn btn-primary back-btn">⬅ Back to Gallery</a>
+                <a href="{% url 'gallery' %}" class="btn btn-primary back-btn" data-i18n="⬅ Back to Gallery">⬅ Back to Gallery</a>
             </div>
         </div>
 

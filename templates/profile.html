@@ -1,64 +1,61 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Profile</title>
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <style>
-        body { background:#0d0d0d; color:#fff; }
 
-        .profile-card {
-            background: linear-gradient(145deg, #1c1c1c, #111);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-            max-width: 750px;
-            margin: auto;
-        }
+{% block title %}My Profile | M-Power Fitness Lab{% endblock %}
 
-        .profile-photo img {
-            width: 150px;
-            height:150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #ff9600;
-        }
+{% block content %}
+<style>
+    body { background:#0d0d0d; color:#fff; }
 
-        /* Highlight box for BMR */
-        .bmr-box {
-            background: rgba(255, 150, 0, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid #ff9600;
-            margin-bottom: 25px;
-        }
+    .profile-card {
+        background: linear-gradient(145deg, #1c1c1c, #111);
+        padding: 35px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        max-width: 750px;
+        margin: auto;
+    }
 
-        .info-box {
-            background:#171717;
-            padding:15px;
-            border-radius:10px;
-            margin-bottom:15px;
-            border-left:4px solid #ff9600;
-        }
+    .profile-photo img {
+        width: 150px;
+        height:150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #ff9600;
+    }
 
-        .btn-edit {
-            background:#ff9600;
-            color:white;
-            border-radius: 25px;
-            padding:12px 25px;
-            font-weight:bold;
-            text-decoration:none;
-            display: inline-block;
-        }
+    /* Highlight box for BMR */
+    .bmr-box {
+        background: rgba(255, 150, 0, 0.1);
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid #ff9600;
+        margin-bottom: 25px;
+    }
 
-        .btn-edit:hover {
-            opacity: 0.9;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-{% include "navbar.html" %}
+    .info-box {
+        background:#171717;
+        padding:15px;
+        border-radius:10px;
+        margin-bottom:15px;
+        border-left:4px solid #ff9600;
+    }
+
+    .btn-edit {
+        background:#ff9600;
+        color:white;
+        border-radius: 25px;
+        padding:12px 25px;
+        font-weight:bold;
+        text-decoration:none;
+        display: inline-block;
+    }
+
+    .btn-edit:hover {
+        opacity: 0.9;
+        color: white;
+    }
+</style>
 
 <div class="container mt-5 mb-5">
     <div class="profile-card text-center">
@@ -72,37 +69,37 @@
         </div>
 
         <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
-        <p class="text-warning">Fitness Plan: {{ profile.fitness_goal|default:"General" }}</p>
+        <p class="text-warning" data-i18n="Fitness Plan:"><span data-i18n="Fitness Plan">Fitness Plan:</span> {{ profile.fitness_goal|default:"General" }}</p>
 
         <div class="info-box text-start mt-3">
-            <strong>Gym Coins:</strong> {{ profile.gym_coins|default:0 }}
-            <div class="text-muted small mt-1">Earn coins by completing Daily Challenges.</div>
+            <strong data-i18n="Gym Coins:">Gym Coins:</strong> {{ profile.gym_coins|default:0 }}
+            <div class="text-muted small mt-1" data-i18n="Earn coins by completing Daily Challenges.">Earn coins by completing Daily Challenges.</div>
         </div>
 
         {% if selected_plan %}
         <div class="info-box text-start mt-3">
-            <strong>Membership Plan:</strong> {{ selected_plan }}
-            <div class="text-success small mt-1">Payment verified by admin ✅</div>
+            <strong data-i18n="Membership Plan:">Membership Plan:</strong> {{ selected_plan }}
+            <div class="text-success small mt-1" data-i18n="Payment verified by admin ✅">Payment verified by admin ✅</div>
         </div>
         {% elif pending_plan %}
         <div class="info-box text-start mt-3">
-            <strong>Membership Plan:</strong> {{ pending_plan }}
-            <div class="text-warning small mt-1">Payment verification pending. We will confirm soon.</div>
+            <strong data-i18n="Membership Plan:">Membership Plan:</strong> {{ pending_plan }}
+            <div class="text-warning small mt-1" data-i18n="Payment verification pending. We will confirm soon.">Payment verification pending. We will confirm soon.</div>
         </div>
         {% endif %}
 
         <div class="mt-4 text-start">
-            <h5 class="mb-3 border-bottom border-secondary pb-2">Body & Contact Info</h5>
+            <h5 class="mb-3 border-bottom border-secondary pb-2" data-i18n="Body & Contact Info">Body & Contact Info</h5>
 
             <div class="row">
                 <div class="col-md-6">
                     <div class="info-box">
-                        <strong>Weight:</strong> {{ profile.weight }} kg
+                        <strong data-i18n="Weight:">Weight:</strong> {{ profile.weight }} kg
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="info-box">
-                        <strong>Height:</strong> {{ profile.height }} cm
+                        <strong data-i18n="Height:">Height:</strong> {{ profile.height }} cm
                     </div>
                 </div>
             </div>
@@ -110,64 +107,49 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="info-box">
-                        <strong>Age:</strong> {{ profile.age|default:"Not set" }}
+                        <strong data-i18n="Age:">Age:</strong> {{ profile.age|default:"Not set" }}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="info-box">
-                        <strong>Gender:</strong> {{ profile.gender|default:"Not set"|capfirst }}
+                        <strong data-i18n="Gender:">Gender:</strong> {{ profile.gender|default:"Not set"|capfirst }}
                     </div>
                 </div>
             </div>
 
             <div class="info-box">
-                <strong>Date of Birth:</strong> {{ profile.date_of_birth|default:"Not set" }}
+                <strong data-i18n="Date of Birth:">Date of Birth:</strong> {{ profile.date_of_birth|default:"Not set" }}
             </div>
 
             <div class="info-box">
-                <strong>Email:</strong> {{ profile.user.email }}
+                <strong data-i18n="Email:">Email:</strong> {{ profile.user.email }}
             </div>
 
             <div class="info-box">
-                <strong>Address:</strong> {{ profile.address|default:"Not set" }}
+                <strong data-i18n="Address:">Address:</strong> {{ profile.address|default:"Not set" }}
             </div>
 
             <div class="info-box">
-                <strong>Bio:</strong> {{ profile.bio|default:"Not set" }}
+                <strong data-i18n="Bio:">Bio:</strong> {{ profile.bio|default:"Not set" }}
             </div>
 
             <div class="info-box">
-                <strong>Socials:</strong> 
+                <strong data-i18n="Socials:">Socials:</strong> 
                 {% if profile.facebook %}FB: {{ profile.facebook }} | {% endif %}
                 {% if profile.instagram %}IG: {{ profile.instagram }}{% endif %}
-                {% if not profile.facebook and not profile.instagram %}None set{% endif %}
+                {% if not profile.facebook and not profile.instagram %}<span data-i18n="None set">None set</span>{% endif %}
             </div>
 
         </div>
 
-        <a href="{% url 'edit_profile' %}" class="btn-edit mt-4">Edit Profile</a>
-        <a href="{% url 'add_success_story' %}" class="btn-edit mt-3" style="background:#1e88ff;">Share Success Story</a>
+        <a href="{% url 'edit_profile' %}" class="btn-edit mt-4" data-i18n="Edit Profile">Edit Profile</a>
+        <a href="{% url 'add_success_story' %}" class="btn-edit mt-3" style="background:#1e88ff;" data-i18n="Share Success Story">Share Success Story</a>
 
     </div>
 </div>
 
-<a href="{% url 'home' %}" 
-   style="
-     position: fixed;
-     bottom: 20px;
-     right: 20px;
-     background:#007bff;
-     padding:12px 18px;
-     border-radius: 50px;
-     color:white;
-     font-weight:bold;
-     text-decoration:none;
-     font-size:16px;
-     z-index: 9999;
-     box-shadow:0 4px 8px rgba(0,0,0,0.3);
-   ">
-    🏠 Home
-</a>
 {% include "chatbox_partial.html" %}
-</body>
-</html>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

@@ -60,12 +60,12 @@
   <div class="video-hub-hero mb-4">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
       <div>
-        <h2 class="mb-1">{% trans "Daily Challenge Videos" %}</h2>
-        <div class="text-white-50">{% trans "Every proof video uploaded by members — updated live as the community completes challenges." %}</div>
+        <h2 class="mb-1" data-i18n="Daily Challenge Videos">{% trans "Daily Challenge Videos" %}</h2>
+        <div class="text-white-50" data-i18n="Every proof video uploaded by members — updated live as the community completes challenges.">{% trans "Every proof video uploaded by members — updated live as the community completes challenges." %}</div>
       </div>
       <form method="get" class="d-flex gap-2" style="min-width: min(520px, 100%);">
-        <input name="q" value="{{ q }}" class="form-control" placeholder="{% trans 'Search by username or challenge…' %}">
-        <button class="btn btn-outline-light" type="submit">{% trans "Search" %}</button>
+        <input name="q" value="{{ q }}" class="form-control" placeholder="{% trans 'Search by username or challenge…' %}" data-i18n-placeholder="Search by username or challenge…">
+        <button class="btn btn-outline-light" type="submit" data-i18n="Search">{% trans "Search" %}</button>
       </form>
     </div>
   </div>
@@ -84,12 +84,12 @@
             </div>
             <div class="mt-2 text-white-50" style="font-size: 13px;">
               <span class="me-2">{{ s.challenge.title }}</span>
-              <span class="badge badge-soft rounded-pill me-2">+{{ s.coins_granted }} coins</span>
+              <span class="badge badge-soft rounded-pill me-2">+{{ s.coins_granted }} <span data-i18n="coins">coins</span></span>
               {% if s.coins_granted > 0 %}
                 {% if s.coins_approved %}
-                  <span class="badge badge-approved rounded-pill">{% trans "Approved" %}</span>
+                  <span class="badge badge-approved rounded-pill" data-i18n="Approved">{% trans "Approved" %}</span>
                 {% else %}
-                  <span class="badge badge-pending rounded-pill">{% trans "Pending" %}</span>
+                  <span class="badge badge-pending rounded-pill" data-i18n="Pending">{% trans "Pending" %}</span>
                 {% endif %}
               {% endif %}
             </div>
@@ -97,8 +97,8 @@
 
           <div class="comment-box p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <div class="fw-bold">{% trans "Comments" %}</div>
-              <div class="text-white-50" style="font-size: 12px;">{{ s.comments.count }} {% trans "total" %}</div>
+              <div class="fw-bold" data-i18n="Comments">{% trans "Comments" %}</div>
+              <div class="text-white-50" style="font-size: 12px;">{{ s.comments.count }} <span data-i18n="total">{% trans "total" %}</span></div>
             </div>
 
             <div class="d-grid gap-2 mb-3" style="max-height: 170px; overflow: auto;">
@@ -110,8 +110,8 @@
                       <div class="text-white-50" style="font-size: 11px;">{{ c.created_at|date:"M d, h:i A" }}</div>
                       {% if request.user.is_staff or request.user.id == c.user_id %}
                         <div class="comment-actions">
-                          <button type="button" class="btn btn-sm btn-outline-light js-edit-comment">{% trans "Edit" %}</button>
-                          <button type="button" class="btn btn-sm btn-outline-danger js-delete-comment">{% trans "Delete" %}</button>
+                          <button type="button" class="btn btn-sm btn-outline-light js-edit-comment" data-i18n="Edit">{% trans "Edit" %}</button>
+                          <button type="button" class="btn btn-sm btn-outline-danger js-delete-comment" data-i18n="Delete">{% trans "Delete" %}</button>
                         </div>
                       {% endif %}
                     </div>
@@ -119,15 +119,15 @@
                   <div class="text-white-50 js-comment-text" style="font-size: 13px; margin-top: 4px;">{{ c.text }}</div>
                 </div>
               {% empty %}
-                <div class="text-white-50" style="font-size: 13px;">{% trans "No comments yet. Be the first." %}</div>
+                <div class="text-white-50" style="font-size: 13px;" data-i18n="No comments yet. Be the first.">{% trans "No comments yet. Be the first." %}</div>
               {% endfor %}
             </div>
 
             <form method="post" action="{% url 'add_challenge_video_comment' s.id %}">
               {% csrf_token %}
               <div class="input-group">
-                <input name="text" class="form-control" maxlength="1000" placeholder="{% trans 'Write a comment…' %}" required>
-                <button class="btn btn-outline-light" type="submit">{% trans "Post" %}</button>
+                <input name="text" class="form-control" maxlength="1000" placeholder="{% trans 'Write a comment…' %}" required data-i18n-placeholder="Write a comment…">
+                <button class="btn btn-outline-light" type="submit" data-i18n="Post">{% trans "Post" %}</button>
               </div>
             </form>
           </div>
@@ -136,8 +136,8 @@
     {% empty %}
       <div class="col-12">
         <div class="video-hub-hero text-center p-5">
-          <h4 class="mb-2">{% trans "No videos yet" %}</h4>
-          <div class="text-white-50">{% trans "Complete a Daily Challenge and upload a proof video to appear here." %}</div>
+          <h4 class="mb-2" data-i18n="No videos yet">{% trans "No videos yet" %}</h4>
+          <div class="text-white-50" data-i18n="Complete a Daily Challenge and upload a proof video to appear here.">{% trans "Complete a Daily Challenge and upload a proof video to appear here." %}</div>
         </div>
       </div>
     {% endfor %}
@@ -148,27 +148,27 @@
       <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link bg-transparent text-white border-secondary" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a>
+            <a class="page-link bg-transparent text-white border-secondary" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}" data-i18n="Previous">{% trans "Previous" %}</a>
           </li>
         {% else %}
           <li class="page-item disabled">
-            <span class="page-link bg-transparent text-white-50 border-secondary">{% trans "Previous" %}</span>
+            <span class="page-link bg-transparent text-white-50 border-secondary" data-i18n="Previous">{% trans "Previous" %}</span>
           </li>
         {% endif %}
 
         <li class="page-item disabled">
           <span class="page-link bg-transparent text-white border-secondary">
-            {% trans "Page" %} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            <span data-i18n="Page">{% trans "Page" %}</span> {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
           </span>
         </li>
 
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link bg-transparent text-white border-secondary" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">{% trans "Next" %}</a>
+            <a class="page-link bg-transparent text-white border-secondary" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}" data-i18n="Next">{% trans "Next" %}</a>
           </li>
         {% else %}
           <li class="page-item disabled">
-            <span class="page-link bg-transparent text-white-50 border-secondary">{% trans "Next" %}</span>
+            <span class="page-link bg-transparent text-white-50 border-secondary" data-i18n="Next">{% trans "Next" %}</span>
           </li>
         {% endif %}
       </ul>
@@ -197,7 +197,7 @@
       if (!commentId) return;
 
       if (deleteBtn) {
-        if (!confirm('Delete this comment?')) return;
+        if (!confirm('Delete this comment?')) return; // data-i18n handled in JS
         const res = await fetch(`/team/comments/${commentId}/delete/`, {
           method: 'POST',
           headers: {
@@ -215,7 +215,7 @@
       if (editBtn) {
         const textEl = item.querySelector('.js-comment-text');
         const oldText = (textEl?.textContent || '').trim();
-        const next = prompt('Edit your comment', oldText);
+        const next = prompt('Edit your comment', oldText); // data-i18n handled in JS
         if (next === null) return;
         const newText = next.trim();
         if (!newText) return;

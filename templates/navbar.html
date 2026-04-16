@@ -118,7 +118,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
     font-size: 13px;
     flex: 0 0 24px;
@@ -209,6 +209,94 @@
     color: #fff;
   }
 
+  #navbar .theme-toggle-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+  }
+
+  #navbar .theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  [data-theme="light"] #navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  [data-theme="light"] #navbar .navbar-brand {
+    background: #f0f0f0;
+  }
+
+  [data-theme="light"] #navbar .main_menu .nav-link,
+  [data-theme="light"] #navbar .auth-nav .nav-link {
+    color: #212529;
+  }
+
+  [data-theme="light"] #navbar .main_menu .nav-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #212529;
+  }
+
+  [data-theme="light"] #navbar .feature-dropdown-menu {
+    background: #ffffff;
+    border-color: #dee2e6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  [data-theme="light"] #navbar .feature-dropdown-item {
+    color: #212529 !important;
+  }
+
+  [data-theme="light"] #navbar .feature-dropdown-item:hover,
+  [data-theme="light"] #navbar .feature-dropdown-item:focus {
+    color: #fff !important;
+  }
+
+  [data-theme="light"] #navbar .feature-icon {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme="light"] #navbar .notification-trigger,
+  [data-theme="light"] #navbar .notification-trigger i {
+    color: #212529 !important;
+  }
+
+  [data-theme="light"] #navbar .notification-menu {
+    background: #ffffff;
+    border-color: #dee2e6;
+  }
+
+  [data-theme="light"] #navbar .notification-title {
+    color: #212529;
+  }
+
+  [data-theme="light"] #navbar .notification-item {
+    color: #495057 !important;
+  }
+
+  [data-theme="light"] #navbar .notification-clear {
+    color: #6c757d;
+  }
+
+  [data-theme="light"] #navbar .theme-toggle-btn {
+    color: #212529;
+    border-color: #dee2e6;
+  }
+
+  [data-theme="light"] #navbar .theme-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: #adb5bd;
+  }
+
   #navbar .auth-user-item {
     display: flex;
     align-items: center;
@@ -243,6 +331,10 @@
     #navbar .navbar-collapse.show {
       display: block;
     }
+
+    [data-theme="light"] #navbar .navbar-collapse {
+      background: rgba(255, 255, 255, 0.98);
+    }
   }
 </style>
 <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
@@ -253,107 +345,97 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 main_menu">
-<li class="nav-item"><a class="nav-link" href="{% url 'home' %}">{% trans "Home" %}</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'home' %}" data-i18n="Home">Home</a></li>
 <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        {% trans "Explore" %}
+    <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="Explore">
+        Explore
     </a>
     <ul class="dropdown-menu shadow feature-dropdown-menu" aria-labelledby="exploreDropdown">
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'about' %}">
                 <span class="feature-icon"><i class="fa-solid fa-circle-info"></i></span>
-                <span class="feature-label">{% trans "About Us" %}</span>
+                <span class="feature-label" data-i18n="About Us">About Us</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'team' %}">
                 <span class="feature-icon"><i class="fa-solid fa-video"></i></span>
-                <span class="feature-label">{% trans "Video Gallery" %}</span>
+                <span class="feature-label" data-i18n="Video Gallery">Video Gallery</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'gallery' %}">
                 <span class="feature-icon"><i class="fa-regular fa-images"></i></span>
-                <span class="feature-label">{% trans "Gallery" %}</span>
+                <span class="feature-label" data-i18n="Gallery">Gallery</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'testimonial' %}">
                 <span class="feature-icon"><i class="fa-solid fa-quote-left"></i></span>
-                <span class="feature-label">{% trans "Testimonial" %}</span>
+                <span class="feature-label" data-i18n="Testimonial">Testimonial</span>
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'contact' %}">
                 <span class="feature-icon"><i class="fa-regular fa-envelope"></i></span>
-                <span class="feature-label">{% trans "Contact" %}</span>
+                <span class="feature-label" data-i18n="Contact">Contact</span>
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
         <li class="px-2">
-            <div class="text-white-50" style="font-size: 12px; padding: 4px 10px;">{% trans "Language" %}</div>
+            <div class="text-white-50" style="font-size: 12px; padding: 4px 10px;" data-i18n="Language">Language</div>
         </li>
         <li>
-            <form action="{% url 'set_language' %}" method="post" class="m-0">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <input type="hidden" name="language" value="en">
-                <button type="submit" class="dropdown-item feature-dropdown-item" style="width: 100%; background: transparent; border: 0;">
-                    <span class="feature-icon"><i class="fa-solid fa-language"></i></span>
-                    <span class="feature-label">{% trans "English" %}</span>
-                </button>
-            </form>
+            <button type="button" onclick="setLanguage('en')" class="dropdown-item feature-dropdown-item" style="width: 100%; background: transparent; border: 0;">
+                <span class="feature-icon"><i class="fa-solid fa-language"></i></span>
+                <span class="feature-label" data-i18n="English">English</span>
+            </button>
         </li>
         <li>
-            <form action="{% url 'set_language' %}" method="post" class="m-0">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <input type="hidden" name="language" value="bn">
-                <button type="submit" class="dropdown-item feature-dropdown-item" style="width: 100%; background: transparent; border: 0;">
-                    <span class="feature-icon"><i class="fa-solid fa-language"></i></span>
-                    <span class="feature-label">{% trans "Bangla" %}</span>
-                </button>
-            </form>
+            <button type="button" onclick="setLanguage('bn')" class="dropdown-item feature-dropdown-item" style="width: 100%; background: transparent; border: 0;">
+                <span class="feature-icon"><i class="fa-solid fa-language"></i></span>
+                <span class="feature-label" data-i18n="Bangla">Bangla</span>
+            </button>
         </li>
     </ul>
 </li>
 
 <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        {% trans "Features" %}
+    <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="Features">
+        Features
     </a>
     <ul class="dropdown-menu shadow feature-dropdown-menu" aria-labelledby="featuresDropdown">
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'workout' %}">
                 <span class="feature-icon">🏋️</span>
-                <span class="feature-label">AI Push-up Counter</span>
+                <span class="feature-label" data-i18n="AI Push-up Counter">AI Push-up Counter</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'diet' %}">
                 <span class="feature-icon">🥗</span>
-                <span class="feature-label">Diet Plans</span>
+                <span class="feature-label" data-i18n="Diet Plans">Diet Plans</span>
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'progress_tracker' %}">
                 <span class="feature-icon">📊</span>
-                <span class="feature-label">Progress Tracker</span>
+                <span class="feature-label" data-i18n="Progress Tracker">Progress Tracker</span>
             </a>
         </li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'exercise_library' %}">
                 <span class="feature-icon"><i class="fa-solid fa-dumbbell"></i></span>
-                <span class="feature-label">Exercise Library</span>
+                <span class="feature-label" data-i18n="Exercise Library">Exercise Library</span>
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
         <li>
             <a class="dropdown-item feature-dropdown-item" href="{% url 'live_training_dashboard' %}">
                 <span class="feature-icon"><i class="fa-solid fa-video"></i></span>
-                <span class="feature-label">{% trans "Live Training" %}</span>
+                <span class="feature-label" data-i18n="Live Training">Live Training</span>
             </a>
         </li>
     </ul>
@@ -361,6 +443,11 @@
 
 </ul>
 <ul class="navbar-nav mb-2 mb-lg-0 ms-lg-4 auth-nav align-items-lg-center">
+    <li class="nav-item me-3">
+        <button type="button" class="theme-toggle-btn" onclick="toggleTheme()" id="navbarThemeToggle" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+    </li>
 {% if user.is_authenticated %}
     <li class="nav-item dropdown me-2">
         <a class="nav-link position-relative notification-trigger" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -370,7 +457,7 @@
             {% endif %}
         </a>
         <ul class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationDropdown">
-            <li class="notification-title">{% trans "Notifications" %}</li>
+            <li class="notification-title" data-i18n="Notifications">Notifications</li>
             <li><hr class="dropdown-divider"></li>
             {% for item in navbar_notifications %}
                 <li>
@@ -380,10 +467,10 @@
                     </a>
                 </li>
             {% empty %}
-                <li><span class="dropdown-item notification-item info">{% trans "No new notifications" %}</span></li>
+                <li><span class="dropdown-item notification-item info" data-i18n="No new notifications">No new notifications</span></li>
             {% endfor %}
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item notification-item info" href="{% url 'notification_history' %}">{% trans "View all notifications" %}</a></li>
+            <li><a class="dropdown-item notification-item info" href="{% url 'notification_history' %}" data-i18n="View all notifications">View all notifications</a></li>
         </ul>
     </li>
     <li class="nav-item d-flex align-items-center auth-user-item">
@@ -401,18 +488,18 @@
         {% if user.trainer_account %}
           <a href="{% url 'trainer_profile' %}" class="nav-link d-flex align-items-center me-3">
             <i class="fa-solid fa-user-tie me-2"></i>
-            <span class="d-none d-lg-inline">{% trans "Trainer Profile" %}</span>
+            <span class="d-none d-lg-inline" data-i18n="Trainer Profile">Trainer Profile</span>
           </a>
         {% endif %}
 
         <form action="{% url 'logout' %}" method="post" style="display: inline;">
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Logout" %}</button>
+            <button type="submit" class="btn btn-sm btn-outline-danger" data-i18n="Logout">Logout</button>
         </form>
     </li>
 {% else %}
-    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
-    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 ms-2" href="{% url 'signup' %}">{% trans "Sign Up" %}</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}" data-i18n="Login">Login</a></li>
+    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 ms-2" href="{% url 'signup' %}" data-i18n="Sign Up">Sign Up</a></li>
 {% endif %}
 </ul>
       </div>
@@ -423,12 +510,10 @@
     const nav = document.getElementById('navbar');
     if (!nav) return;
 
-    // Keep non-home pages below fixed navbar.
     if (window.location.pathname !== '/') {
       document.body.style.paddingTop = '86px';
     }
 
-    // Mobile toggler fallback (works without Bootstrap JS).
     const toggler = nav.querySelector('.navbar-toggler');
     const collapse = nav.querySelector('#navbarSupportedContent');
     if (toggler && collapse) {
@@ -527,5 +612,44 @@
         // Let the <a href> navigate to history page.
       });
     });
+
+    // Theme Toggle Functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      // Update icon
+      const themeIcon = document.getElementById('themeIcon');
+      if (themeIcon) {
+        if (newTheme === 'dark') {
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        } else {
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        }
+      }
+    }
+
+    // Initialize theme on page load
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      
+      const themeIcon = document.getElementById('themeIcon');
+      if (themeIcon) {
+        if (savedTheme === 'dark') {
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        } else {
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        }
+      }
+    })();
   })();
 </script>

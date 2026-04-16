@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.safestring import mark_safe
 import uuid
 
 
@@ -23,6 +24,10 @@ class Plan(models.Model):
 
     def BDT (self):
         return self.title
+    
+    def safe_description(self):
+        """Return description as safe HTML to prevent escaping"""
+        return mark_safe(self.description)
 
 
 

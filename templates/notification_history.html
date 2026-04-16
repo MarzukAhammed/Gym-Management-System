@@ -79,11 +79,11 @@
     <div class="glass">
       <div class="head">
         <div>
-          <h4 class="title">Notification History</h4>
-          <div class="sub">All your recent notifications in one place.</div>
+          <h4 class="title" data-i18n="Notification History">Notification History</h4>
+          <div class="sub" data-i18n="All your recent notifications in one place.">All your recent notifications in one place.</div>
         </div>
         <a class="btn-outline-soft" href="{% url 'home' %}">
-          <i class="fa-solid fa-house"></i> Home
+          <i class="fa-solid fa-house"></i> <span data-i18n="Home">Home</span>
         </a>
       </div>
 
@@ -96,7 +96,7 @@
           </div>
         </div>
       {% empty %}
-        <div class="empty">No notifications yet.</div>
+        <div class="empty" data-i18n="No notifications yet.">No notifications yet.</div>
       {% endfor %}
     </div>
   </div>

@@ -156,6 +156,22 @@ msgstr "বাংলা"
 msgid "Features"
 msgstr "ফিচারসমূহ"
 
+#: .\templates\navbar.html:330
+msgid "AI Push-up Counter"
+msgstr "এআই পুশ-আপ কাউন্টার"
+
+#: .\templates\navbar.html:336
+msgid "Diet Plans"
+msgstr "ডায়েট প্ল্যান"
+
+#: .\templates\navbar.html:343
+msgid "Progress Tracker"
+msgstr "প্রোগ্রেস ট্র্যাকার"
+
+#: .\templates\navbar.html:349
+msgid "Exercise Library"
+msgstr "এক্সারসাইজ লাইব্রেরি"
+
 #: .\templates\navbar.html:356
 msgid "Live Training"
 msgstr "লাইভ ট্রেনিং"

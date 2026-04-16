@@ -101,8 +101,8 @@
 
     <div class="premium-card">
       <div class="premium-header">
-        <h2>Contact Us</h2>
-        <p>Need help with your plan, workouts, or account? Send us a message and our team will get back to you.</p>
+        <h2 data-i18n="Contact Us">Contact Us</h2>
+        <p data-i18n="Need help with your plan, workouts, or account? Send us a message and our team will get back to you.">Need help with your plan, workouts, or account? Send us a message and our team will get back to you.</p>
       </div>
 
       <div class="premium-body">
@@ -110,7 +110,7 @@
           {% csrf_token %}
 
           <div class="mb-3">
-            <label class="form-label" for="{{ form.name.id_for_label }}">Your Name</label>
+            <label class="form-label" for="{{ form.name.id_for_label }}" data-i18n="Your Name">Your Name</label>
             {{ form.name }}
             {% if form.name.errors %}
               <div class="field-error">{{ form.name.errors|striptags }}</div>
@@ -118,7 +118,7 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label" for="{{ form.email.id_for_label }}">Your Email</label>
+            <label class="form-label" for="{{ form.email.id_for_label }}" data-i18n="Your Email">Your Email</label>
             {{ form.email }}
             {% if form.email.errors %}
               <div class="field-error">{{ form.email.errors|striptags }}</div>
@@ -126,7 +126,7 @@
           </div>
 
           <div class="mb-2">
-            <label class="form-label" for="{{ form.message.id_for_label }}">Your Message</label>
+            <label class="form-label" for="{{ form.message.id_for_label }}" data-i18n="Your Message">Your Message</label>
             {{ form.message }}
             {% if form.message.errors %}
               <div class="field-error">{{ form.message.errors|striptags }}</div>
@@ -137,8 +137,8 @@
             <div class="field-error mb-2">{{ form.non_field_errors|striptags }}</div>
           {% endif %}
 
-          <button type="submit" class="btn btn-premium w-100 mt-3">Send Message</button>
-          <div class="premium-note">We usually reply within 24 hours.</div>
+          <button type="submit" class="btn btn-premium w-100 mt-3" data-i18n="Send Message">Send Message</button>
+          <div class="premium-note" data-i18n="We usually reply within 24 hours.">We usually reply within 24 hours.</div>
         </form>
       </div>
     </div>

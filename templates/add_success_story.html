@@ -42,23 +42,23 @@
 {% include "navbar.html" %}
 <div class="story-wrap">
   <div class="story-card">
-    <h3 class="mb-3">Share Your Success Story</h3>
-    <p class="text-light mb-4">Your story may appear in the home page success slider and motivate others.</p>
+    <h3 class="mb-3" data-i18n="Share Your Success Story">Share Your Success Story</h3>
+    <p class="text-light mb-4" data-i18n="Your story may appear in the home page success slider and motivate others.">Your story may appear in the home page success slider and motivate others.</p>
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="mb-3">
-        <label class="form-label">Title</label>
+        <label class="form-label" data-i18n="Title">Title</label>
         {{ form.title }}
       </div>
       <div class="mb-3">
-        <label class="form-label">Your Story</label>
+        <label class="form-label" data-i18n="Your Story">Your Story</label>
         {{ form.story }}
       </div>
       <div class="mb-4">
-        <label class="form-label">Photo (optional)</label>
+        <label class="form-label" data-i18n="Photo (optional)">Photo (optional)</label>
         {{ form.photo }}
       </div>
-      <button type="submit" class="btn btn-primary px-4">Publish Story</button>
+      <button type="submit" class="btn btn-primary px-4" data-i18n="Publish Story">Publish Story</button>
     </form>
   </div>
 </div>

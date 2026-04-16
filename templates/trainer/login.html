@@ -56,8 +56,8 @@
 <body>
   <div class="glass">
     <div class="head">
-      <h3 class="title">Trainer Portal</h3>
-      <div class="sub">Login to manage sessions and start live training.</div>
+      <h3 class="title" data-i18n="Trainer Portal">Trainer Portal</h3>
+      <div class="sub" data-i18n="Login to manage sessions and start live training.">Login to manage sessions and start live training.</div>
     </div>
     <div class="body">
       {% if messages %}
@@ -69,16 +69,16 @@
       <form method="post">
         {% csrf_token %}
         <div class="mb-3">
-          <label class="form-label">Email</label>
+          <label class="form-label" data-i18n="Email">Email</label>
           <input type="email" name="email" class="form-control" placeholder="trainer@email.com" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Password</label>
+          <label class="form-label" data-i18n="Password">Password</label>
           <input type="password" name="password" class="form-control" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-premium">Login</button>
+        <button type="submit" class="btn-premium" data-i18n="Login">Login</button>
       </form>
-      <div class="mt-3 hint">If you don’t have credentials, ask the admin.</div>
+      <div class="mt-3 hint" data-i18n="If you don't have credentials, ask the admin.">If you don't have credentials, ask the admin.</div>
     </div>
   </div>
   {% include "chatbox_partial.html" %}

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Diet Plans</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
     <style>
         body {
             background: #0f172a;
@@ -65,8 +66,8 @@
 {% include "navbar.html" %}
 
 <div class="container py-5">
-    <h2 class="text-center mb-5">🥗 Premium Diet Plans</h2>
-    <p class="text-center text-muted small mb-4" style="max-width: 640px; margin-left: auto; margin-right: auto;">
+    <h2 class="text-center mb-5" data-i18n="🥗 Premium Diet Plans">🥗 Premium Diet Plans</h2>
+    <p class="text-center text-muted small mb-4" style="max-width: 640px; margin-left: auto; margin-right: auto;" data-i18n="Plans are numbered #1, #2, … (oldest first). In chat, say e.g. delete diet plan 2 to remove only that plan, or delete all diet plans to remove every saved plan.">
         Plans are numbered <strong>#1, #2, …</strong> (oldest first). In chat, say e.g.
         <em>delete diet plan 2</em> to remove only that plan, or <em>delete all diet plans</em> to remove every saved plan.
     </p>
@@ -75,21 +76,21 @@
         {% for plan in plans %}
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="diet-card h-100">
-                <div class="text-secondary small mb-1">Plan #{{ forloop.counter }}</div>
+                <div class="text-secondary small mb-1" data-i18n="Plan #">Plan #</div>{{ forloop.counter }}
                 <div class="diet-title">{{ plan.title }}</div>
 
                 <div class="meal mt-3">
-                    <h6>🍳 Breakfast</h6>
+                    <h6 data-i18n="🍳 Breakfast">🍳 Breakfast</h6>
                     <p>{{ plan.breakfast }}</p>
                 </div>
 
                 <div class="meal">
-                    <h6>🍛 Lunch</h6>
+                    <h6 data-i18n="🍛 Lunch">🍛 Lunch</h6>
                     <p>{{ plan.lunch }}</p>
                 </div>
 
                 <div class="meal">
-                    <h6>🍽 Dinner</h6>
+                    <h6 data-i18n="🍽 Dinner">🍽 Dinner</h6>
                     <p>{{ plan.dinner }}</p>
                 </div>
 
@@ -99,10 +100,57 @@
             </div>
         </div>
         {% empty %}
-        <p class="empty-text">No diet plans added yet.</p>
+        <p class="empty-text" data-i18n="No diet plans added yet.">No diet plans added yet.</p>
         {% endfor %}
     </div>
 </div>
+<script>
+  const translations = {
+    en: {
+      "🥗 Premium Diet Plans": "🥗 Premium Diet Plans",
+      "Plans are numbered #1, #2, … (oldest first). In chat, say e.g. delete diet plan 2 to remove only that plan, or delete all diet plans to remove every saved plan.": "Plans are numbered <strong>#1, #2, …</strong> (oldest first). In chat, say e.g. <em>delete diet plan 2</em> to remove only that plan, or <em>delete all diet plans</em> to remove every saved plan.",
+      "Plan #": "Plan #",
+      "🍳 Breakfast": "🍳 Breakfast",
+      "🍛 Lunch": "🍛 Lunch",
+      "🍽 Dinner": "🍽 Dinner",
+      "No diet plans added yet.": "No diet plans added yet."
+    },
+    bn: {
+      "🥗 Premium Diet Plans": "🥗 প্রিমিয়াম ডায়েট প্ল্যান",
+      "Plans are numbered #1, #2, … (oldest first). In chat, say e.g. delete diet plan 2 to remove only that plan, or delete all diet plans to remove every saved plan.": "প্ল্যানগুলি নম্বরযুক্ত <strong>#1, #2, …</strong> (পুরানো আগে)। চ্যাটে বলুন যেমন <em>ডায়েট প্ল্যান 2 মুছুন</em> শুধুমাত্র সেই প্ল্যানটি মুছতে, অথবা <em>সব ডায়েট প্ল্যান মুছুন</em> সব সংরক্ষিত প্ল্যান মুছতে।",
+      "Plan #": "প্ল্যান #",
+      "🍳 Breakfast": "🍳 সকালের নাস্তা",
+      "🍛 Lunch": "🍛 দুপুরের খাবার",
+      "🍽 Dinner": "🍽 রাতের খাবার",
+      "No diet plans added yet.": "এখনও কোনো ডায়েট প্ল্যান যোগ করা হয়নি।"
+    }
+  };
+
+  function applyTranslations(lang) {
+    const trans = translations[lang] || translations.en;
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      if (trans[key]) {
+        element.innerHTML = trans[key];
+      }
+    });
+  }
+
+  function getSavedLanguage() {
+    return localStorage.getItem('language') || 'en';
+  }
+
+  function setLanguage(lang) {
+    localStorage.setItem('language', lang);
+    applyTranslations(lang);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const currentLang = getSavedLanguage();
+    applyTranslations(currentLang);
+  });
+</script>
 <script src="{% static 'js/script.js' %}"></script>
 {% include "chatbox_partial.html" %}
 </body>

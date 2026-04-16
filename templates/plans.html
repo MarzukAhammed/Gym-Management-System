@@ -20,6 +20,8 @@
     border-radius: 18px;
     overflow: hidden;
     height: 100%;
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
     box-shadow: 0 16px 38px rgba(0,0,0,0.28);
   }
@@ -77,6 +79,11 @@
     font-size: 14px;
   }
   .feature-list i { color: #22c55e; margin-top: 3px; }
+  .plan-description {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
   .faq-card {
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 18px;
@@ -91,15 +98,15 @@
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
       <div>
         <div class="text-white-50" style="font-size: 13px; letter-spacing: .35px;">M-POWER FITNESS LAB</div>
-        <h2 class="mt-2 mb-2 fw-bold">{% trans "Membership Plans" %}</h2>
+        <h2 class="mt-2 mb-2 fw-bold" data-i18n="Membership Plans">{% trans "Membership Plans" %}</h2>
         <div class="text-white-50" style="max-width: 820px;">
-          {% trans "Pick a plan, complete payment, and unlock your premium training experience. You can join challenges, earn Gym Coins, and book live sessions." %}
+          <div data-i18n="Pick a plan, complete payment, and unlock your premium training experience. You can join challenges, earn Gym Coins, and book live sessions.">{% trans "Pick a plan, complete payment, and unlock your premium training experience. You can join challenges, earn Gym Coins, and book live sessions." %}</div>
         </div>
       </div>
       <div class="d-flex gap-2 flex-wrap">
-        <span class="badge badge-soft rounded-pill px-3 py-2"><i class="fa-solid fa-bolt me-2"></i>{% trans "Instant access after verification" %}</span>
-        <span class="badge badge-soft rounded-pill px-3 py-2"><i class="fa-solid fa-shield-halved me-2"></i>{% trans "Secure payments" %}</span>
-        <span class="badge badge-soft rounded-pill px-3 py-2"><i class="fa-solid fa-trophy me-2"></i>{% trans "Earn Gym Coins" %}</span>
+        <span class="badge badge-soft rounded-pill px-3 py-2"><i class="fa-solid fa-bolt me-2"></i><span data-i18n="Instant access after verification">{% trans "Instant access after verification" %}</span></span>
+        <span class="badge badge-soft rounded-pill px-3 py-2"><i class="fa-solid fa-shield-halved me-2"></i><span data-i18n="Secure payments">{% trans "Secure payments" %}</span></span>
+        <span class="badge badge-soft rounded-pill px-3 py-2"><i class="fa-solid fa-trophy me-2"></i><span data-i18n="Earn Gym Coins">{% trans "Earn Gym Coins" %}</span></span>
       </div>
     </div>
   </div>
@@ -109,44 +116,59 @@
       <div class="col-12 col-md-6 col-lg-4">
         <div class="plan-card">
           <div class="plan-thumb">
-            {% if plan.image %}
+            {% if forloop.counter == 1 %}
+              <img src="{% static 'images/Team-2.jpg' %}" alt="{{ plan.title }}">
+            {% elif forloop.counter == 2 %}
+              <img src="{% static 'images/team-4.jpg' %}" alt="{{ plan.title }}">
+            {% elif forloop.counter == 3 %}
+              <img src="{% static 'images/slide-img-1.jpg' %}" alt="{{ plan.title }}">
+            {% elif plan.image %}
               <img src="{{ plan.image.url }}" alt="{{ plan.title }}">
             {% else %}
               <img src="{% static 'images/membership-1.jpg' %}" alt="{{ plan.title }}">
             {% endif %}
           </div>
-          <div class="p-4">
+          <div class="p-4 d-flex flex-column flex-grow-1">
             <div class="d-flex justify-content-between align-items-start gap-3">
               <div>
-                <h3 class="mb-1" style="font-weight: 900;">{{ plan.title }}</h3>
+                <div class="text-white-50" style="font-size: 12px; letter-spacing: .35px;">M-POWER FITNESS LAB</div>
+                <h3 class="mt-2 mb-1" style="font-weight: 800;">
+                  {% if PLAN_TRANSLATIONS %}
+                    {% for key, value in PLAN_TRANSLATIONS.items %}
+                      {% if key == plan.title %}
+                        {{ value.title }}
+                      {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    {{ plan.title }}
+                  {% endif %}
+                </h3>
                 <div class="text-white-50" style="font-size: 13px;">{{ plan.duration }}</div>
               </div>
               <div class="text-end">
-                <div class="text-white-50" style="font-size: 12px;">{% trans "Price" %}</div>
+                <div class="text-white-50" style="font-size: 12px;" data-i18n="Price">{% trans "Price" %}</div>
                 <div class="plan-price">৳{{ plan.price }}</div>
               </div>
             </div>
 
-            <div class="mt-3 text-white-50" style="font-size: 14px;">
-              {{ plan.description|linebreaks }}
+            <div class="mt-3 text-white-50 plan-description" style="font-size: 14px;">
+              {% if PLAN_TRANSLATIONS %}
+                {% for key, value in PLAN_TRANSLATIONS.items %}
+                  {% if key == plan.title %}
+                    {{ value.description|linebreaks }}
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                {{ plan.description|linebreaks }}
+              {% endif %}
             </div>
 
             <div class="mt-3" style="height: 1px; background: rgba(255,255,255,0.10);"></div>
 
-            <div class="mt-3">
-              <div class="fw-bold mb-2">{% trans "What you get" %}</div>
-              <ul class="feature-list">
-                <li><i class="fa-solid fa-check"></i><span>{% trans "Daily Challenge access + streak tracking" %}</span></li>
-                <li><i class="fa-solid fa-check"></i><span>{% trans "Gym Coins rewards (admin-approved)" %}</span></li>
-                <li><i class="fa-solid fa-check"></i><span>{% trans "Progress Tracker + BMR insights" %}</span></li>
-                <li><i class="fa-solid fa-check"></i><span>{% trans "Video Gallery community feed" %}</span></li>
-              </ul>
-            </div>
-
-            <div class="d-grid gap-2 mt-4">
-              <a href="{% url 'join' %}?plan={{ plan.id }}" class="btn btn-cta">{% trans "Join Now" %}</a>
+            <div class="d-grid gap-2 mt-auto mt-4">
+              <a href="{% url 'join' %}?plan={{ plan.id }}" class="btn btn-cta" data-i18n="Join Now">{% trans "Join Now" %}</a>
               <a href="{% url 'payment' %}" class="btn btn-outline-light" style="border-radius: 999px; padding: 12px 16px;">
-                {% trans "How payment works" %}
+                <span data-i18n="How payment works">{% trans "How payment works" %}</span>
               </a>
             </div>
           </div>
@@ -155,8 +177,8 @@
     {% empty %}
       <div class="col-12">
         <div class="plans-hero text-center p-5">
-          <h4 class="mb-2">{% trans "No plans available right now." %}</h4>
-          <div class="text-white-50">{% trans "Please check back soon." %}</div>
+          <h4 class="mb-2" data-i18n="No plans available right now.">{% trans "No plans available right now." %}</h4>
+          <div class="text-white-50" data-i18n="Please check back soon.">{% trans "Please check back soon." %}</div>
         </div>
       </div>
     {% endfor %}
@@ -165,31 +187,31 @@
   <div class="row g-3 g-lg-4 mt-4">
     <div class="col-12 col-lg-7">
       <div class="faq-card p-4">
-        <h4 class="fw-bold mb-3">{% trans "Frequently Asked Questions" %}</h4>
+        <h4 class="fw-bold mb-3" data-i18n="Frequently Asked Questions">{% trans "Frequently Asked Questions" %}</h4>
         <div class="mb-3">
-          <div class="fw-bold">{% trans "When do I get access after payment?" %}</div>
-          <div class="text-white-50">{% trans "After admin verifies your payment, your plan will show as active on your profile." %}</div>
+          <div class="fw-bold" data-i18n="When do I get access after payment?">{% trans "When do I get access after payment?" %}</div>
+          <div class="text-white-50" data-i18n="After admin verifies your payment, your plan will show as active on your profile.">{% trans "After admin verifies your payment, your plan will show as active on your profile." %}</div>
         </div>
         <div class="mb-3">
-          <div class="fw-bold">{% trans "Can I earn Gym Coins?" %}</div>
-          <div class="text-white-50">{% trans "Yes. Complete Daily Challenges and upload proof videos. Coins are added after admin approval." %}</div>
+          <div class="fw-bold" data-i18n="Can I earn Gym Coins?">{% trans "Can I earn Gym Coins?" %}</div>
+          <div class="text-white-50" data-i18n="Yes. Complete Daily Challenges and upload proof videos. Coins are added after admin approval.">{% trans "Yes. Complete Daily Challenges and upload proof videos. Coins are added after admin approval." %}</div>
         </div>
         <div>
-          <div class="fw-bold">{% trans "Can I change plans later?" %}</div>
-          <div class="text-white-50">{% trans "Yes. You can join again with a different plan when you’re ready." %}</div>
+          <div class="fw-bold" data-i18n="Can I change plans later?">{% trans "Can I change plans later?" %}</div>
+          <div class="text-white-50" data-i18n="Yes. You can join again with a different plan when you're ready.">{% trans "Yes. You can join again with a different plan when you're ready." %}</div>
         </div>
       </div>
     </div>
     <div class="col-12 col-lg-5">
       <div class="faq-card p-4 h-100">
-        <h4 class="fw-bold mb-2">{% trans "Need help choosing?" %}</h4>
-        <div class="text-white-50 mb-3">{% trans "Tell us your goal and we’ll recommend the best plan." %}</div>
+        <h4 class="fw-bold mb-2" data-i18n="Need help choosing?">{% trans "Need help choosing?" %}</h4>
+        <div class="text-white-50 mb-3" data-i18n="Tell us your goal and we'll recommend the best plan.">{% trans "Tell us your goal and we'll recommend the best plan." %}</div>
         <div class="d-grid gap-2">
           <a href="{% url 'contact' %}" class="btn btn-outline-light" style="border-radius: 999px; padding: 12px 16px;">
-            {% trans "Contact Support" %}
+            <span data-i18n="Contact Support">{% trans "Contact Support" %}</span>
           </a>
           <a href="{% url 'live_training_dashboard' %}" class="btn btn-outline-light" style="border-radius: 999px; padding: 12px 16px;">
-            {% trans "Explore Live Training" %}
+            <span data-i18n="Explore Live Training">{% trans "Explore Live Training" %}</span>
           </a>
         </div>
       </div>

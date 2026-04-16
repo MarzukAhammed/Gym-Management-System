@@ -723,17 +723,24 @@ font-family: 'Oswald', sans-serif; */
 .team_item .image{
     position: relative;
     z-index: 10;
+    height: 350px; /* Fixed height for uniformity */
+    overflow: hidden;
+}
+.team_item .image img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover; /* Ensures images fill the area without stretching */
 }
 .team_item .image .overlay{
-    height: 90%;
-    width: 90%;
-    left: 15px;
+    height: calc(100% - 20px);
+    width: calc(100% - 20px);
+    left: 10px;
     top: 10px;
     border: 5px solid #fff;
     position: absolute;
-    background: rgb(226, 62, 56,0.5);
+    background: rgba(226, 62, 56, 0.5);
     transform: scale(0);
-    transition: all linear .3s;
+    transition: all linear 0.3s;
 }
 .team_item:hover .image .overlay{
     transform: scale(1);

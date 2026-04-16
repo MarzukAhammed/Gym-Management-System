@@ -1,6 +1,6 @@
 {% load static i18n %}
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,145 +9,199 @@
     <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/light-theme.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            transition: 0.4s ease-in-out;
+        :root {
+            --bg-primary: #0b0f1a;
+            --bg-secondary: rgba(16, 26, 44, 0.92);
+            --bg-tertiary: rgba(7, 12, 24, 0.96);
+            --bg-card: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96));
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.72);
+            --text-muted: rgba(255,255,255,0.55);
+            --border-color: rgba(255,255,255,0.12);
+            --input-bg: rgba(255,255,255,0.08);
+            --input-border: rgba(255,255,255,0.18);
+            --link-color: rgba(123, 215, 255, 0.95);
+            --link-hover: #7bd7ff;
+            --accent: #007bff;
         }
 
-        /* Global Premium Dark Theme (override legacy white sections) */
-        body {
-            background: #0b0f1a !important;
-            color: #ffffff !important;
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --bg-card: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            --border-color: #dee2e6;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --link-color: #007bff;
+            --link-hover: #0056b3;
+            --accent: #007bff;
         }
-        /* Make text consistently readable on dark background */
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
         body, p, li, label, small, span, div, strong, em, b, i, input, textarea, select, button {
             color: inherit;
         }
+
         h1, h2, h3, h4, h5, h6 {
-            color: #ffffff !important;
+            color: var(--text-primary) !important;
         }
+
         .text-muted, .text-secondary, .text-body-secondary, .text-body-tertiary, .text-body {
-            color: rgba(255,255,255,0.72) !important;
+            color: var(--text-secondary) !important;
         }
+
         .lead {
-            color: rgba(255,255,255,0.82) !important;
+            color: var(--text-primary) !important;
+            opacity: 0.9;
         }
+
         .breadcrumb, .breadcrumb-item, .breadcrumb-item a {
-            color: rgba(255,255,255,0.75) !important;
+            color: var(--text-secondary) !important;
         }
+
         .alert {
-            color: #fff;
-            border-color: rgba(255,255,255,0.14);
+            color: var(--text-primary);
+            border-color: var(--border-color);
         }
-        .alert a { color: #7bd7ff; }
+
+        .alert a { color: var(--link-color); }
+
         section, main, header, .container-fluid {
             background-color: transparent;
         }
-        .bg-white, .bg-light, .text-bg-light {
-            background: rgba(255,255,255,0.06) !important;
-            color: #fff !important;
-        }
-        .text-dark {
-            color: #fff !important;
-        }
-        .card, .modal-content, .dropdown-menu {
-            background: linear-gradient(165deg, rgba(16, 26, 44, 0.92), rgba(7, 12, 24, 0.96)) !important;
-            color: #fff !important;
-            border-color: rgba(255,255,255,0.12) !important;
-        }
-        .table {
-            color: #fff;
-        }
-        .form-control, .form-select {
-            background: rgba(255,255,255,0.08) !important;
-            border-color: rgba(255,255,255,0.18) !important;
-            color: #fff !important;
-        }
-        .form-control::placeholder {
-            color: rgba(255,255,255,0.55) !important;
-        }
-        a { color: rgba(123, 215, 255, 0.95); }
-        a:hover { color: #7bd7ff; }
 
-        /* Dark Mode */
-        html[data-theme='dark'] {
-            background: #121212;
-            color: #ffffff;
+        .bg-white, .bg-light, .text-bg-light {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
         }
-        html[data-theme='dark'] .card {
-            background: #1f1f1f;
-            color: #fff;
+
+        .text-dark {
+            color: var(--text-primary) !important;
         }
-        html[data-theme='dark'] nav {
-            background: #1f1f1f !important;
+
+        .card, .modal-content, .dropdown-menu {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
         }
+
+        .table {
+            color: var(--text-primary);
+        }
+
+        .form-control, .form-select {
+            background: var(--input-bg) !important;
+            border-color: var(--input-border) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+        }
+
+        a { color: var(--link-color); }
+        a:hover { color: var(--link-hover); }
 
         /* Dark mode switch */
         .theme-toggle {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
-            background: #007bff;
+            background: var(--accent);
             padding: 10px 16px;
             border-radius: 50px;
             font-weight: bold;
             color: #fff;
             cursor: pointer;
             z-index: 9999;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .premium-footer {
             margin-top: 50px;
             background: linear-gradient(165deg, rgba(16, 26, 44, 0.98), rgba(7, 12, 24, 0.98));
             color: #e8ecff;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 1px solid var(--border-color);
         }
+
+        [data-theme="light"] .premium-footer {
+            background: #f8f9fa;
+            color: #212529;
+            border-top: 1px solid var(--border-color);
+        }
+
         .premium-footer .footer-title {
             font-weight: 700;
             font-size: 15px;
             margin-bottom: 12px;
-            color: #fff;
+            color: var(--text-primary);
         }
+
         .premium-footer .footer-text {
-            color: rgba(232, 236, 255, 0.76);
+            color: var(--text-secondary);
             font-size: 14px;
             line-height: 1.5;
         }
+
         .premium-footer .footer-link {
-            color: rgba(232, 236, 255, 0.88);
+            color: var(--text-secondary);
             text-decoration: none;
             display: block;
             margin-bottom: 8px;
             font-size: 14px;
         }
+
         .premium-footer .footer-link:hover {
-            color: #7bd7ff;
+            color: var(--link-hover);
         }
+
         .premium-footer .social-btn {
             width: 34px;
             height: 34px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            color: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-right: 8px;
             text-decoration: none;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--input-bg);
         }
+
         .premium-footer .social-btn:hover {
             background: linear-gradient(130deg, #335bff, #4cc2ff);
+            color: #fff;
         }
+
         .premium-footer .newsletter-input,
         .premium-footer .newsletter-input:focus {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #fff;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
             box-shadow: none;
         }
+
         .premium-footer .newsletter-btn {
             border: 0;
             border-radius: 10px;
@@ -156,44 +210,194 @@
             font-weight: 700;
             background: linear-gradient(130deg, #335bff, #4cc2ff);
         }
+
         .bd-news-box {
             margin-top: 10px;
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
         }
+
         .bd-news-list {
             margin: 0;
             padding-left: 18px;
             font-size: 13px;
-            color: rgba(232, 236, 255, 0.88);
+            color: var(--text-secondary);
             max-height: 138px;
             overflow-y: auto;
         }
+
         .bd-news-list li {
             margin-bottom: 7px;
         }
+
         .bd-news-list a {
-            color: rgba(232, 236, 255, 0.88);
+            color: var(--text-secondary);
             text-decoration: none;
         }
+
         .bd-news-list a:hover {
-            color: #7bd7ff;
+            color: var(--link-hover);
         }
+
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            color: rgba(232, 236, 255, 0.74);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
             font-size: 13px;
+        }
+
+        /* Additional light theme overrides for specific sections */
+        [data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3,
+        [data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6 {
+            color: #212529 !important;
+        }
+
+        [data-theme="light"] .card, [data-theme="light"] .modal-content,
+        [data-theme="light"] .dropdown-menu {
+            background: #ffffff !important;
+            color: #212529 !important;
+            border-color: #dee2e6 !important;
+        }
+
+        [data-theme="light"] .btn-primary {
+            background: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+
+        [data-theme="light"] .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        [data-theme="light"] .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        [data-theme="light"] .btn-outline-success {
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+        [data-theme="light"] .badge {
+            color: #fff;
+        }
+
+        [data-theme="light"] .badge-primary {
+            background: #007bff;
+        }
+
+        [data-theme="light"] .badge-success {
+            background: #28a745;
+        }
+
+        [data-theme="light"] .badge-danger {
+            background: #dc3545;
+        }
+
+        [data-theme="light"] .badge-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        [data-theme="light"] .badge-info {
+            background: #17a2b8;
+        }
+
+        [data-theme="light"] .progress {
+            background: #e9ecef;
+        }
+
+        [data-theme="light"] .progress-bar {
+            background: #007bff;
+        }
+
+        [data-theme="light"] .alert {
+            background: #fff;
+            border-color: #dee2e6;
+            color: #212529;
+        }
+
+        [data-theme="light"] .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        [data-theme="light"] .alert-danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        [data-theme="light"] .alert-warning {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+
+        [data-theme="light"] .alert-info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        [data-theme="light"] .list-group-item {
+            background: #fff;
+            border-color: #dee2e6;
+            color: #212529;
+        }
+
+        [data-theme="light"] .list-group-item-action:hover {
+            background: #f8f9fa;
+        }
+
+        [data-theme="light"] .close {
+            color: #6c757d;
+        }
+
+        [data-theme="light"] .close:hover {
+            color: #000;
+        }
+
+        /* Specific section overrides */
+        [data-theme="light"] .challenge-proof-highlight,
+        [data-theme="light"] .success-story,
+        [data-theme="light"] .membership-plan,
+        [data-theme="light"] .timer-display,
+        [data-theme="light"] .streak-counter,
+        [data-theme="light"] .refund-policy,
+        [data-theme="light"] .about-section,
+        [data-theme="light"] .video-gallery,
+        [data-theme="light"] .diet-plan,
+        [data-theme="light"] .progress-tracker,
+        [data-theme="light"] .exercise-library {
+            color: #212529 !important;
+        }
+
+        [data-theme="light"] .challenge-proof-highlight .card,
+        [data-theme="light"] .success-story .card,
+        [data-theme="light"] .membership-plan .card,
+        [data-theme="light"] .diet-plan .card,
+        [data-theme="light"] .exercise-library .card {
+            background: #ffffff !important;
+            color: #212529 !important;
+        }
+
+        [data-theme="light"] .grid-item, [data-theme="light"] .grid-container {
+            color: #212529 !important;
+        }
+
+        [data-theme="light"] .feature-icon {
+            color: #212529;
         }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-    <!-- Dark mode toggle -->
-    <div class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</div>
 
     <!-- Navbar (Optional Placeholder) -->
     {% block navbar %}
@@ -206,12 +410,13 @@
         {% endblock %}
     </div>
 
+    {% block footer %}
     <footer class="premium-footer mt-5">
         <div class="container py-5">
             <div class="row g-4">
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">M-Power Fitness Lab</h5>
-                    <p class="footer-text mb-3">
+                    <h5 class="footer-title" data-i18n="M-Power Fitness Lab">M-Power Fitness Lab</h5>
+                    <p class="footer-text mb-3" data-i18n="Train smarter with AI-powered fitness, live coaching, and premium wellness tools.">
                         Train smarter with AI-powered fitness, live coaching, and premium wellness tools.
                     </p>
                     <a class="social-btn" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -221,47 +426,48 @@
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">{% trans "Platform" %}</h5>
-                    <a href="{% url 'home' %}" class="footer-link">Home</a>
-                    <a href="{% url 'plans' %}" class="footer-link">Plans</a>
-                    <a href="{% url 'live_training_dashboard' %}" class="footer-link">Live Training</a>
-                    <a href="/trainer/" class="footer-link">{% trans "Trainer Portal" %}</a>
-                    <a href="{% url 'profile' %}" class="footer-link">{% trans "My Profile" %}</a>
+                    <h5 class="footer-title" data-i18n="Platform">Platform</h5>
+                    <a href="{% url 'home' %}" class="footer-link" data-i18n="Home">Home</a>
+                    <a href="{% url 'plans' %}" class="footer-link" data-i18n="Plans">Plans</a>
+                    <a href="{% url 'live_training_dashboard' %}" class="footer-link" data-i18n="Live Training">Live Training</a>
+                    <a href="/trainer/" class="footer-link" data-i18n="Trainer Portal">Trainer Portal</a>
+                    <a href="{% url 'profile' %}" class="footer-link" data-i18n="My Profile">My Profile</a>
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">{% trans "Support & Legal" %}</h5>
-                    <a href="{% url 'contact' %}" class="footer-link">{% trans "Contact Support" %}</a>
-                    <a href="{% url 'about' %}" class="footer-link">{% trans "About Us" %}</a>
-                    <a href="{% url 'privacy_policy' %}" class="footer-link">{% trans "Privacy Policy" %}</a>
-                    <a href="{% url 'terms_conditions' %}" class="footer-link">{% trans "Terms & Conditions" %}</a>
-                    <a href="{% url 'refund_policy' %}" class="footer-link">{% trans "Refund Policy" %}</a>
+                    <h5 class="footer-title" data-i18n="Support & Legal">Support & Legal</h5>
+                    <a href="{% url 'contact' %}" class="footer-link" data-i18n="Contact Support">Contact Support</a>
+                    <a href="{% url 'about' %}" class="footer-link" data-i18n="About Us">About Us</a>
+                    <a href="{% url 'privacy_policy' %}" class="footer-link" data-i18n="Privacy Policy">Privacy Policy</a>
+                    <a href="{% url 'terms_conditions' %}" class="footer-link" data-i18n="Terms & Conditions">Terms & Conditions</a>
+                    <a href="{% url 'refund_policy' %}" class="footer-link" data-i18n="Refund Policy">Refund Policy</a>
                 </div>
 
                 <div class="col-12 col-md-6 col-lg-3">
-                    <h5 class="footer-title">{% trans "Newsletter" %}</h5>
-                    <p class="footer-text">{% trans "Get fitness tips and product updates weekly." %}</p>
+                    <h5 class="footer-title" data-i18n="Newsletter">Newsletter</h5>
+                    <p class="footer-text" data-i18n="Get fitness tips and product updates weekly.">Get fitness tips and product updates weekly.</p>
                     <form onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
                         <div class="mb-2">
                             <input type="email" class="form-control newsletter-input" placeholder="Enter your email" required>
                         </div>
-                        <button type="submit" class="newsletter-btn w-100">{% trans "Subscribe" %}</button>
+                        <button type="submit" class="newsletter-btn w-100" data-i18n="Subscribe">Subscribe</button>
                     </form>
                 </div>
             </div>
 
             <div class="bd-news-box mt-4">
-                <h6 class="footer-title mb-2">{% trans "Live BD News" %}</h6>
+                <h6 class="footer-title mb-2" data-i18n="Live BD News">Live BD News</h6>
                 <ul id="bd-news-list" class="bd-news-list">
-                    <li>Loading latest Bangladesh headlines...</li>
+                    <li data-i18n="Loading latest Bangladesh headlines...">Loading latest Bangladesh headlines...</li>
                 </ul>
             </div>
         </div>
 
-        <div class="footer-bottom py-3 text-center">
+        <div class="footer-bottom py-3 text-center" data-i18n="© {year} M-Power Fitness Lab. All rights reserved.">
             &copy; {% now "Y" %} M-Power Fitness Lab. All rights reserved.
         </div>
     </footer>
+    {% endblock %}
 
 <script>
 function toggleTheme() {
@@ -323,6 +529,916 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
-{% block extra_js %}{% endblock %}
+    <script>
+      function setCookie(name, value, days) {
+        let expires = '';
+        if (days) {
+          const date = new Date();
+          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+          expires = '; expires=' + date.toUTCString();
+        }
+        document.cookie = name + '=' + value + expires + '; path=/';
+      }
+
+      function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split(';') : [];
+        for (let c of cookies) {
+          c = c.trim();
+          if (c.startsWith(name + '=')) return decodeURIComponent(c.substring(name.length + 1));
+        }
+        return '';
+      }
+
+      function setLanguage(lang) {
+        setCookie('django_language', lang, 365);
+        applyTranslations(lang);
+      }
+
+      // Translation dictionary for English and Bangla
+      const translations = {
+        en: {
+          "Home": "Home",
+          "Explore": "Explore",
+          "About Us": "About Us",
+          "Video Gallery": "Video Gallery",
+          "Gallery": "Gallery",
+          "Testimonial": "Testimonial",
+          "Contact": "Contact",
+          "Language": "Language",
+          "English": "English",
+          "Bangla": "Bangla",
+          "Features": "Features",
+          "AI Push-up Counter": "AI Push-up Counter",
+          "Diet Plans": "Diet Plans",
+          "Progress Tracker": "Progress Tracker",
+          "Exercise Library": "Exercise Library",
+          "Live Training": "Live Training",
+          "Notifications": "Notifications",
+          "No new notifications": "No new notifications",
+          "View all notifications": "View all notifications",
+          "Trainer Profile": "Trainer Profile",
+          "Logout": "Logout",
+          "Login": "Login",
+          "Sign Up": "Sign Up",
+          "M-Power Fitness Lab": "M-Power Fitness Lab",
+          "Train smarter with AI-powered fitness, live coaching, and premium wellness tools.": "Train smarter with AI-powered fitness, live coaching, and premium wellness tools.",
+          "Platform": "Platform",
+          "Plans": "Plans",
+          "Trainer Portal": "Trainer Portal",
+          "My Profile": "My Profile",
+          "Support & Legal": "Support & Legal",
+          "Contact Support": "Contact Support",
+          "Privacy Policy": "Privacy Policy",
+          "Terms & Conditions": "Terms & Conditions",
+          "Refund Policy": "Refund Policy",
+          "Newsletter": "Newsletter",
+          "Get fitness tips and product updates weekly.": "Get fitness tips and product updates weekly.",
+          "Subscribe": "Subscribe",
+          "Live BD News": "Live BD News",
+          "Loading latest Bangladesh headlines...": "Loading latest Bangladesh headlines...",
+          "© {year} M-Power Fitness Lab. All rights reserved.": "© {year} M-Power Fitness Lab. All rights reserved.",
+          "🌙 Dark Mode": "🌙 Dark Mode",
+          "TIME TO START": "TIME TO START",
+          "M-Power Fitness Lab": "M-Power Fitness Lab",
+          "Achieve your dream body with premium training, expert trainers & modern facilities.": "Achieve your dream body with premium training, expert trainers & modern facilities.",
+          "Join Now": "Join Now",
+          "View Plans": "View Plans",
+          "TRANSFORM YOURSELF": "TRANSFORM YOURSELF",
+          "Push Beyond Limits": "Push Beyond Limits",
+          "Your fitness journey starts today. Build strength, confidence, and discipline with us.": "Your fitness journey starts today. Build strength, confidence, and discipline with us.",
+          "Get Started": "Get Started",
+          "Daily Challenges": "Daily Challenges",
+          "BE STRONGER EVERY DAY": "BE STRONGER EVERY DAY",
+          "Your Gym, Your Family": "Your Gym, Your Family",
+          "Join a community that motivates you to stay fit and live healthy.": "Join a community that motivates you to stay fit and live healthy.",
+          "Contact Us": "Contact Us",
+          "View Gallery": "View Gallery",
+          "Our Team": "Our Team",
+          "What Our Members Achieve": "What Our Members Achieve",
+          "Read More": "Read More",
+          "No success stories yet!": "No success stories yet!",
+          "Days Passed (365)": "Days Passed (365)",
+          "Hour (Dhaka)": "Hour (Dhaka)",
+          "Minute": "Minute",
+          "Second": "Second",
+          "Nanosecond": "Nanosecond",
+          "Daily Challenge Streak": "Daily Challenge Streak",
+          "Complete today's challenge, upload proof, keep your streak alive, earn Gym Coins.": "Complete today's challenge, upload proof, keep your streak alive, earn Gym Coins.",
+          "Mon": "Mon",
+          "Tue": "Tue",
+          "Wed": "Wed",
+          "Thu": "Thu",
+          "Fri": "Fri",
+          "Sat": "Sat",
+          "Sun": "Sun",
+          "Today": "Today",
+          "Click to record & submit proof": "Click to record & submit proof",
+          "Login to start": "Login to start",
+          "Locked": "Locked",
+          "Available today (login required).": "Available today (login required).",
+          "Preview only": "Preview only",
+          "Available on its day.": "Available on its day.",
+          "No challenges found. Run the seed command or add them in admin.": "No challenges found. Run the seed command or add them in admin.",
+          "ABOUT OUR GYM": "ABOUT OUR GYM",
+          "Where discipline, strength & technology meet": "Where discipline, strength & technology meet",
+          "The Visionary": "The Visionary",
+          "Founder • Technologist • Fitness Enthusiast": "Founder • Technologist • Fitness Enthusiast",
+          "Build bodies, sharpen minds, and create unstoppable confidence.": "Build bodies, sharpen minds, and create unstoppable confidence.",
+          "Our Purpose": "Our Purpose",
+          "🎯 Mission": "🎯 Mission",
+          "To transform lives through fitness, discipline, and a strong mindset — helping individuals become the strongest version of themselves.": "To transform lives through fitness, discipline, and a strong mindset — helping individuals become the strongest version of themselves.",
+          "🚀 Vision": "🚀 Vision",
+          "To build a premium gym ecosystem where fitness meets technology, creating a global community driven by growth and excellence.": "To build a premium gym ecosystem where fitness meets technology, creating a global community driven by growth and excellence.",
+          "🏋️ Our Gym Gallery": "🏋️ Our Gym Gallery",
+          "No gallery items added yet.": "No gallery items added yet.",
+          "AI PUSH-UP COUNTER": "AI PUSH-UP COUNTER",
+          "Ensure your full body is visible for accurate counting.": "Ensure your full body is visible for accurate counting.",
+          "Exit Session": "Exit Session",
+          "🥗 Premium Diet Plans": "🥗 Premium Diet Plans",
+          "Plans are numbered #1, #2, … (oldest first). In chat, say e.g. delete diet plan 2 to remove only that plan, or delete all diet plans to remove every saved plan.": "Plans are numbered #1, #2, … (oldest first). In chat, say e.g. delete diet plan 2 to remove only that plan, or delete all diet plans to remove every saved plan.",
+          "Plan #": "Plan #",
+          "🍳 Breakfast": "🍳 Breakfast",
+          "🍛 Lunch": "🍛 Lunch",
+          "🍽 Dinner": "🍽 Dinner",
+          "No diet plans added yet.": "No diet plans added yet.",
+          "PROGRESS": "PROGRESS",
+          "Personalized Fitness Insights": "Personalized Fitness Insights",
+          "← Back": "← Back",
+          "Current Weight": "Current Weight",
+          "Target:": "Target:",
+          "-- kg remaining": "-- kg remaining",
+          "Weekly Calories": "Weekly Calories",
+          "Burned this week": "Burned this week",
+          "BMI Status": "BMI Status",
+          "Loading height data...": "Loading height data...",
+          "Daily BMR": "Daily BMR",
+          "Calories at rest": "Calories at rest",
+          "🏆 Recent Achievements": "🏆 Recent Achievements",
+          "Weekly Streak": "Weekly Streak",
+          "Track your daily challenge streak": "Track your daily challenge streak",
+          "Strength Builder": "Strength Builder",
+          "Complete 10 workout sessions": "Complete 10 workout sessions",
+          "Goal Crusher": "Goal Crusher",
+          "Reach your target weight": "Reach your target weight",
+          "📊 Weight Trend Analysis": "📊 Weight Trend Analysis",
+          "Starting Weight": "Starting Weight",
+          "Weight Change": "Weight Change",
+          "Weekly Average": "Weekly Average",
+          "Progress to Goal": "Progress to Goal",
+          "Update Today's Progress": "Update Today's Progress",
+          "Today's Weight": "Today's Weight",
+          "Save Record": "Save Record",
+          "Logs today's weight on your journey.": "Logs today's weight on your journey.",
+          "Activity Overview": "Activity Overview",
+          "Contact Us": "Contact Us",
+          "Need help with your plan, workouts, or account? Send us a message and our team will get back to you.": "Need help with your plan, workouts, or account? Send us a message and our team will get back to you.",
+          "Your Name": "Your Name",
+          "Your Email": "Your Email",
+          "Your Message": "Your Message",
+          "Send Message": "Send Message",
+          "We usually reply within 24 hours.": "We usually reply within 24 hours.",
+          "Welcome back": "Welcome back",
+          "Login to continue your training.": "Login to continue your training.",
+          "Username": "Username",
+          "Password": "Password",
+          "Don't have an account?": "Don't have an account?",
+          "Create your account": "Create your account",
+          "Join the community and start earning Gym Coins.": "Join the community and start earning Gym Coins.",
+          "Email": "Email",
+          "Confirm password": "Confirm password",
+          "Create Account": "Create Account",
+          "Already have an account?": "Already have an account?",
+          "Membership Plans": "Membership Plans",
+          "Pick a plan, complete payment, and unlock your premium training experience. You can join challenges, earn Gym Coins, and book live sessions.": "Pick a plan, complete payment, and unlock your premium training experience. You can join challenges, earn Gym Coins, and book live sessions.",
+          "Instant access after verification": "Instant access after verification",
+          "Secure payments": "Secure payments",
+          "Earn Gym Coins": "Earn Gym Coins",
+          "Price": "Price",
+          "How payment works": "How payment works",
+          "No plans available right now.": "No plans available right now.",
+          "Please check back soon.": "Please check back soon.",
+          "Frequently Asked Questions": "Frequently Asked Questions",
+          "When do I get access after payment?": "When do I get access after payment?",
+          "After admin verifies your payment, your plan will show as active on your profile.": "After admin verifies your payment, your plan will show as active on your profile.",
+          "Can I earn Gym Coins?": "Can I earn Gym Coins?",
+          "Yes. Complete Daily Challenges and upload proof videos. Coins are added after admin approval.": "Yes. Complete Daily Challenges and upload proof videos. Coins are added after admin approval.",
+          "Can I change plans later?": "Can I change plans later?",
+          "Yes. You can join again with a different plan when you're ready.": "Yes. You can join again with a different plan when you're ready.",
+          "Need help choosing?": "Need help choosing?",
+          "Tell us your goal and we'll recommend the best plan.": "Tell us your goal and we'll recommend the best plan.",
+          "Contact Support": "Contact Support",
+          "Explore Live Training": "Explore Live Training",
+          "WELCOME": "WELCOME",
+          "WELCOME, ...!": "WELCOME, ...!",
+          "Customize your session by muscle group and intensity.": "Customize your session by muscle group and intensity.",
+          "Ready to Train": "Ready to Train",
+          "Step 1: Target Muscle Group": "Step 1: Target Muscle Group",
+          "All Muscles": "All Muscles",
+          "Chest": "Chest",
+          "Back": "Back",
+          "Legs": "Legs",
+          "Arms": "Arms",
+          "Core": "Core",
+          "Step 2: Training Intensity": "Step 2: Training Intensity",
+          "Beginner": "Beginner",
+          "Intermediate": "Intermediate",
+          "Expert": "Expert",
+          "ROUTINE": "ROUTINE",
+          "Close": "Close",
+          "START TRAINING": "START TRAINING",
+          "Your browser does not support the video tag.": "Your browser does not support the video tag.",
+          "Reps": "Reps",
+          "LOG": "LOG",
+          "Set Complete!": "Set Complete!",
+          "This routine isn't ready yet!": "This routine isn't ready yet!",
+          "Start Set": "Start Set",
+          "Fitness Plan:": "Fitness Plan:",
+          "Fitness Plan": "Fitness Plan",
+          "Gym Coins:": "Gym Coins:",
+          "Earn coins by completing Daily Challenges.": "Earn coins by completing Daily Challenges.",
+          "Membership Plan:": "Membership Plan:",
+          "Payment verified by admin ✅": "Payment verified by admin ✅",
+          "Payment verification pending. We will confirm soon.": "Payment verification pending. We will confirm soon.",
+          "Body & Contact Info": "Body & Contact Info",
+          "Weight:": "Weight:",
+          "Height:": "Height:",
+          "Age:": "Age:",
+          "Gender:": "Gender:",
+          "Date of Birth:": "Date of Birth:",
+          "Email:": "Email:",
+          "Address:": "Address:",
+          "Bio:": "Bio:",
+          "Socials:": "Socials:",
+          "None set": "None set",
+          "Edit Profile": "Edit Profile",
+          "Share Success Story": "Share Success Story",
+          "✨ Edit Full Profile": "✨ Edit Full Profile",
+          "Full Name": "Full Name",
+          "Phone": "Phone",
+          "Weight (kg)": "Weight (kg)",
+          "Height (cm)": "Height (cm)",
+          "Select": "Select",
+          "Male": "Male",
+          "Female": "Female",
+          "Other": "Other",
+          "Fitness Goal / Plan": "Fitness Goal / Plan",
+          "Facebook": "Facebook",
+          "Instagram": "Instagram",
+          "Profile Photo": "Profile Photo",
+          "Save Changes": "Save Changes",
+          "bKash Manual Payment": "bKash Manual Payment",
+          "Send payment to merchant number, then submit confirmation below.": "Send payment to merchant number, then submit confirmation below.",
+          "Send money to this bKash number:": "Send money to this bKash number:",
+          "Reference must include your username and phone number.": "Reference must include your username and phone number.",
+          "Add your bKash QR image at": "Add your bKash QR image at",
+          "Enter Amount (BDT)": "Enter Amount (BDT)",
+          "Enter amount you sent": "Enter amount you sent",
+          "Your Username (Reference)": "Your Username (Reference)",
+          "Enter your website username": "Enter your website username",
+          "Your Phone Number (Reference)": "Your Phone Number (Reference)",
+          "Enter your phone number": "Enter your phone number",
+          "Transaction ID (optional)": "Transaction ID (optional)",
+          "Enter TrxID if available": "Enter TrxID if available",
+          "I confirm I have sent payment to 01760813261 and reference includes my username + number.": "I confirm I have sent payment to 01760813261 and reference includes my username + number.",
+          "I Have Sent Payment": "I Have Sent Payment",
+          "Join Premium Membership": "Join Premium Membership",
+          "Pick your plan and complete your member details.": "Pick your plan and complete your member details.",
+          "Select Plan": "Select Plan",
+          "Phone Number": "Phone Number",
+          "Continue Membership": "Continue Membership",
+          "You can complete payment after membership submission.": "You can complete payment after membership submission.",
+          "Share Your Success Story": "Share Your Success Story",
+          "Your story may appear in the home page success slider and motivate others.": "Your story may appear in the home page success slider and motivate others.",
+          "Title": "Title",
+          "Your Story": "Your Story",
+          "Photo (optional)": "Photo (optional)",
+          "Publish Story": "Publish Story",
+          "Record workout proof": "Record workout proof",
+          "Start Recording": "Start Recording",
+          "Stop": "Stop",
+          "Upload & Submit": "Upload & Submit",
+          "Ready.": "Ready.",
+          "Rules": "Rules",
+          "Record yourself clearly performing the challenge.": "Record yourself clearly performing the challenge.",
+          "Keep the camera stable and well-lit.": "Keep the camera stable and well-lit.",
+          "Upload after recording to update your streak and earn coins.": "Upload after recording to update your streak and earn coins.",
+          "Reward:": "Reward:",
+          "Recording ready to upload.": "Recording ready to upload.",
+          "Recording...": "Recording...",
+          "Camera error. Please allow camera/mic permissions.": "Camera error. Please allow camera/mic permissions.",
+          "Uploading...": "Uploading...",
+          "Upload failed.": "Upload failed.",
+          "Submitted! +${pending} coins pending admin approval. Streak: ${data.current_streak}.": "Submitted! +${pending} coins pending admin approval. Streak: ${data.current_streak}.",
+          "Submitted! Streak: ${data.current_streak}.": "Submitted! Streak: ${data.current_streak}.",
+          "Trainer Reviews": "Trainer Reviews",
+          "Review our trainers and help members choose the best coach.": "Review our trainers and help members choose the best coach.",
+          "All trainers": "All trainers",
+          "Filter": "Filter",
+          "Add Trainer Review": "Add Trainer Review",
+          "Login to review": "Login to review",
+          "By": "By",
+          "No trainer reviews yet.": "No trainer reviews yet.",
+          "Be the first to review a trainer.": "Be the first to review a trainer.",
+          "Daily Challenge Videos": "Daily Challenge Videos",
+          "Every proof video uploaded by members — updated live as the community completes challenges.": "Every proof video uploaded by members — updated live as the community completes challenges.",
+          "Search by username or challenge…": "Search by username or challenge…",
+          "coins": "coins",
+          "Approved": "Approved",
+          "Pending": "Pending",
+          "Comments": "Comments",
+          "total": "total",
+          "Edit": "Edit",
+          "Delete": "Delete",
+          "No comments yet. Be the first.": "No comments yet. Be the first.",
+          "Write a comment…": "Write a comment…",
+          "Post": "Post",
+          "No videos yet": "No videos yet",
+          "Complete a Daily Challenge and upload a proof video to appear here.": "Complete a Daily Challenge and upload a proof video to appear here.",
+          "Previous": "Previous",
+          "Page": "Page",
+          "Next": "Next",
+          "Delete this comment?": "Delete this comment?",
+          "Edit your comment": "Edit your comment",
+          "Privacy Policy": "Privacy Policy",
+          "Last updated:": "Last updated:",
+          "At M-Power Fitness Lab, we respect your privacy. This policy explains what we collect, why we collect it, and how we protect it.": "At M-Power Fitness Lab, we respect your privacy. This policy explains what we collect, why we collect it, and how we protect it.",
+          "Information we collect": "Information we collect",
+          "Account details (username, email).": "Account details (username, email).",
+          "Profile details you choose to add (photo, height, weight, age, fitness goal).": "Profile details you choose to add (photo, height, weight, age, fitness goal).",
+          "Usage data (pages visited, actions like booking a session).": "Usage data (pages visited, actions like booking a session).",
+          "How we use your information": "How we use your information",
+          "To provide features like live training, progress tracking, and personalized recommendations.": "To provide features like live training, progress tracking, and personalized recommendations.",
+          "To improve the platform experience and security.": "To improve the platform experience and security.",
+          "To contact you about important account or service updates.": "To contact you about important account or service updates.",
+          "Data sharing": "Data sharing",
+          "We do not sell your personal data. We may share limited information only when required for service delivery (e.g., live session access) or when legally required.": "We do not sell your personal data. We may share limited information only when required for service delivery (e.g., live session access) or when legally required.",
+          "Cookies": "Cookies",
+          "We use cookies/session storage for login sessions and to keep the site working properly. You can control cookies in your browser settings.": "We use cookies/session storage for login sessions and to keep the site working properly. You can control cookies in your browser settings.",
+          "Security": "Security",
+          "We use standard security practices to protect your data, but no online system can guarantee 100% security.": "We use standard security practices to protect your data, but no online system can guarantee 100% security.",
+          "For privacy questions, contact us via the Contact page.": "For privacy questions, contact us via the Contact page.",
+          "Terms & Conditions": "Terms & Conditions",
+          "By using M-Power Fitness Lab, you agree to the terms below. If you do not agree, please do not use the platform.": "By using M-Power Fitness Lab, you agree to the terms below. If you do not agree, please do not use the platform.",
+          "Accounts": "Accounts",
+          "You are responsible for keeping your login information secure.": "You are responsible for keeping your login information secure.",
+          "Do not share your password with others.": "Do not share your password with others.",
+          "We may suspend accounts for abuse, fraud, or harmful behavior.": "We may suspend accounts for abuse, fraud, or harmful behavior.",
+          "Live sessions are subject to trainer availability and schedule.": "Live sessions are subject to trainer availability and schedule.",
+          "Do not record or redistribute sessions without permission.": "Do not record or redistribute sessions without permission.",
+          "Be respectful to trainers and other users.": "Be respectful to trainers and other users.",
+          "Health disclaimer": "Health disclaimer",
+          "Fitness content is for general educational purposes. Consult a medical professional before starting any exercise or diet plan, especially if you have medical conditions.": "Fitness content is for general educational purposes. Consult a medical professional before starting any exercise or diet plan, especially if you have medical conditions.",
+          "Payments": "Payments",
+          "Payments may require verification. Access to premium features may depend on payment status.": "Payments may require verification. Access to premium features may depend on payment status.",
+          "Changes to terms": "Changes to terms",
+          "We may update these terms from time to time. Continued use of the platform means you accept the updated terms.": "We may update these terms from time to time. Continued use of the platform means you accept the updated terms.",
+          "Review a Trainer": "Review a Trainer",
+          "Pick a trainer and share honest feedback to help other members choose the right coach.": "Pick a trainer and share honest feedback to help other members choose the right coach.",
+          "Trainer": "Trainer",
+          "Rating (1–5)": "Rating (1–5)",
+          "Your comment": "Your comment",
+          "Submit Review": "Submit Review",
+          "Back to Reviews": "Back to Reviews",
+          "Refund Policy": "Refund Policy",
+          "We want you to feel confident using M-Power Fitness Lab. If you need a refund, please review the policy below.": "We want you to feel confident using M-Power Fitness Lab. If you need a refund, please review the policy below.",
+          "Refund request window": "Refund request window",
+          "You must inform us within 3 days of your payment date to request a refund.": "You must inform us within 3 days of your payment date to request a refund.",
+          "Verification & processing time": "Verification & processing time",
+          "After we verify your request, your refund will be returned within 4 days.": "After we verify your request, your refund will be returned within 4 days.",
+          "How to request a refund": "How to request a refund",
+          "Go to our Contact page.": "Go to our Contact page.",
+          "Include your username, payment method, transaction ID (if available), and the reason for the request.": "Include your username, payment method, transaction ID (if available), and the reason for the request.",
+          "Our team will reply after checking the payment details.": "Our team will reply after checking the payment details.",
+          "Notes": "Notes",
+          "Refund eligibility may depend on verification of the payment and account ownership.": "Refund eligibility may depend on verification of the payment and account ownership.",
+          "Processing times may vary based on payment provider.": "Processing times may vary based on payment provider.",
+          "Payment Submitted": "Payment Submitted",
+          "Thank you for submitting your payment request. Our admin team will verify the transaction and let you know after confirmation.": "Thank you for submitting your payment request. Our admin team will verify the transaction and let you know after confirmation.",
+          "Go to Home": "Go to Home",
+          "Congratulations!": "Congratulations!",
+          "Your account has been successfully created.": "Your account has been successfully created.",
+          "Go to Homepage": "Go to Homepage",
+          "Tip:": "Tip:",
+          "Complete a Daily Challenge to start earning Gym Coins.": "Complete a Daily Challenge to start earning Gym Coins.",
+          "⬅ Back Home": "⬅ Back Home",
+          "Trainer Tools": "Trainer Tools",
+          "Trainer Logout": "Trainer Logout",
+          "Create Live Slot": "Create Live Slot",
+          "Users will book from your slots": "Users will book from your slots",
+          "Add Slot": "Add Slot",
+          "Upcoming Slots": "Upcoming Slots",
+          "Activate when you're ready": "Activate when you're ready",
+          "Booked by:": "Booked by:",
+          "Not booked yet": "Not booked yet",
+          "Deactivate": "Deactivate",
+          "Activate": "Activate",
+          "Start Session": "Start Session",
+          "No upcoming slots yet.": "No upcoming slots yet.",
+          "All Slots": "All Slots",
+          "See bookings and manage status": "See bookings and manage status",
+          "Time": "Time",
+          "Status": "Status",
+          "Booked By": "Booked By",
+          "Actions": "Actions",
+          "Active": "Active",
+          "Inactive": "Inactive",
+          "Booked": "Booked",
+          "Start": "Start",
+          "No slots.": "No slots.",
+          "Role:": "Role:",
+          "Joined Year:": "Joined Year:",
+          "Specialty:": "Specialty:",
+          "Program:": "Program:",
+          "Experience:": "Experience:",
+          "⬅ Back to Gallery": "⬅ Back to Gallery",
+          "Trainer Portal": "Trainer Portal",
+          "Login to manage sessions and start live training.": "Login to manage sessions and start live training.",
+          "If you don't have credentials, ask the admin.": "If you don't have credentials, ask the admin.",
+          "Live Room": "Live Room",
+          "Slot:": "Slot:",
+          "Booked by": "Booked by",
+          "Not booked yet": "Not booked yet",
+          "Back": "Back",
+          "Meeting:": "Meeting:",
+          "Live Training Sessions": "Live Training Sessions",
+          "Choose a trainer, book a slot, and join the live stream once it's activated.": "Choose a trainer, book a slot, and join the live stream once it's activated.",
+          "Premium trainer available for live sessions.": "Premium trainer available for live sessions.",
+          "Your booking active": "Your booking active",
+          "Your booking pending": "Your booking pending",
+          "No booking yet": "No booking yet",
+          "Join Live Session": "Join Live Session",
+          "Book Selected Slot": "Book Selected Slot",
+          "No available slots right now. Please check again later.": "No available slots right now. Please check again later.",
+          "Join button will appear when the trainer activates the session.": "Join button will appear when the trainer activates the session.",
+          "No trainers found. Add trainers from the admin panel.": "No trainers found. Add trainers from the admin panel.",
+          "Live Session with": "Live Session with",
+          "Scheduled:": "Scheduled:",
+          "Waiting for trainer activation…": "Waiting for trainer activation…",
+          "The Join experience will appear here automatically once the trainer marks this session as active.": "The Join experience will appear here automatically once the trainer marks this session as active.",
+          "Notification History": "Notification History",
+          "All your recent notifications in one place.": "All your recent notifications in one place.",
+          "No notifications yet.": "No notifications yet.",
+          "Loading Session...": "Loading Session...",
+          "Quit Workout": "Quit Workout",
+          "Exercise Name": "Exercise Name",
+          "Target Muscle": "Target Muscle",
+          "NEXT EXERCISE ➔": "NEXT EXERCISE ➔",
+          "🌙 Dark Mode": "🌙 Dark Mode",
+          "☀️ Light Mode": "☀️ Light Mode"
+        },
+        bn: {
+          "Home": "হোম",
+          "Explore": "এক্সপ্লোর",
+          "About Us": "আমাদের সম্পর্কে",
+          "Video Gallery": "ভিডিও গ্যালারি",
+          "Gallery": "গ্যালারি",
+          "Testimonial": "রিভিউ",
+          "Contact": "যোগাযোগ",
+          "Language": "ভাষা",
+          "English": "ইংরেজি",
+          "Bangla": "বাংলা",
+          "Features": "ফিচারসমূহ",
+          "AI Push-up Counter": "এআই পুশ-আপ কাউন্টার",
+          "Diet Plans": "ডায়েট প্ল্যান",
+          "Progress Tracker": "প্রোগ্রেস ট্র্যাকার",
+          "Exercise Library": "এক্সারসাইজ লাইব্রেরি",
+          "Live Training": "লাইভ ট্রেনিং",
+          "Notifications": "নোটিফিকেশন",
+          "No new notifications": "নতুন নোটিফিকেশন নেই",
+          "View all notifications": "সব নোটিফিকেশন দেখুন",
+          "Trainer Profile": "ট্রেইনার প্রোফাইল",
+          "Logout": "লগআউট",
+          "Login": "লগইন",
+          "Sign Up": "সাইন আপ",
+          "M-Power Fitness Lab": "এম-পাওয়ার ফিটনেস ল্যাব",
+          "Train smarter with AI-powered fitness, live coaching, and premium wellness tools.": "এআই-চালিত ফিটনেস, লাইভ কোচিং এবং প্রিমিয়াম ওয়েলনেস টুলের সাথে আরও স্মার্টভাবে প্রশিক্ষণ নিন।",
+          "Platform": "প্ল্যাটফর্ম",
+          "Plans": "পরিকল্পনা",
+          "Trainer Portal": "ট্রেইনার পোর্টাল",
+          "My Profile": "আমার প্রোফাইল",
+          "Support & Legal": "সহায়তা এবং আইনি",
+          "Contact Support": "সহায়তায় যোগাযোগ করুন",
+          "Privacy Policy": "গোপনীয়তা নীতি",
+          "Terms & Conditions": "শর্তাবলী",
+          "Refund Policy": "রিফান্ড নীতি",
+          "Newsletter": "নিউজলেটার",
+          "Get fitness tips and product updates weekly.": "সাপ্তাহিক ফিটনেস টিপস এবং পণ্য আপডেট পান।",
+          "Subscribe": "সাবস্ক্রাইব করুন",
+          "Live BD News": "লাইভ বিডি নিউজ",
+          "Loading latest Bangladesh headlines...": "সর্বশেষ বাংলাদেশ শিরোনাম লোড হচ্ছে...",
+          "© {year} M-Power Fitness Lab. All rights reserved.": "© {year} এম-পাওয়ার ফিটনেস ল্যাব। সর্বস্বত্ব সংরক্ষিত।",
+          "🌙 Dark Mode": "🌙 ডার্ক মোড",
+          "TIME TO START": "শুরু করার সময়",
+          "M-Power Fitness Lab": "এম-পাওয়ার ফিটনেস ল্যাব",
+          "Achieve your dream body with premium training, expert trainers & modern facilities.": "প্রিমিয়াম প্রশিক্ষণ, বিশেষজ্ঞ ট্রেইনার এবং আধুনিক সুবিধার সাথে আপনার স্বপ্নের শরীর অর্জন করুন।",
+          "Join Now": "এখনই যোগ দিন",
+          "View Plans": "পরিকল্পনা দেখুন",
+          "TRANSFORM YOURSELF": "নিজেকে রূপান্তর করুন",
+          "Push Beyond Limits": "সীমার বাইরে যান",
+          "Your fitness journey starts today. Build strength, confidence, and discipline with us.": "আপনার ফিটনেস যাত্রা আজ থেকে শুরু। আমাদের সাথে শক্তি, আত্মবিশ্বাস এবং শৃঙ্খলা গড়ে তুলুন।",
+          "Get Started": "শুরু করুন",
+          "Daily Challenges": "দৈনিক চ্যালেঞ্জ",
+          "BE STRONGER EVERY DAY": "প্রতিদিন শক্তিশালী হোন",
+          "Your Gym, Your Family": "আপনার জিম, আপনার পরিবার",
+          "Join a community that motivates you to stay fit and live healthy.": "ফিট থাকতে এবং স্বাস্থ্যকর জীবনযাপন করতে অনুপ্রাণিত করে এমন একটি সম্প্রদায়ে যোগ দিন।",
+          "Contact Us": "আমাদের সাথে যোগাযোগ করুন",
+          "View Gallery": "গ্যালারি দেখুন",
+          "Our Team": "আমাদের দল",
+          "What Our Members Achieve": "আমাদের সদস্যরা কী অর্জন করে",
+          "Read More": "আরও পড়ুন",
+          "No success stories yet!": "এখনও কোনো সাফল্যের গল্প নেই!",
+          "Days Passed (365)": "অতিবাহিত দিন (৩৬৫)",
+          "Hour (Dhaka)": "ঘন্টা (ঢাকা)",
+          "Minute": "মিনিট",
+          "Second": "সেকেন্ড",
+          "Nanosecond": "ন্যানোসেকেন্ড",
+          "Daily Challenge Streak": "দৈনিক চ্যালেঞ্জ স্ট্রিক",
+          "Complete today's challenge, upload proof, keep your streak alive, earn Gym Coins.": "আজকের চ্যালেঞ্জ সম্পূর্ণ করুন, প্রমাণ আপলোড করুন, আপনার স্ট্রিক চালু রাখুন, জিম কয়েন অর্জন করুন।",
+          "Mon": "সোম",
+          "Tue": "মঙ্গল",
+          "Wed": "বুধ",
+          "Thu": "বৃহস্পতি",
+          "Fri": "শুক্র",
+          "Sat": "শনি",
+          "Sun": "রবি",
+          "Today": "আজ",
+          "Click to record & submit proof": "রেকর্ড এবং প্রমাণ জমা দিতে ক্লিক করুন",
+          "Login to start": "শুরু করতে লগইন করুন",
+          "Locked": "লক করা",
+          "Available today (login required).": "আজ উপলব্ধ (লগইন প্রয়োজন)।",
+          "Preview only": "শুধুমাত্র প্রিভিউ",
+          "Available on its day.": "তার দিনে উপলব্ধ।",
+          "No challenges found. Run the seed command or add them in admin.": "কোনো চ্যালেঞ্জ পাওয়া যায়নি। সিড কমান্ড চালান বা অ্যাডমিনে যোগ করুন।",
+          "ABOUT OUR GYM": "আমাদের জিম সম্পর্কে",
+          "Where discipline, strength & technology meet": "যেখানে শৃঙ্খলা, শক্তি এবং প্রযুক্তি মিলিত হয়",
+          "The Visionary": "দূরদর্শী",
+          "Founder • Technologist • Fitness Enthusiast": "প্রতিষ্ঠাতা • প্রযুক্তিবিদ • ফিটনেস উৎসাহী",
+          "Build bodies, sharpen minds, and create unstoppable confidence.": "শরীর গড়ুন, মন তীক্ষ্ণ করুন, এবং অপ্রতিরোধ্য আত্মবিশ্বাস তৈরি করুন।",
+          "Our Purpose": "আমাদের উদ্দেশ্য",
+          "🎯 Mission": "🎯 মিশন",
+          "To transform lives through fitness, discipline, and a strong mindset — helping individuals become the strongest version of themselves.": "ফিটনেস, শৃঙ্খলা এবং শক্তিশালী মানসিকতার মাধ্যমে জীবন রূপান্তর করা — ব্যক্তিদের তাদের সবচেয়ে শক্তিশালী সংস্করণে পরিণত হতে সাহায্য করা।",
+          "🚀 Vision": "🚀 দৃষ্টি",
+          "To build a premium gym ecosystem where fitness meets technology, creating a global community driven by growth and excellence.": "একটি প্রিমিয়াম জিম ইকোসিস্টেম তৈরি করা যেখানে ফিটনেস প্রযুক্তির সাথে মিলিত হয়, বৃদ্ধি এবং উৎকর্ষ দ্বারা চালিত একটি বিশ্বব্যাপী সম্প্রদায় তৈরি করা।",
+          "🏋️ Our Gym Gallery": "🏋️ আমাদের জিম গ্যালারি",
+          "No gallery items added yet.": "এখনও কোনো গ্যালারি আইটেম যোগ করা হয়নি।",
+          "AI PUSH-UP COUNTER": "এআই পুশ-আপ কাউন্টার",
+          "Ensure your full body is visible for accurate counting.": "সঠিক গণনার জন্য আপনার পূর্ণ শরীর দৃশ্যমান করুন।",
+          "Exit Session": "সেশন বন্ধ করুন",
+          "🥗 Premium Diet Plans": "🥗 প্রিমিয়াম ডায়েট প্ল্যান",
+          "Plans are numbered #1, #2, … (oldest first). In chat, say e.g. delete diet plan 2 to remove only that plan, or delete all diet plans to remove every saved plan.": "পরিকল্পনাগুলি নম্বরযুক্ত #1, #2, … (প্রাচীনতম প্রথম)। চ্যাটে, বলুন যেমন ডায়েট প্ল্যান 2 মুছে ফেলুন শুধুমাত্র সেই পরিকল্পনাটি সরাতে, বা সব ডায়েট প্ল্যান মুছে ফেলুন প্রতিটি সংরক্ষিত পরিকল্পনা সরাতে।",
+          "Plan #": "পরিকল্পনা #",
+          "🍳 Breakfast": "🍳 নাস্তা",
+          "🍛 Lunch": "🍛 দুপুরের খাবার",
+          "🍽 Dinner": "🍽 রাতের খাবার",
+          "No diet plans added yet.": "এখনও কোনো ডায়েট প্ল্যান যোগ করা হয়নি।",
+          "PROGRESS": "অগ্রগতি",
+          "Personalized Fitness Insights": "ব্যক্তিগত ফিটনেস অন্তর্দৃষ্টি",
+          "← Back": "← ফিরে যান",
+          "Current Weight": "বর্তমান ওজন",
+          "Target:": "লক্ষ্য:",
+          "-- kg remaining": "-- কেজি বাকি",
+          "Weekly Calories": "সাপ্তাহিক ক্যালরি",
+          "Burned this week": "এই সপ্তাহে পোড়ানো হয়েছে",
+          "BMI Status": "বিএমআই স্থিতি",
+          "Loading height data...": "উচ্চতা ডেটা লোড হচ্ছে...",
+          "Daily BMR": "দৈনিক বিএমআর",
+          "Calories at rest": "বিশ্রামে ক্যালরি",
+          "🏆 Recent Achievements": "🏆 সাম্প্রতিক অর্জন",
+          "Weekly Streak": "সাপ্তাহিক স্ট্রিক",
+          "Track your daily challenge streak": "আপনার দৈনিক চ্যালেঞ্জ স্ট্রিক ট্র্যাক করুন",
+          "Strength Builder": "শক্তি নির্মাতা",
+          "Complete 10 workout sessions": "১০টি ওয়ার্কআউট সেশন সম্পূর্ণ করুন",
+          "Goal Crusher": "লক্ষ্য অর্জনকারী",
+          "Reach your target weight": "আপনার লক্ষ্য ওজন অর্জন করুন",
+          "📊 Weight Trend Analysis": "📊 ওজন ট্রেন্ড বিশ্লেষণ",
+          "Starting Weight": "শুরুর ওজন",
+          "Weight Change": "ওজন পরিবর্তন",
+          "Weekly Average": "সাপ্তাহিক গড়",
+          "Progress to Goal": "লক্ষ্যের অগ্রগতি",
+          "Update Today's Progress": "আজকের অগ্রগতি আপডেট করুন",
+          "Today's Weight": "আজকের ওজন",
+          "Save Record": "রেকর্ড সংরক্ষণ করুন",
+          "Logs today's weight on your journey.": "আপনার যাত্রায় আজকের ওজন লগ করে।",
+          "Activity Overview": "কার্যকলাপ ওভারভিউ",
+          "Contact Us": "আমাদের সাথে যোগাযোগ করুন",
+          "Need help with your plan, workouts, or account? Send us a message and our team will get back to you.": "আপনার পরিকল্পনা, ওয়ার্কআউট বা অ্যাকাউন্ট সম্পর্কে সাহায্য প্রয়োজন? আমাদের একটি বার্তা পাঠান এবং আমাদের দল আপনার সাথে যোগাযোগ করবে।",
+          "Your Name": "আপনার নাম",
+          "Your Email": "আপনার ইমেইল",
+          "Your Message": "আপনার বার্তা",
+          "Send Message": "বার্তা পাঠান",
+          "We usually reply within 24 hours.": "আমরা সাধারণত ২৪ ঘন্টার মধ্যে উত্তর দিই।",
+          "Welcome back": "আবার স্বাগতম",
+          "Login to continue your training.": "আপনার প্রশিক্ষণ চালিয়ে যেতে লগইন করুন।",
+          "Username": "ব্যবহারকারী নাম",
+          "Password": "পাসওয়ার্ড",
+          "Don't have an account?": "অ্যাকাউন্ট নেই?",
+          "Create your account": "আপনার অ্যাকাউন্ট তৈরি করুন",
+          "Join the community and start earning Gym Coins.": "সম্প্রদায়ে যোগ দিন এবং জিম কয়েন অর্জন শুরু করুন।",
+          "Email": "ইমেইল",
+          "Confirm password": "পাসওয়ার্ড নিশ্চিত করুন",
+          "Create Account": "অ্যাকাউন্ট তৈরি করুন",
+          "Already have an account?": "ইতিমধ্যেই একটি অ্যাকাউন্ট আছে?",
+          "Membership Plans": "সদস্যতা পরিকল্পনা",
+          "Pick a plan, complete payment, and unlock your premium training experience. You can join challenges, earn Gym Coins, and book live sessions.": "একটি পরিকল্পনা নির্বাচন করুন, পেমেন্ট সম্পূর্ণ করুন, এবং আপনার প্রিমিয়াম প্রশিক্ষণ অভিজ্ঞতা আনলক করুন। আপনি চ্যালেঞ্জে যোগ দিতে পারেন, জিম কয়েন অর্জন করতে পারেন, এবং লাইভ সেশন বুক করতে পারেন।",
+          "Instant access after verification": "যাচাইয়ের পরে তাৎক্ষণিক অ্যাক্সেস",
+          "Secure payments": "নিরাপদ পেমেন্ট",
+          "Earn Gym Coins": "জিম কয়েন অর্জন করুন",
+          "Price": "মূল্য",
+          "How payment works": "পেমেন্ট কীভাবে কাজ করে",
+          "No plans available right now.": "এখন কোনো পরিকল্পনা উপলব্ধ নেই।",
+          "Please check back soon.": "শীঘ্রই ফিরে দেখুন।",
+          "Frequently Asked Questions": "সাধারণ প্রশ্নাবলী",
+          "When do I get access after payment?": "পেমেন্টের পরে আমি কখন অ্যাক্সেস পাব?",
+          "After admin verifies your payment, your plan will show as active on your profile.": "অ্যাডমিন আপনার পেমেন্ট যাচাই করার পরে, আপনার পরিকল্পনাটি আপনার প্রোফাইলে সক্রিয় হিসাবে দেখাবে।",
+          "Can I earn Gym Coins?": "আমি কি জিম কয়েন অর্জন করতে পারি?",
+          "Yes. Complete Daily Challenges and upload proof videos. Coins are added after admin approval.": "হ্যাঁ। দৈনিক চ্যালেঞ্জ সম্পূর্ণ করুন এবং প্রমাণ ভিডিও আপলোড করুন। অ্যাডমিন অনুমোদনের পরে কয়েন যোগ করা হয়।",
+          "Can I change plans later?": "আমি কি পরে পরিকল্পনা পরিবর্তন করতে পারি?",
+          "Yes. You can join again with a different plan when you're ready.": "হ্যাঁ। আপনি প্রস্তুত হলে ভিন্ন পরিকল্পনার সাথে আবার যোগ দিতে পারেন।",
+          "Need help choosing?": "নির্বাচনে সাহায্য প্রয়োজন?",
+          "Tell us your goal and we'll recommend the best plan.": "আমাদের আপনার লক্ষ্য বলুন এবং আমরা সেরা পরিকল্পনা সুপারিশ করব।",
+          "Contact Support": "সাপোর্টে যোগাযোগ করুন",
+          "Explore Live Training": "লাইভ প্রশিক্ষণ এক্সপ্লোর করুন",
+          "WELCOME": "স্বাগতম",
+          "WELCOME, ...!": "স্বাগতম, ...!",
+          "Customize your session by muscle group and intensity.": "পেশি গোষ্ঠী এবং তীব্রতা অনুযায়ী আপনার সেশন কাস্টমাইজ করুন।",
+          "Ready to Train": "প্রশিক্ষণের জন্য প্রস্তুত",
+          "Step 1: Target Muscle Group": "ধাপ ১: লক্ষ্য পেশি গোষ্ঠী",
+          "All Muscles": "সব পেশি",
+          "Chest": "বুক",
+          "Back": "পিঠ",
+          "Legs": "পা",
+          "Arms": "বাহু",
+          "Core": "কোর",
+          "Step 2: Training Intensity": "ধাপ ২: প্রশিক্ষণ তীব্রতা",
+          "Beginner": "শুরুকারী",
+          "Intermediate": "মধ্যবর্তী",
+          "Expert": "বিশেষজ্ঞ",
+          "ROUTINE": "রুটিন",
+          "Close": "বন্ধ করুন",
+          "START TRAINING": "প্রশিক্ষণ শুরু করুন",
+          "Your browser does not support the video tag.": "আপনার ব্রাউজার ভিডিও ট্যাগ সমর্থন করে না।",
+          "Reps": "রেপস",
+          "LOG": "লগ",
+          "Set Complete!": "সেট সম্পূর্ণ!",
+          "This routine isn't ready yet!": "এই রুটিনটি এখনও প্রস্তুত নেই!",
+          "Start Set": "সেট শুরু করুন",
+          "Fitness Plan:": "ফিটনেস পরিকল্পনা:",
+          "Fitness Plan": "ফিটনেস পরিকল্পনা",
+          "Gym Coins:": "জিম কয়েন:",
+          "Earn coins by completing Daily Challenges.": "দৈনিক চ্যালেঞ্জ সম্পূর্ণ করে কয়েন অর্জন করুন।",
+          "Membership Plan:": "সদস্যতা পরিকল্পনা:",
+          "Payment verified by admin ✅": "অ্যাডমিন দ্বারা পেমেন্ট যাচাই করা হয়েছে ✅",
+          "Payment verification pending. We will confirm soon.": "পেমেন্ট যাচাই মুলতুবি আছে। আমরা শীঘ্রই নিশ্চিত করব।",
+          "Body & Contact Info": "শরীর ও যোগাযোগ তথ্য",
+          "Weight:": "ওজন:",
+          "Height:": "উচ্চতা:",
+          "Age:": "বয়স:",
+          "Gender:": "লিঙ্গ:",
+          "Date of Birth:": "জন্ম তারিখ:",
+          "Email:": "ইমেইল:",
+          "Address:": "ঠিকানা:",
+          "Bio:": "বায়ো:",
+          "Socials:": "সোশ্যাল:",
+          "None set": "কিছু সেট করা নেই",
+          "Edit Profile": "প্রোফাইল সম্পাদনা করুন",
+          "Share Success Story": "সাফল্যের গল্প শেয়ার করুন",
+          "✨ Edit Full Profile": "✨ সম্পূর্ণ প্রোফাইল সম্পাদনা করুন",
+          "Full Name": "পূর্ণ নাম",
+          "Phone": "ফোন",
+          "Weight (kg)": "ওজন (কেজি)",
+          "Height (cm)": "উচ্চতা (সেমি)",
+          "Select": "নির্বাচন করুন",
+          "Male": "পুরুষ",
+          "Female": "মহিলা",
+          "Other": "অন্যান্য",
+          "Fitness Goal / Plan": "ফিটনেস লক্ষ্য / পরিকল্পনা",
+          "Facebook": "ফেসবুক",
+          "Instagram": "ইনস্টাগ্রাম",
+          "Profile Photo": "প্রোফাইল ফটো",
+          "Save Changes": "পরিবর্তনসমূহ সংরক্ষণ করুন",
+          "bKash Manual Payment": "বিকাশ ম্যানুয়াল পেমেন্ট",
+          "Send payment to merchant number, then submit confirmation below.": "ব্যবসায়ী নম্বরে পেমেন্ট পাঠান, তারপর নিচে নিশ্চিতকরণ জমা দিন।",
+          "Send money to this bKash number:": "এই বিকাশ নম্বরে টাকা পাঠান:",
+          "Reference must include your username and phone number.": "রেফারেন্সে আপনার ব্যবহারকারী নাম এবং ফোন নম্বর অন্তর্ভুক্ত থাকতে হবে।",
+          "Add your bKash QR image at": "আপনার বিকাশ কিউআর ইমেজ যোগ করুন",
+          "Enter Amount (BDT)": "পরিমাণ লিখুন (বিডিটি)",
+          "Enter amount you sent": "আপনি যে পরিমাণ পাঠিয়েছেন তা লিখুন",
+          "Your Username (Reference)": "আপনার ব্যবহারকারী নাম (রেফারেন্স)",
+          "Enter your website username": "আপনার ওয়েবসাইট ব্যবহারকারী নাম লিখুন",
+          "Your Phone Number (Reference)": "আপনার ফোন নম্বর (রেফারেন্স)",
+          "Enter your phone number": "আপনার ফোন নম্বর লিখুন",
+          "Transaction ID (optional)": "লেনদেন আইডি (ঐচ্ছিক)",
+          "Enter TrxID if available": "উপলব্ধ থাকলে ট্রানজেকশন আইডি লিখুন",
+          "I confirm I have sent payment to 01760813261 and reference includes my username + number.": "আমি নিশ্চিত করছি যে আমি 01760813261 তে পেমেন্ট পাঠিয়েছি এবং রেফারেন্সে আমার ব্যবহারকারী নাম + নম্বর অন্তর্ভুক্ত আছে।",
+          "I Have Sent Payment": "আমি পেমেন্ট পাঠিয়েছি",
+          "Join Premium Membership": "প্রিমিয়াম সদস্যতায় যোগ দিন",
+          "Pick your plan and complete your member details.": "আপনার পরিকল্পনা নির্বাচন করুন এবং আপনার সদস্য বিবরণ সম্পূর্ণ করুন।",
+          "Select Plan": "পরিকল্পনা নির্বাচন করুন",
+          "Phone Number": "ফোন নম্বর",
+          "Continue Membership": "সদস্যতা চালিয়ে যান",
+          "You can complete payment after membership submission.": "সদস্যতা জমা দেওয়ার পরে আপনি পেমেন্ট সম্পূর্ণ করতে পারেন।",
+          "Share Your Success Story": "আপনার সাফল্যের গল্প শেয়ার করুন",
+          "Your story may appear in the home page success slider and motivate others.": "আপনার গল্প হোম পেজের সাফল্য স্লাইডারে দেখা যেতে পারে এবং অন্যদের অনুপ্রাণিত করতে পারে।",
+          "Title": "শিরোনাম",
+          "Your Story": "আপনার গল্প",
+          "Photo (optional)": "ফটো (ঐচ্ছিক)",
+          "Publish Story": "গল্প প্রকাশ করুন",
+          "Record workout proof": "ওয়ার্কআউট প্রমাণ রেকর্ড করুন",
+          "Start Recording": "রেকর্ডিং শুরু করুন",
+          "Stop": "বন্ধ করুন",
+          "Upload & Submit": "আপলোড এবং জমা দিন",
+          "Ready.": "প্রস্তুত।",
+          "Rules": "নিয়মাবলী",
+          "Record yourself clearly performing the challenge.": "চ্যালেঞ্জটি স্পষ্টভাবে সম্পাদন করার ভিডিও রেকর্ড করুন।",
+          "Keep the camera stable and well-lit.": "ক্যামেরা স্থিতিশীল এবং ভালো আলোতে রাখুন।",
+          "Upload after recording to update your streak and earn coins.": "আপনার স্ট্রিক আপডেট করতে এবং কয়েন অর্জন করতে রেকর্ডিংয়ের পরে আপলোড করুন।",
+          "Reward:": "পুরস্কার:",
+          "Recording ready to upload.": "আপলোড করার জন্য রেকর্ডিং প্রস্তুত।",
+          "Recording...": "রেকর্ডিং হচ্ছে...",
+          "Camera error. Please allow camera/mic permissions.": "ক্যামেরা ত্রুটি। দয়া করে ক্যামেরা/মাইক অনুমতি দিন।",
+          "Uploading...": "আপলোড হচ্ছে...",
+          "Upload failed.": "আপলোড ব্যর্থ হয়েছে।",
+          "Submitted! +${pending} coins pending admin approval. Streak: ${data.current_streak}.": "জমা দেওয়া হয়েছে! +${pending} কয়েন অ্যাডমিন অনুমোদনের অপেক্ষায়। স্ট্রিক: ${data.current_streak}.",
+          "Submitted! Streak: ${data.current_streak}.": "জমা দেওয়া হয়েছে! স্ট্রিক: ${data.current_streak}.",
+          "Trainer Reviews": "ট্রেইনার রিভিউ",
+          "Review our trainers and help members choose the best coach.": "আমাদের ট্রেইনারদের রিভিউ করুন এবং সদস্যদের সেরা কোচ নির্বাচন করতে সাহায্য করুন।",
+          "All trainers": "সব ট্রেইনার",
+          "Filter": "ফিল্টার",
+          "Add Trainer Review": "ট্রেইনার রিভিউ যোগ করুন",
+          "Login to review": "রিভিউ করতে লগইন করুন",
+          "By": "দ্বারা",
+          "No trainer reviews yet.": "এখনও কোনো ট্রেইনার রিভিউ নেই।",
+          "Be the first to review a trainer.": "প্রথম ট্রেইনার রিভিউ করার সুযোগ নিন।",
+          "Daily Challenge Videos": "দৈনিক চ্যালেঞ্জ ভিডিও",
+          "Every proof video uploaded by members — updated live as the community completes challenges.": "সদস্যদের দ্বারা আপলোড করা প্রতিটি প্রমাণ ভিডিও — সম্প্রদায় চ্যালেঞ্জ সম্পূর্ণ করার সাথে সাথে লাইভ আপডেট হয়।",
+          "Search by username or challenge…": "ব্যবহারকারী নাম বা চ্যালেঞ্জ দিয়ে অনুসন্ধান করুন…",
+          "coins": "কয়েন",
+          "Approved": "অনুমোদিত",
+          "Pending": "মুলতুবি",
+          "Comments": "মন্তব্য",
+          "total": "মোট",
+          "Edit": "সম্পাদনা করুন",
+          "Delete": "মুছে ফেলুন",
+          "No comments yet. Be the first.": "এখনও কোনো মন্তব্য নেই। প্রথম হোন।",
+          "Write a comment…": "একটি মন্তব্য লিখুন…",
+          "Post": "পোস্ট করুন",
+          "No videos yet": "এখনও কোনো ভিডিও নেই",
+          "Complete a Daily Challenge and upload a proof video to appear here.": "এখানে দেখাতে একটি দৈনিক চ্যালেঞ্জ সম্পূর্ণ করুন এবং একটি প্রমাণ ভিডিও আপলোড করুন।",
+          "Previous": "আগে",
+          "Page": "পেজ",
+          "Next": "পরবর্তী",
+          "Delete this comment?": "এই মন্তব্যটি মুছে ফেলবেন?",
+          "Edit your comment": "আপনার মন্তব্য সম্পাদনা করুন",
+          "Privacy Policy": "গোপনীয়তা নীতি",
+          "Last updated:": "সর্বশেষ আপডেট:",
+          "At M-Power Fitness Lab, we respect your privacy. This policy explains what we collect, why we collect it, and how we protect it.": "এম-পাওয়ার ফিটনেস ল্যাবে, আমরা আপনার গোপনীয়তার প্রতি শ্রদ্ধাশীল। এই নীতি ব্যাখ্যা করে আমরা কী সংগ্রহ করি, কেন আমরা তা সংগ্রহ করি এবং আমরা কীভাবে এটি সুরক্ষিত করি।",
+          "Information we collect": "আমরা যে তথ্য সংগ্রহ করি",
+          "Account details (username, email).": "অ্যাকাউন্ট বিবরণ (ব্যবহারকারী নাম, ইমেইল)।",
+          "Profile details you choose to add (photo, height, weight, age, fitness goal).": "আপনি যে প্রোফাইল বিবরণ যোগ করতে বেছে নেন (ফটো, উচ্চতা, ওজন, বয়স, ফিটনেস লক্ষ্য)।",
+          "Usage data (pages visited, actions like booking a session).": "ব্যবহারের তথ্য (পৃষ্ঠাগুলি পরিদর্শন, সেশন বুকিং ইত্যাদি কর্ম)।",
+          "How we use your information": "আমরা কীভাবে আপনার তথ্য ব্যবহার করি",
+          "To provide features like live training, progress tracking, and personalized recommendations.": "লাইভ প্রশিক্ষণ, অগ্রগতি ট্র্যাকিং এবং ব্যক্তিগতকৃত সুপারিশের মতো বৈশিষ্ট্যগুলি প্রদান করতে।",
+          "To improve the platform experience and security.": "প্ল্যাটফর্ম অভিজ্ঞতা এবং নিরাপত্তা উন্নত করতে।",
+          "To contact you about important account or service updates.": "গুরুত্বপূর্ণ অ্যাকাউন্ট বা সেবা আপডেট সম্পর্কে আপনার সাথে যোগাযোগ করতে।",
+          "Data sharing": "তথ্য ভাগাভাগি",
+          "We do not sell your personal data. We may share limited information only when required for service delivery (e.g., live session access) or when legally required.": "আমরা আপনার ব্যক্তিগত তথ্য বিক্রি করি না। আমরা কেবল সেবা সরবরাহের জন্য প্রয়োজনীয় (যেমন লাইভ সেশন অ্যাক্সেস) বা আইনত প্রয়োজন হলেই সীমিত তথ্য ভাগ করতে পারি।",
+          "Cookies": "কুকিজ",
+          "We use cookies/session storage for login sessions and to keep the site working properly. You can control cookies in your browser settings.": "আমরা লগইন সেশনের জন্য এবং সাইটটি সঠিকভাবে কাজ করার জন্য কুকিজ/সেশন স্টোরেজ ব্যবহার করি। আপনি আপনার ব্রাউজার সেটিংসে কুকিজ নিয়ন্ত্রণ করতে পারেন।",
+          "Security": "নিরাপত্তা",
+          "We use standard security practices to protect your data, but no online system can guarantee 100% security.": "আমরা আপনার তথ্য সুরক্ষিত করতে মানক নিরাপত্তা অনুশীলন ব্যবহার করি, তবে কোনো অনলাইন সিস্টেম ১০০% নিরাপত্তা নিশ্চিত করতে পারে না।",
+          "For privacy questions, contact us via the Contact page.": "গোপনীয়তা সম্পর্কিত প্রশ্নের জন্য, যোগাযোগ পেজের মাধ্যমে আমাদের সাথে যোগাযোগ করুন।",
+          "Terms & Conditions": "শর্তাবলী",
+          "By using M-Power Fitness Lab, you agree to the terms below. If you do not agree, please do not use the platform.": "এম-পাওয়ার ফিটনেস ল্যাব ব্যবহার করে, আপনি নিচের শর্তাবলীতে সম্মত হন। আপনি যদি সম্মত না হন, তবে দয়া করে প্ল্যাটফর্ম ব্যবহার করবেন না।",
+          "Accounts": "অ্যাকাউন্ট",
+          "You are responsible for keeping your login information secure.": "আপনার লগইন তথ্য সুরক্ষিত রাখার দায়িত্ব আপনার।",
+          "Do not share your password with others.": "আপনার পাসওয়ার্ড অন্যের সাথে শেয়ার করবেন না।",
+          "We may suspend accounts for abuse, fraud, or harmful behavior.": "আমরা অপব্যবহার, জালিয়াতি বা ক্ষতিকর আচরণের জন্য অ্যাকাউন্ট স্থগিত করতে পারি।",
+          "Live sessions are subject to trainer availability and schedule.": "লাইভ সেশনগুলি ট্রেইনারের উপলব্ধতা এবং সময়সূচির উপর নির্ভরশীল।",
+          "Do not record or redistribute sessions without permission.": "অনুমতি ছাড়া সেশন রেকর্ড বা পুনরবিতরণ করবেন না।",
+          "Be respectful to trainers and other users.": "ট্রেইনার এবং অন্য ব্যবহারকারীদের প্রতি সম্মান দেখান।",
+          "Health disclaimer": "স্বাস্থ্য দাবিত্যাগ",
+          "Fitness content is for general educational purposes. Consult a medical professional before starting any exercise or diet plan, especially if you have medical conditions.": "ফিটনেস সামগ্রী সাধারণ শিক্ষামূলক উদ্দেশ্যে। কোনো ব্যায়াম বা ডায়েট পরিকল্পনা শুরু করার আগে, বিশেষ করে আপনার চিকিৎসাগত অবস্থা থাকলে, একজন চিকিৎসকের পরামর্শ নিন।",
+          "Payments": "পেমেন্ট",
+          "Payments may require verification. Access to premium features may depend on payment status.": "পেমেন্ট যাচাইয়ের প্রয়োজন হতে পারে। প্রিমিয়াম বৈশিষ্ট্যগুলিতে অ্যাক্সেস পেমেন্ট স্ট্যাটাসের উপর নির্ভর করতে পারে।",
+          "Changes to terms": "শর্তাবলীতে পরিবর্তন",
+          "We may update these terms from time to time. Continued use of the platform means you accept the updated terms.": "আমরা সময়ে সময়ে এই শর্তাবলী আপডেট করতে পারি। প্ল্যাটফর্ম চালিয়ে যাওয়া মানে আপনি আপডেট করা শর্তাবলী গ্রহণ করেন।",
+          "Review a Trainer": "একজন ট্রেইনার রিভিউ করুন",
+          "Pick a trainer and share honest feedback to help other members choose the right coach.": "একজন ট্রেইনার বেছে নিন এবং অন্য সদস্যদের সঠিক কোচ নির্বাচন করতে সাহায্য করতে সৎ মতামত শেয়ার করুন।",
+          "Trainer": "ট্রেইনার",
+          "Rating (1–5)": "রেটিং (১-৫)",
+          "Your comment": "আপনার মন্তব্য",
+          "Submit Review": "রিভিউ জমা দিন",
+          "Back to Reviews": "রিভিউতে ফিরে যান",
+          "Refund Policy": "রিফান্ড নীতি",
+          "We want you to feel confident using M-Power Fitness Lab. If you need a refund, please review the policy below.": "আমরা চাই আপনি এম-পাওয়ার ফিটনেস ল্যাব ব্যবহার করে আত্মবিশ্বাসী হোন। আপনার যদি রিফান্ড প্রয়োজন হয়, দয়া করে নিচের নীতি পর্যালোচনা করুন।",
+          "Refund request window": "রিফান্ড অনুরোধ সময়সীমা",
+          "You must inform us within 3 days of your payment date to request a refund.": "আপনার পেমেন্টের তারিখ থেকে ৩ দিনের মধ্যে রিফান্ড অনুরোধ করতে আমাদের জানাতে হবে।",
+          "Verification & processing time": "যাচাই এবং প্রক্রিয়াকরণ সময়",
+          "After we verify your request, your refund will be returned within 4 days.": "আমরা আপনার অনুরোধ যাচাই করার পরে, আপনার রিফান্ড ৪ দিনের মধ্যে ফেরত দেওয়া হবে।",
+          "How to request a refund": "কীভাবে রিফান্ড অনুরোধ করবেন",
+          "Go to our Contact page.": "আমাদের যোগাযোগ পেজে যান।",
+          "Include your username, payment method, transaction ID (if available), and the reason for the request.": "আপনার ব্যবহারকারী নাম, পেমেন্ট পদ্ধতি, লেনদেন আইডি (যদি উপলব্ধ থাকে) এবং অনুরোধের কারণ অন্তর্ভুক্ত করুন।",
+          "Our team will reply after checking the payment details.": "আমাদের দল পেমেন্ট বিবরণ পরীক্ষা করার পরে উত্তর দেবে।",
+          "Notes": "নোট",
+          "Refund eligibility may depend on verification of the payment and account ownership.": "রিফান্ডের যোগ্যতা পেমেন্ট এবং অ্যাকাউন্টের মালিকানা যাচাইয়ের উপর নির্ভর করতে পারে।",
+          "Processing times may vary based on payment provider.": "প্রক্রিয়াকরণের সময় পেমেন্ট প্রদানকারীর উপর ভিত্তি করে পরিবর্তিত হতে পারে।",
+          "Payment Submitted": "পেমেন্ট জমা দেওয়া হয়েছে",
+          "Thank you for submitting your payment request. Our admin team will verify the transaction and let you know after confirmation.": "আপনার পেমেন্ট অনুরোধ জমা দেওয়ার জন্য ধন্যবাদ। আমাদের অ্যাডমিন দল লেনদেন যাচাই করবে এবং নিশ্চিতকরণের পরে আপনাকে জানাবে।",
+          "Go to Home": "হোমে যান",
+          "Congratulations!": "অভিনন্দন!",
+          "Your account has been successfully created.": "আপনার অ্যাকাউন্ট সফলভাবে তৈরি করা হয়েছে।",
+          "Go to Homepage": "হোমপেজে যান",
+          "Tip:": "টিপ:",
+          "Complete a Daily Challenge to start earning Gym Coins.": "জিম কয়েন অর্জন শুরু করতে একটি দৈনিক চ্যালেঞ্জ সম্পূর্ণ করুন।",
+          "⬅ Back Home": "⬅ হোমে ফিরুন",
+          "Trainer Tools": "ট্রেইনার টুলস",
+          "Trainer Logout": "ট্রেইনার লগআউট",
+          "Create Live Slot": "লাইভ স্লট তৈরি করুন",
+          "Users will book from your slots": "ব্যবহারকারীরা আপনার স্লট থেকে বুক করবে",
+          "Add Slot": "স্লট যোগ করুন",
+          "Upcoming Slots": "আসন্ন স্লটগুলি",
+          "Activate when you're ready": "আপনি প্রস্তুত হলে সক্রিয় করুন",
+          "Booked by:": "বুক করেছে:",
+          "Not booked yet": "এখনও বুক করা হয়নি",
+          "Deactivate": "নিষ্ক্রিয় করুন",
+          "Activate": "সক্রিয় করুন",
+          "Start Session": "সেশন শুরু করুন",
+          "No upcoming slots yet.": "এখনও কোনো আসন্ন স্লট নেই।",
+          "All Slots": "সব স্লট",
+          "See bookings and manage status": "বুকিং দেখুন এবং স্ট্যাটাস পরিচালনা করুন",
+          "Time": "সময়",
+          "Status": "স্ট্যাটাস",
+          "Booked By": "বুক করেছে",
+          "Actions": "কর্ম",
+          "Active": "সক্রিয়",
+          "Inactive": "নিষ্ক্রিয়",
+          "Booked": "বুক করা",
+          "Start": "শুরু",
+          "No slots.": "কোনো স্লট নেই।",
+          "Role:": "ভূমিকা:",
+          "Joined Year:": "যোগদানের বছর:",
+          "Specialty:": "বিশেষত্ব:",
+          "Program:": "প্রোগ্রাম:",
+          "Experience:": "অভিজ্ঞতা:",
+          "⬅ Back to Gallery": "⬅ গ্যালারিতে ফিরুন",
+          "Trainer Portal": "ট্রেইনার পোর্টাল",
+          "Login to manage sessions and start live training.": "সেশন পরিচালনা এবং লাইভ প্রশিক্ষণ শুরু করতে লগইন করুন।",
+          "If you don't have credentials, ask the admin.": "আপনার যদি ক্রেডেনশিয়াল না থাকে, অ্যাডমিনকে জিজ্ঞাসা করুন।",
+          "Live Room": "লাইভ রুম",
+          "Slot:": "স্লট:",
+          "Booked by": "বুক করেছে",
+          "Not booked yet": "এখনও বুক করা হয়নি",
+          "Back": "ফিরে যান",
+          "Meeting:": "মিটিং:",
+          "Live Training Sessions": "লাইভ প্রশিক্ষণ সেশন",
+          "Choose a trainer, book a slot, and join the live stream once it's activated.": "একজন ট্রেইনার বেছে নিন, একটি স্লট বুক করুন, এবং এটি সক্রিয় হলে লাইভ স্ট্রিমে যোগ দিন।",
+          "Premium trainer available for live sessions.": "লাইভ সেশনের জন্য প্রিমিয়াম ট্রেইনার উপলব্ধ।",
+          "Your booking active": "আপনার বুকিং সক্রিয়",
+          "Your booking pending": "আপনার বুকিং মুলতুবি",
+          "No booking yet": "এখনও কোনো বুকিং নেই",
+          "Join Live Session": "লাইভ সেশনে যোগ দিন",
+          "Book Selected Slot": "নির্বাচিত স্লট বুক করুন",
+          "No available slots right now. Please check again later.": "এখন কোনো উপলব্ধ স্লট নেই। পরে আবার চেক করুন।",
+          "Join button will appear when the trainer activates the session.": "ট্রেইনার সেশন সক্রিয় করলে যোগ দিন বাটন দেখা যাবে।",
+          "No trainers found. Add trainers from the admin panel.": "কোনো ট্রেইনার পাওয়া যায়নি। অ্যাডমিন প্যানেল থেকে ট্রেইনার যোগ করুন।",
+          "Live Session with": "লাইভ সেশন সাথে",
+          "Scheduled:": "নির্ধারিত:",
+          "Waiting for trainer activation…": "ট্রেইনার সক্রিয়করণের জন্য অপেক্ষা করছে…",
+          "The Join experience will appear here automatically once the trainer marks this session as active.": "ট্রেইনার এই সেশনটি সক্রিয় হিসাবে চিহ্নিত করলে যোগ দিন অভিজ্ঞতা এখানে স্বয়ংক্রিয়ভাবে উপস্থিত হবে।",
+          "Notification History": "নোটিফিকেশন ইতিহাস",
+          "All your recent notifications in one place.": "আপনার সমস্ত সাম্প্রতিক নোটিফিকেশন এক জায়গায়।",
+          "No notifications yet.": "এখনও কোনো নোটিফিকেশন নেই।",
+          "Loading Session...": "সেশন লোড হচ্ছে...",
+          "Quit Workout": "ওয়ার্কআউট বন্ধ করুন",
+          "Exercise Name": "ব্যায়ামের নাম",
+          "Target Muscle": "টার্গেট মাসল",
+          "NEXT EXERCISE ➔": "পরবর্তী ব্যায়াম ➔",
+          "🌙 Dark Mode": "🌙 ডার্ক মোড",
+          "☀️ Light Mode": "☀️ লাইট মোড"
+        }
+      };
+
+      function applyTranslations(lang) {
+        const trans = translations[lang] || translations.en;
+        console.log('Applying translations for language:', lang);
+        
+        const elements = document.querySelectorAll('[data-i18n]');
+        console.log('Found elements with data-i18n:', elements.length);
+        elements.forEach(element => {
+          const key = element.getAttribute('data-i18n');
+          if (key && trans[key]) {
+            console.log('Translating:', key, '->', trans[key]);
+            element.textContent = trans[key];
+          }
+        });
+      }
+
+      // Apply translations on page load
+      const savedLang = getCookie('django_language') || 'en';
+      console.log('Saved language from cookie:', savedLang);
+      applyTranslations(savedLang);
+    </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
