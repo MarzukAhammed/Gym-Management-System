@@ -470,6 +470,9 @@
                 <li><span class="dropdown-item notification-item info" data-i18n="No new notifications">No new notifications</span></li>
             {% endfor %}
             <li><hr class="dropdown-divider"></li>
+            {% if navbar_notifications %}
+            <li><button type="button" class="dropdown-item notification-item info" id="clearAllNotifications" data-i18n="Clear All Notifications">Clear All Notifications</button></li>
+            {% endif %}
             <li><a class="dropdown-item notification-item info" href="{% url 'notification_history' %}" data-i18n="View all notifications">View all notifications</a></li>
         </ul>
     </li>
@@ -612,6 +615,42 @@
         // Let the <a href> navigate to history page.
       });
     });
+
+    // Clear All Notifications
+    const clearAllBtn = nav.querySelector('#clearAllNotifications');
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fetch('/notifications/clear-all/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          }
+        }).finally(function () {
+          // Remove all notification items
+          nav.querySelectorAll('.notification-item[data-notification-id]').forEach(function (item) {
+            item.closest('li')?.remove();
+          });
+          // Remove the clear all button itself
+          clearAllBtn.closest('li')?.remove();
+          // Remove the badge
+          const badge = nav.querySelector('.notification-badge');
+          if (badge) badge.remove();
+          // Show "No new notifications"
+          const menu = nav.querySelector('.notification-menu');
+          if (menu) {
+            const divider = menu.querySelector('.dropdown-divider');
+            if (divider) {
+              const noNotif = document.createElement('li');
+              noNotif.innerHTML = '<span class="dropdown-item notification-item info" data-i18n="No new notifications">No new notifications</span>';
+              divider.after(noNotif);
+            }
+          }
+        });
+      });
+    }
 
     // Theme Toggle Functionality
     function toggleTheme() {

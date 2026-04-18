@@ -126,12 +126,15 @@
 
             <form method="POST">
             {% csrf_token %}
+            {% if selected_plan %}
+            <input type="hidden" name="plan_id" value="{{ selected_plan.id }}">
+            {% endif %}
 
             <div class="mb-3">
                 <label class="form-label" data-i18n="Enter Amount (BDT)">Enter Amount (BDT)</label>
-                <input type="number" name="amount" class="form-control" 
-                       placeholder="Enter amount you sent" 
-                       value="{% if selected_plan %}{{ selected_plan.price }}{% endif %}" 
+                <input type="number" name="amount" class="form-control"
+                       placeholder="Enter amount you sent"
+                       value="{% if selected_plan %}{{ selected_plan.price }}{% endif %}"
                        {% if selected_plan %}readonly{% endif %}
                        required data-i18n-placeholder="Enter amount you sent">
                 {% if selected_plan %}

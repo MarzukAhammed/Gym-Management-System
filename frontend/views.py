@@ -126,16 +126,17 @@ def join_now(request):
             if Member.objects.filter(email=email).exists():
                 messages.error(request, "A member with this email already exists.")
             else:
+                # Get plan_id from form before saving
+                plan_id = form.cleaned_data.get('plan')
                 member = form.save(commit=False)
                 if request.user.is_authenticated:
                     member.user = request.user
                 member.save()
                 messages.success(request, "🎉 You have successfully joined our gym!")
-                # Get plan_id for payment redirect
-                try:
-                    plan = Plan.objects.get(title=member.plan)
-                    return redirect(f'/payment/?plan={plan.id}')
-                except Plan.DoesNotExist:
+                # Redirect to payment with the plan_id directly from form
+                if plan_id:
+                    return redirect(f'/payment/?plan={plan_id}')
+                else:
                     return redirect('payment')
     else:
         initial = {}
@@ -145,10 +146,11 @@ def join_now(request):
         if plan_id.isdigit():
             try:
                 plan = Plan.objects.get(id=int(plan_id))
-                initial["plan"] = plan.title
+                initial["plan"] = plan.id
             except Plan.DoesNotExist:
                 pass
         form = JoinForm(initial=initial)
+
     return render(request, 'join_now.html', {'form': form})
 
 @login_required
@@ -465,12 +467,13 @@ def diet(request):
         )
     return render(request, 'diet.html', {'plans': plans})
 
-def payment(request):
+def payment(request, plan_name=None):
     if request.method == "POST":
         amount = request.POST.get("amount")
         sender_number = request.POST.get("sender_number")
         reference_username = request.POST.get("reference_username")
         trx_id = request.POST.get("trx_id")
+        plan_id = request.POST.get("plan_id")
 
         if not amount or not sender_number or not reference_username:
             messages.error(request, "Please fill all required payment details.")
@@ -495,14 +498,21 @@ def payment(request):
 
     default_username = request.user.username if request.user.is_authenticated else ""
     
-    # Get selected plan if passed via query parameter
+    # Get selected plan from URL parameter or query parameter (fallback)
     selected_plan = None
-    plan_id = request.GET.get("plan")
-    if plan_id and plan_id.isdigit():
+    if plan_name:
         try:
-            selected_plan = Plan.objects.get(id=int(plan_id))
+            selected_plan = Plan.objects.get(title__iexact=plan_name)
         except Plan.DoesNotExist:
             pass
+    else:
+        # Fallback to query parameter for backward compatibility
+        plan_id = request.GET.get("plan")
+        if plan_id and plan_id.isdigit():
+            try:
+                selected_plan = Plan.objects.get(id=int(plan_id))
+            except Plan.DoesNotExist:
+                pass
     
     return render(request, "payment.html", {
         "default_username": default_username,
@@ -537,6 +547,17 @@ def clear_notification(request):
         if not notif_id:
             return JsonResponse({"status": "error", "message": "notification_id required"}, status=400)
         Notification.objects.filter(id=notif_id, user=request.user).delete()
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+@login_required
+def clear_all_notifications(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "POST only"}, status=405)
+    try:
+        Notification.objects.filter(user=request.user).delete()
         return JsonResponse({"status": "success"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=400)

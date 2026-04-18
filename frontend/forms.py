@@ -110,14 +110,15 @@ class SignupForm(UserCreationForm):
 
 # For Join Now form
 class JoinForm(forms.ModelForm):
+    plan = forms.ChoiceField(choices=[], required=True)
+
     class Meta:
         model = Member
-        fields = ["plan", "phone", "email", "address"]
+        fields = ["phone", "email", "address"]
         widgets = {
             "phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter phone number"}),
             "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter email"}),
             "address": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Enter your address"}),
-            "plan": forms.Select(attrs={"class": "form-control"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -125,11 +126,25 @@ class JoinForm(forms.ModelForm):
         initial_plan = kwargs.get('initial', {}).get('plan')
         super().__init__(*args, **kwargs)
         plans = Plan.objects.all()
-        plan_choices = [(plan.title, f"{plan.title} ({plan.duration}) - {plan.price} BDT") for plan in plans]
+        plan_choices = [(plan.id, f"{plan.title} ({plan.duration}) - {plan.price} BDT") for plan in plans]
         self.fields['plan'].choices = plan_choices
+        self.fields['plan'].widget.attrs["class"] = "form-control"
         # Preserve initial value if it was set
         if initial_plan:
             self.fields['plan'].initial = initial_plan
+
+    def save(self, commit=True):
+        member = super().save(commit=False)
+        plan_id = self.cleaned_data.get('plan')
+        if plan_id:
+            try:
+                plan = Plan.objects.get(id=plan_id)
+                member.plan = plan.title
+            except Plan.DoesNotExist:
+                pass
+        if commit:
+            member.save()
+        return member
 
 class MemberUpdateForm(forms.ModelForm):
     class Meta:

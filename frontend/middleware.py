@@ -1,5 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.utils import timezone
+from datetime import timedelta
 
 
 class AdminOnlySessionMiddleware:
@@ -54,6 +56,14 @@ class NotificationsFromMessagesMiddleware:
             text = str(m.message or "").strip()
             if not text:
                 continue
-            Notification.objects.create(user=request.user, level=level, text=text)
+            # Prevent duplicate notifications: check if same user has same text within last 5 minutes
+            five_minutes_ago = timezone.now() - timedelta(minutes=5)
+            existing = Notification.objects.filter(
+                user=request.user,
+                text=text,
+                created_at__gte=five_minutes_ago
+            ).exists()
+            if not existing:
+                Notification.objects.create(user=request.user, level=level, text=text)
 
         return response
