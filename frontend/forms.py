@@ -110,24 +110,26 @@ class SignupForm(UserCreationForm):
 
 # For Join Now form
 class JoinForm(forms.ModelForm):
-    plan = forms.ModelChoiceField(queryset=Plan.objects.all(), empty_label="Select a Plan")
     class Meta:
         model = Member
         fields = ["plan", "phone", "email", "address"]
         widgets = {
-            "plan": forms.Select(attrs={"class": "form-control"}),  # Use Select for ForeignKey
             "phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter phone number"}),
             "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter email"}),
             "address": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Enter your address"}),
+            "plan": forms.Select(attrs={"class": "form-control"}),
         }
 
     def __init__(self, *args, **kwargs):
+        # Extract initial plan value before calling super
+        initial_plan = kwargs.get('initial', {}).get('plan')
         super().__init__(*args, **kwargs)
-        self.fields["plan"].label_from_instance = self._plan_label
-
-    @staticmethod
-    def _plan_label(plan):
-        return f"{plan.title} ({plan.duration})"
+        plans = Plan.objects.all()
+        plan_choices = [(plan.title, f"{plan.title} ({plan.duration}) - {plan.price} BDT") for plan in plans]
+        self.fields['plan'].choices = plan_choices
+        # Preserve initial value if it was set
+        if initial_plan:
+            self.fields['plan'].initial = initial_plan
 
 class MemberUpdateForm(forms.ModelForm):
     class Meta:

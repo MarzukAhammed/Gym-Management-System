@@ -99,6 +99,14 @@
                 {% endfor %}
             {% endif %}
 
+            {% if selected_plan %}
+            <div class="alert alert-info" style="background: rgba(94, 114, 255, 0.2); border-color: rgba(94, 114, 255, 0.5); color: #fff;">
+                <strong>Selected Plan:</strong> {{ selected_plan.title }} - {{ selected_plan.duration }}
+                <br>
+                <strong>Amount to Pay:</strong> {{ selected_plan.price }} BDT
+            </div>
+            {% endif %}
+
             <div class="merchant-box">
                 <div class="mb-2" data-i18n="Send money to this bKash number:">Send money to this bKash number:</div>
                 <div class="merchant-number">01760813261</div>
@@ -121,7 +129,14 @@
 
             <div class="mb-3">
                 <label class="form-label" data-i18n="Enter Amount (BDT)">Enter Amount (BDT)</label>
-                <input type="number" name="amount" class="form-control" placeholder="Enter amount you sent" required data-i18n-placeholder="Enter amount you sent">
+                <input type="number" name="amount" class="form-control" 
+                       placeholder="Enter amount you sent" 
+                       value="{% if selected_plan %}{{ selected_plan.price }}{% endif %}" 
+                       {% if selected_plan %}readonly{% endif %}
+                       required data-i18n-placeholder="Enter amount you sent">
+                {% if selected_plan %}
+                <small class="text-muted">Amount automatically set for {{ selected_plan.title }}</small>
+                {% endif %}
             </div>
 
             <div class="mb-3">

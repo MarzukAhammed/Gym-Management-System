@@ -14,7 +14,7 @@ staticfiles/
 
 # Virtual env
 venv/
-env/
+env
 ENV/
 
 # OS

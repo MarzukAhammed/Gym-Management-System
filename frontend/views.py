@@ -36,7 +36,8 @@ def _user_has_verified_subscription(user):
             return False
 
         # Check for verified payment directly linked to user or matching username
-        return Payment.objects.filter(
+        from .models import ManualPayment
+        return ManualPayment.objects.filter(
             models.Q(user=user) | models.Q(full_name__iexact=user.username),
             verified=True
         ).exists()
@@ -107,8 +108,15 @@ def join_now(request):
         # If they already filled join details (Member exists + plan chosen), take them to payment.
         existing_member = getattr(request.user, "member", None)
         if existing_member and getattr(existing_member, "plan", None):
-            messages.info(request, "Complete payment to activate your subscription.")
-            return redirect("payment")
+            # Try to find the plan by title to get its ID
+            plan_title = existing_member.plan
+            try:
+                plan = Plan.objects.get(title=plan_title)
+                messages.info(request, "Complete payment to activate your subscription.")
+                return redirect(f'/payment/?plan={plan.id}')
+            except Plan.DoesNotExist:
+                messages.info(request, "Complete payment to activate your subscription.")
+                return redirect("payment")
         # Otherwise let them fill the join form (we can preselect plan from query param).
 
     if request.method == 'POST':
@@ -119,23 +127,28 @@ def join_now(request):
                 messages.error(request, "A member with this email already exists.")
             else:
                 member = form.save(commit=False)
-                selected_plan = form.cleaned_data.get('plan')
-                if selected_plan:
-                    member.plan = selected_plan.title
                 if request.user.is_authenticated:
                     member.user = request.user
                 member.save()
                 messages.success(request, "🎉 You have successfully joined our gym!")
-                return redirect('payment')
+                # Get plan_id for payment redirect
+                try:
+                    plan = Plan.objects.get(title=member.plan)
+                    return redirect(f'/payment/?plan={plan.id}')
+                except Plan.DoesNotExist:
+                    return redirect('payment')
     else:
         initial = {}
         if request.user.is_authenticated and getattr(request.user, "email", None):
             initial["email"] = request.user.email
         plan_id = (request.GET.get("plan") or "").strip()
         if plan_id.isdigit():
-            initial["plan"] = int(plan_id)
+            try:
+                plan = Plan.objects.get(id=int(plan_id))
+                initial["plan"] = plan.title
+            except Plan.DoesNotExist:
+                pass
         form = JoinForm(initial=initial)
-        form.fields['plan'].queryset = Plan.objects.all()
     return render(request, 'join_now.html', {'form': form})
 
 @login_required
@@ -179,7 +192,8 @@ def profile(request):
     # NEW logic: use the direct user link for payment verification.
     # We still fallback to username-based match for legacy payments if needed,
     # but the primary check is the user ForeignKey.
-    verified_payment = Payment.objects.filter(
+    from .models import ManualPayment
+    verified_payment = ManualPayment.objects.filter(
         models.Q(user=request.user) | models.Q(full_name__iexact=request.user.username),
         verified=True
     ).exists()
@@ -468,7 +482,8 @@ def payment(request):
             user = request.user
             reference_username = user.username
 
-        Payment.objects.create(
+        from .models import ManualPayment
+        ManualPayment.objects.create(
             user=user,
             full_name=reference_username,
             phone=sender_number,
@@ -479,7 +494,20 @@ def payment(request):
         return redirect("payment_success")
 
     default_username = request.user.username if request.user.is_authenticated else ""
-    return render(request, "payment.html", {"default_username": default_username})
+    
+    # Get selected plan if passed via query parameter
+    selected_plan = None
+    plan_id = request.GET.get("plan")
+    if plan_id and plan_id.isdigit():
+        try:
+            selected_plan = Plan.objects.get(id=int(plan_id))
+        except Plan.DoesNotExist:
+            pass
+    
+    return render(request, "payment.html", {
+        "default_username": default_username,
+        "selected_plan": selected_plan
+    })
 
 def payment_success(request): return render(request, "payment_success.html")
 

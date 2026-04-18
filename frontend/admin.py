@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import Plan, Trainer, Member, Review, TrainerReview, Contact, GalleryMember, SuccessStory, Payment, TrainingSession, Notification, TrainingSlot, DailyChallenge, ChallengeSubmission, UserChallengeProfile, ChallengeVideoComment
+from .models import Plan, Trainer, Member, Review, TrainerReview, Contact, GalleryMember, SuccessStory, Payment, ManualPayment, TrainingSession, Notification, TrainingSlot, DailyChallenge, ChallengeSubmission, UserChallengeProfile, ChallengeVideoComment
 from .forms import TrainerCreateForm, TrainerAdminForm
 
 admin.site.unregister(Group)
@@ -56,8 +56,8 @@ class MemberAdmin(ActionAdmin):
     list_display = ('user', 'plan', 'delete_button') 
     search_fields = ('user__username', 'plan__title')
 
-@admin.register(Payment)
-class PaymentAdmin(ActionAdmin):
+@admin.register(ManualPayment)
+class ManualPaymentAdmin(ActionAdmin):
     list_display = ('full_name', 'amount', 'verified', 'mark_received_button', 'delete_button')
     search_fields = ('full_name', 'phone', 'transaction_id')
     actions = ['mark_payment_received']
@@ -90,7 +90,7 @@ class PaymentAdmin(ActionAdmin):
         
         # Check if verified status is changing from False to True
         if change:
-            old_obj = Payment.objects.filter(pk=obj.pk).first()
+            old_obj = ManualPayment.objects.filter(pk=obj.pk).first()
             if old_obj and not old_obj.verified and obj.verified:
                 if obj.user:
                     Notification.objects.create(
@@ -101,6 +101,12 @@ class PaymentAdmin(ActionAdmin):
                     )
         
         super().save_model(request, obj, form, change)
+
+@admin.register(Payment)
+class PaymentAdmin(ActionAdmin):
+    list_display = ('transaction_id', 'amount', 'status', 'delete_button')
+    search_fields = ('transaction_id',)
+    list_filter = ('status',)
 
 @admin.register(GalleryMember)
 class GalleryMemberAdmin(ActionAdmin):

@@ -296,7 +296,41 @@ class DietPlan(models.Model):
 
 
 class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments", null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ssl_payments", null=True, blank=True)
+    plan = models.ForeignKey('Plan', on_delete=models.SET_NULL, related_name='payments', null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_id = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled')
+    ], default='pending')
+    payment_type = models.CharField(max_length=20, choices=[
+        ('new', 'New Membership'),
+        ('renewal', 'Membership Renewal')
+    ], default='new')
+    # SSLCommerz fields
+    bank_tran_id = models.CharField(max_length=100, blank=True, null=True)
+    card_type = models.CharField(max_length=100, blank=True, null=True)
+    card_subtype = models.CharField(max_length=100, blank=True, null=True)
+    currency_type = models.CharField(max_length=20, blank=True, null=True)
+    currency_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    store_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    error = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'SSLCommerz Payment'
+        verbose_name_plural = 'SSLCommerz Payments'
+
+    def __str__(self):
+        return f"{self.transaction_id} - {self.amount} BDT"
+
+class ManualPayment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="manual_payments", null=True, blank=True)
     full_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     amount = models.IntegerField()

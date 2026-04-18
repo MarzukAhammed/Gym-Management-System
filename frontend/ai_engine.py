@@ -4,9 +4,11 @@ import requests
 import re
 from groq import Groq # Using Groq since you mentioned Llama-3.3
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
-
+# Load env file from project root
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, 'env'))
 
 def detect_language_mode(user_text):
     """
