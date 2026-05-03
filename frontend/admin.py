@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import Plan, Trainer, Member, Review, TrainerReview, Contact, GalleryMember, SuccessStory, Payment, ManualPayment, TrainingSession, Notification, TrainingSlot, DailyChallenge, ChallengeSubmission, UserChallengeProfile, ChallengeVideoComment
+from .models import Plan, Trainer, Member, Review, TrainerReview, Contact, GalleryMember, SuccessStory, ManualPayment, TrainingSession, Notification, TrainingSlot, DailyChallenge, ChallengeSubmission, UserChallengeProfile, ChallengeVideoComment
 from .forms import TrainerCreateForm, TrainerAdminForm
 
 admin.site.unregister(Group)
@@ -20,11 +20,13 @@ class BaseAdmin(admin.ModelAdmin):
 
 # ২. ActionAdmin (Delete button + Common Search Logic)
 class ActionAdmin(BaseAdmin): 
+    actions = None  # Remove default actions including delete
+    
     def delete_button(self, obj):
         opts = obj._meta
         delete_url = reverse(f'admin:{opts.app_label}_{opts.model_name}_delete', args=[obj.pk])
         return format_html(
-            '<a class="deletelink" href="{}" style="color: #ff4444; font-weight: bold; text-decoration: none;">× Delete</a>',
+            '<a class="deletelink" href="{}" style="color: #ff4444; font-weight: bold; text-decoration: none;">Delete</a>',
             delete_url
         )
     delete_button.short_description = "Action"
@@ -102,11 +104,6 @@ class ManualPaymentAdmin(ActionAdmin):
         
         super().save_model(request, obj, form, change)
 
-@admin.register(Payment)
-class PaymentAdmin(ActionAdmin):
-    list_display = ('transaction_id', 'amount', 'status', 'delete_button')
-    search_fields = ('transaction_id',)
-    list_filter = ('status',)
 
 @admin.register(GalleryMember)
 class GalleryMemberAdmin(ActionAdmin):
@@ -131,7 +128,6 @@ class ChallengeSubmissionAdmin(ActionAdmin):
     list_display = ("challenge", "user", "coins_granted", "coins_approved", "created_at", "approve_button", "delete_button")
     search_fields = ("challenge__title", "user__username")
     list_filter = ("challenge", "coins_approved")
-    actions = ["approve_selected_coins", "revoke_selected_coins"]
 
     def approve_button(self, obj):
         if obj.coins_approved or obj.coins_granted <= 0:

@@ -6,9 +6,19 @@ from groq import Groq # Using Groq since you mentioned Llama-3.3
 from dotenv import load_dotenv
 from pathlib import Path
 
-# Load env file from project root
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(os.path.join(BASE_DIR, 'env'))
+# --- ENVIRONMENT SETUP ---
+# Load env variables from common local filenames to avoid breaking
+# when a machine uses `env` instead of `.env`.
+current_dir = Path(__file__).resolve().parent
+candidate_env_files = [
+    current_dir / ".env",
+    current_dir.parent / ".env",
+    current_dir / "env",
+    current_dir.parent / "env",
+]
+for env_file in candidate_env_files:
+    if env_file.exists():
+        load_dotenv(env_file)
 
 def detect_language_mode(user_text):
     """
@@ -200,13 +210,13 @@ Return STRICT JSON only with this shape:
 
         try:
             response = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_content},
                 ],
-                max_tokens=512,
-                temperature=0.35,
+                max_tokens=260,
+                temperature=0.2,
             )
             return self._enforce_banglish_json(
                 response.choices[0].message.content,

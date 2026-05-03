@@ -67,6 +67,14 @@
             border: 1px solid rgba(255,255,255,0.22);
             border-radius: 12px;
         }
+        select.form-control {
+            background: rgba(12, 18, 34, 0.95);
+            color: #fff;
+        }
+        select.form-control option {
+            background: #0b1225;
+            color: #fff;
+        }
         .form-control:focus {
             background: rgba(255,255,255,0.12);
             color: #fff;
@@ -99,14 +107,6 @@
                 {% endfor %}
             {% endif %}
 
-            {% if selected_plan %}
-            <div class="alert alert-info" style="background: rgba(94, 114, 255, 0.2); border-color: rgba(94, 114, 255, 0.5); color: #fff;">
-                <strong>Selected Plan:</strong> {{ selected_plan.title }} - {{ selected_plan.duration }}
-                <br>
-                <strong>Amount to Pay:</strong> {{ selected_plan.price }} BDT
-            </div>
-            {% endif %}
-
             <div class="merchant-box">
                 <div class="mb-2" data-i18n="Send money to this bKash number:">Send money to this bKash number:</div>
                 <div class="merchant-number">01760813261</div>
@@ -126,20 +126,27 @@
 
             <form method="POST">
             {% csrf_token %}
-            {% if selected_plan %}
-            <input type="hidden" name="plan_id" value="{{ selected_plan.id }}">
-            {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label" data-i18n="Select Membership Plan">Select Membership Plan</label>
+                <select id="planSelect" name="plan_id" class="form-control" required>
+                    <option value="" data-i18n="Choose a plan">Choose a plan</option>
+                    {% for plan in plans %}
+                    <option value="{{ plan.id }}" data-price="{{ plan.price }}" {% if selected_plan_id == plan.id|stringformat:"s" %}selected{% endif %}>
+                        {{ plan.title }} - {{ plan.duration }} ({{ plan.price }} BDT)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
             <div class="mb-3">
                 <label class="form-label" data-i18n="Enter Amount (BDT)">Enter Amount (BDT)</label>
-                <input type="number" name="amount" class="form-control"
+                <input id="amountInput" type="number" name="amount" class="form-control"
                        placeholder="Enter amount you sent"
                        value="{% if selected_plan %}{{ selected_plan.price }}{% endif %}"
-                       {% if selected_plan %}readonly{% endif %}
+                       readonly
                        required data-i18n-placeholder="Enter amount you sent">
-                {% if selected_plan %}
-                <small class="text-muted">Amount automatically set for {{ selected_plan.title }}</small>
-                {% endif %}
+                <small class="text-muted">Amount auto-fills based on selected plan.</small>
             </div>
 
             <div class="mb-3">
@@ -170,5 +177,25 @@
     </div>
 </div>
 {% include "chatbox_partial.html" %}
+<script>
+(function () {
+    const select = document.getElementById("planSelect");
+    const amountInput = document.getElementById("amountInput");
+    if (!select || !amountInput) return;
+
+    function syncAmount() {
+        const selected = select.options[select.selectedIndex];
+        const price = selected ? selected.getAttribute("data-price") : "";
+        amountInput.value = price || "";
+    }
+
+    if (!select.value && select.options.length > 1) {
+        select.selectedIndex = 1;
+    }
+
+    select.addEventListener("change", syncAmount);
+    syncAmount();
+})();
+</script>
 </body>
 </html>

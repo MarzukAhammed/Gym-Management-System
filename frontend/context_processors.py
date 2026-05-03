@@ -1,7 +1,7 @@
 import datetime
 from django.utils import translation
 from django.utils.safestring import mark_safe
-from .models import Payment, UserProgress, Notification
+from .models import UserProgress, Notification
 
 
 def _calculate_workout_streak(user):

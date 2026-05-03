@@ -175,6 +175,35 @@
     transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.2s ease !important;
     will-change: transform;
 }
+
+#chat-snackbar {
+    position: fixed;
+    right: 30px;
+    bottom: 28px;
+    min-width: 260px;
+    max-width: 360px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.35;
+    z-index: 10020;
+    opacity: 0;
+    transform: translateY(14px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+#chat-snackbar.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+#chat-snackbar.success {
+    background: linear-gradient(130deg, #16a34a, #22c55e);
+}
+#chat-snackbar.error {
+    background: linear-gradient(130deg, #b91c1c, #ef4444);
+}
 </style>
 <div id="floating-cat-container">
     <div id="cat-trigger">
@@ -192,6 +221,7 @@
         >
     </div>
 </div>
+<div id="chat-snackbar" aria-live="polite"></div>
 
 <script>
 const isLoggedIn = "{{ user.is_authenticated|yesno:'true,false' }}";
@@ -230,6 +260,7 @@ const chatUserName = "{{ user.username|default:'' }}";
     const chatBox = document.getElementById("premium-chatbox");
     const input = document.getElementById("ai-user-input");
     const messages = document.getElementById("chat-messages");
+    const snackbar = document.getElementById("chat-snackbar");
     const csrfInput = document.querySelector("[name=csrfmiddlewaretoken]");
 
     if (!cat || !chatBox || !input || !messages) return;
@@ -248,6 +279,41 @@ const chatUserName = "{{ user.username|default:'' }}";
         const bubbleClass = type === "user" ? "user-msg" : "bot-msg";
         messages.innerHTML += `<div class="message-wrapper ${type}" style="justify-content: ${align}; display: flex; margin-bottom: 10px;"><div class="${bubbleClass}" style="padding: 8px 15px; border-radius: 15px;">${text}</div></div>`;
         messages.scrollTop = messages.scrollHeight;
+    }
+
+    let snackbarTimer = null;
+    function showSnackbar(text, tone) {
+        if (!snackbar || !text) return;
+        snackbar.classList.remove("success", "error", "show");
+        snackbar.textContent = text;
+        snackbar.classList.add(tone === "error" ? "error" : "success");
+        window.requestAnimationFrame(function () {
+            snackbar.classList.add("show");
+        });
+        if (snackbarTimer) clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(function () {
+            snackbar.classList.remove("show");
+        }, 2600);
+    }
+
+    function maybeShowDietToast(replyText) {
+        const t = String(replyText || "").toLowerCase();
+        if (
+            t.includes("diet plan saved successfully")
+            || t.includes("diet plan successfully save")
+            || (t.includes("diet plan") && t.includes("save") && (t.includes("success") || t.includes("hoyeche")))
+        ) {
+            showSnackbar("Diet plan saved successfully.", "success");
+            return;
+        }
+        if (
+            t.includes("diet plan deleted successfully")
+            || (t.includes("diet plan delete successful"))
+            || (t.includes("diet plan") && t.includes("delete") && t.includes("success"))
+        ) {
+            showSnackbar("Diet plan deleted successfully.", "success");
+            return;
+        }
     }
 
     let typingEl = null;
@@ -682,10 +748,13 @@ const chatUserName = "{{ user.username|default:'' }}";
             });
             const data = await response.json();
             hideTyping();
-            appendMessage("bot", data.reply || "Hmph. Ask again, human.");
+            const botReply = data.reply || "Hmph. Ask again, human.";
+            appendMessage("bot", botReply);
+            maybeShowDietToast(botReply);
         } catch (e) {
             hideTyping();
             appendMessage("bot", "Network issue. Try again.");
+            showSnackbar("Network issue. Try again.", "error");
         }
     };
 

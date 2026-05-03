@@ -239,11 +239,10 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True)
     goal_weight = models.DecimalField(max_digits=5, decimal_places=2, default=70.0)
     gym_coins = models.PositiveIntegerField(default=0)
-    height = models.DecimalField(max_digits=5, decimal_places=2, default=170.0) # in cm
+    height = models.FloatField(default=170.0) # in cm
     
     # --- ADD THESE THREE FIELDS ---
     weight = models.FloatField(default=0.0) 
-    height = models.FloatField(default=0.0)
     fitness_goal = models.CharField(max_length=255, blank=True, null=True)
     # ------------------------------
 
@@ -259,11 +258,19 @@ class Profile(models.Model):
         if not self.weight or not self.height or not self.age:
             return 0
         
+        # Convert to float for calculation
+        weight = float(self.weight) if self.weight else 0
+        height = float(self.height) if self.height else 0
+        age = int(self.age) if self.age else 0
+        
+        if weight == 0 or height == 0 or age == 0:
+            return 0
+        
         # Mifflin-St Jeor Equation
         if self.gender and self.gender.lower() == 'male':
-            bmr = (10 * self.weight) + (6.25 * self.height) - (5 * self.age) + 5
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
         else:
-            bmr = (10 * self.weight) + (6.25 * self.height) - (5 * self.age) - 161
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161
         return round(bmr)
 
     def __str__(self):
@@ -284,6 +291,7 @@ class GalleryMember(models.Model):
 
 
 class DietPlan(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=255)
     calories = models.IntegerField()
     breakfast = models.TextField(default="Healthy Breakfast") # Eita add korun
@@ -295,39 +303,6 @@ class DietPlan(models.Model):
 
 
 
-class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ssl_payments", null=True, blank=True)
-    plan = models.ForeignKey('Plan', on_delete=models.SET_NULL, related_name='payments', null=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_id = models.CharField(max_length=100, unique=True)
-    status = models.CharField(max_length=20, choices=[
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('cancelled', 'Cancelled')
-    ], default='pending')
-    payment_type = models.CharField(max_length=20, choices=[
-        ('new', 'New Membership'),
-        ('renewal', 'Membership Renewal')
-    ], default='new')
-    # SSLCommerz fields
-    bank_tran_id = models.CharField(max_length=100, blank=True, null=True)
-    card_type = models.CharField(max_length=100, blank=True, null=True)
-    card_subtype = models.CharField(max_length=100, blank=True, null=True)
-    currency_type = models.CharField(max_length=20, blank=True, null=True)
-    currency_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    store_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    error = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'SSLCommerz Payment'
-        verbose_name_plural = 'SSLCommerz Payments'
-
-    def __str__(self):
-        return f"{self.transaction_id} - {self.amount} BDT"
 
 class ManualPayment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="manual_payments", null=True, blank=True)
@@ -371,7 +346,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 class HealthMemory(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE) # Must be on_delete here too
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="health_memories")
     info_type = models.CharField(max_length=50)
     user_input = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
