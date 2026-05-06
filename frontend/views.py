@@ -89,15 +89,81 @@ def signup(request):
         return redirect("home")
 
     if request.method == "POST":
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return render(request, "signup_success.html")
-        else:
-            return render(request, "signup.html", {"form": form})
+        # Step 1 - user submitted signup form
+        if 'otp' not in request.POST:
+            form = SignupForm(request.POST)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
+                # Generate 6 digit OTP
+                from frontend.models import EmailVerificationToken
+                import random
+                code = str(random.randint(100000, 999999))
+                EmailVerificationToken.objects.update_or_create(
+                    user=user,
+                    defaults={'token': code}
+                )
+                # Send email
+                from django.core.mail import send_mail
+                from django.conf import settings
+                send_mail(
+                    'Verify your Gym Account',
+                    f'Your verification code is: {code}\n\nThis code expires in 30 minutes.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                )
+                request.session['verify_user_id'] = user.id
+                return render(request, 'signup.html', {
+                    'form': form,
+                    'show_otp': True,
+                    'email': user.email
+                })
+            else:
+                return render(request, 'signup.html', {'form': form})
+
+        # Step 2 - user submitted OTP
+        if 'otp' in request.POST:
+            user_id = request.session.get('verify_user_id')
+            otp_input = request.POST.get('otp')
+            from frontend.models import EmailVerificationToken
+            from django.contrib.auth.models import User
+            try:
+                user = User.objects.get(id=user_id)
+                token_obj = EmailVerificationToken.objects.get(user=user)
+                if token_obj.is_valid() and token_obj.token == otp_input:
+                    user.is_active = True
+                    user.save()
+                    token_obj.delete()
+                    del request.session['verify_user_id']
+                    messages.success(request, "Email verified! You can now log in.")
+                    return redirect('login')
+                else:
+                    return render(request, 'signup.html', {
+                        'show_otp': True,
+                        'email': user.email,
+                        'error': 'Invalid or expired code. Please try again.'
+                    })
+            except Exception:
+                return render(request, 'signup.html', {
+                    'error': 'Something went wrong. Please sign up again.'
+                })
+
     else:
+        # Clear any previous verification session if user comes back to signup
+        if 'verify_user_id' in request.session:
+            # Delete the inactive user and token if they go back
+            from django.contrib.auth.models import User
+            from frontend.models import EmailVerificationToken
+            try:
+                old_user = User.objects.get(id=request.session['verify_user_id'])
+                EmailVerificationToken.objects.filter(user=old_user).delete()
+                old_user.delete()
+            except Exception:
+                pass
+            del request.session['verify_user_id']
         form = SignupForm()
-    return render(request, "signup.html", {"form": form})
+    return render(request, 'signup.html', {'form': form})
 
 # Join Now
 def join_now(request):

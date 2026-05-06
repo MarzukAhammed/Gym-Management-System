@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 import uuid
+import random
 
 
 @receiver(post_save, sender=User)
@@ -404,3 +406,15 @@ class UserProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date}"
+
+class EmailVerificationToken(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def is_valid(self):
+        expiry = self.created_at + timezone.timedelta(minutes=30)
+        return timezone.now() < expiry
+
+    def __str__(self):
+        return f"Token for {self.user.email}"
