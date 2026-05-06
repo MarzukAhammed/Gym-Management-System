@@ -89,6 +89,78 @@
             <button type="submit" class="btn-premium-auth w-100 mt-3" data-i18n="Login">{% trans "Login" %}</button>
           </form>
 
+          {% if show_otp %}
+<div style="margin-top:30px;">
+    <div style="background:linear-gradient(145deg,#1c1c1c,#111); border:1px solid #ff9600; border-radius:20px; padding:35px; text-align:center; max-width:420px; margin:auto;">
+        
+        <div style="font-size:50px; margin-bottom:15px;">🔐</div>
+        <h4 style="color:#ff9600; margin-bottom:8px;">Two-Factor Authentication</h4>
+        <p style="color:#aaa; font-size:14px; margin-bottom:5px;">
+            We sent a 6-digit code to
+        </p>
+        <p style="color:#fff; font-weight:bold; margin-bottom:20px;">
+            {{ email|slice:":2" }}****{{ email|slice:"-10:" }}
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="otp" maxlength="6" placeholder="• • • • • •"
+                   autofocus
+                   style="width:100%; padding:15px; font-size:24px; letter-spacing:10px; text-align:center; border-radius:12px; border:2px solid #ff9600; background:#0d0d0d; color:#fff; margin-bottom:20px; outline:none;">
+            
+            <button type="submit"
+                style="width:100%; background:linear-gradient(135deg,#ff9600,#e08000); color:white; border:none; padding:14px; border-radius:25px; font-size:16px; font-weight:bold; cursor:pointer;">
+                Verify & Login
+            </button>
+        </form>
+
+        {% if error %}
+        <div style="margin-top:15px; background:rgba(220,53,69,0.15); border:1px solid #dc3545; border-radius:10px; padding:10px; color:#dc3545; font-size:13px;">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #333;">
+            <p style="color:#666; font-size:12px; margin-bottom:8px;">
+                ⏱️ Code expires in <span id="countdown" style="color:#ff9600; font-weight:bold;">5:00</span>
+            </p>
+            <p style="color:#666; font-size:12px; margin:0;">
+                Didn't receive the code?
+                <a href="{% url 'login' %}" style="color:#ff9600;">Go back and login again to resend</a>
+            </p>
+            <p style="margin-top:10px;">
+                <a href="{% url 'login' %}" style="color:#666; font-size:12px;">← Use a different account</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Countdown timer for OTP expiry
+let seconds = 300;
+const countdownEl = document.getElementById('countdown');
+const timer = setInterval(() => {
+    seconds--;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (countdownEl) {
+        countdownEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+        if (seconds <= 60) countdownEl.style.color = '#dc3545';
+    }
+    if (seconds <= 0) {
+        clearInterval(timer);
+        if (countdownEl) countdownEl.textContent = 'Expired';
+    }
+}, 1000);
+</script>
+{% endif %}
+
+{% if error and not show_otp %}
+<div style="margin-top:15px; background:rgba(220,53,69,0.15); border:1px solid #dc3545; border-radius:10px; padding:10px; color:#dc3545; font-size:13px;">
+    ⚠️ {{ error }}
+</div>
+{% endif %}
+
           <div class="text-center mt-4 text-white-50">
             <span data-i18n="Don't have an account?">{% trans "Don't have an account?" %}</span>
             <a href="{% url 'signup' %}" class="fw-bold" data-i18n="Sign up">{% trans "Sign up" %}</a>

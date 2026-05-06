@@ -142,6 +142,79 @@
 
         </div>
 
+        <div class="mt-4 text-start">
+    <h5 class="mb-3 border-bottom border-secondary pb-2">🔐 Security Settings</h5>
+    
+    <div style="background:#1a1a1a; border-radius:15px; padding:25px; border:1px solid #333;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+            <div>
+                <h6 style="color:#ff9600; margin-bottom:5px;">Two-Factor Authentication</h6>
+                <p style="color:#aaa; font-size:13px; margin:0;">
+                    Every login will require a 6-digit code sent to your email.<br>
+                    <span style="color:#666; font-size:12px;">Code sent to: {{ request.user.email }}</span>
+                </p>
+            </div>
+            <div>
+                {% with tfa=request.user.usertwofactor %}
+                {% if tfa and tfa.is_enabled %}
+                    <span style="background:rgba(40,167,69,0.15); color:#28a745; padding:5px 12px; border-radius:20px; font-size:13px; font-weight:bold; border:1px solid #28a745;">
+                        ✅ ENABLED
+                    </span>
+                {% else %}
+                    <span style="background:rgba(220,53,69,0.15); color:#dc3545; padding:5px 12px; border-radius:20px; font-size:13px; font-weight:bold; border:1px solid #dc3545;">
+                        ❌ DISABLED
+                    </span>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        <hr style="border-color:#333; margin:20px 0;">
+
+        <div style="background:#111; border-radius:10px; padding:15px; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:24px;">📧</span>
+                <div>
+                    <div style="color:#fff; font-size:13px; font-weight:bold;">Email OTP</div>
+                    <div style="color:#666; font-size:12px;">A 6-digit code sent to your email each login</div>
+                </div>
+                <div style="margin-left:auto;">
+                    {% with tfa=request.user.usertwofactor %}
+                    {% if tfa and tfa.is_enabled %}
+                        <span style="color:#28a745; font-size:12px;">✓ Active</span>
+                    {% else %}
+                        <span style="color:#666; font-size:12px;">Inactive</span>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <div style="background:rgba(255,150,0,0.05); border:1px solid rgba(255,150,0,0.2); border-radius:10px; padding:12px; margin-bottom:20px; font-size:12px; color:#aaa;">
+            ⚠️ Make sure your email <strong style="color:#ff9600;">{{ request.user.email }}</strong> is accessible before enabling. You will need it every time you log in.
+        </div>
+
+        <form method="POST" action="{% url 'toggle_2fa' %}">
+            {% csrf_token %}
+            {% with tfa=request.user.usertwofactor %}
+            {% if tfa and tfa.is_enabled %}
+                <button type="submit" 
+                    style="background:linear-gradient(135deg,#dc3545,#c82333); color:white; border:none; padding:12px 30px; border-radius:25px; font-weight:bold; cursor:pointer; font-size:14px; width:100%;">
+                    🔓 Disable Two-Factor Authentication
+                </button>
+            {% else %}
+                <button type="submit"
+                    style="background:linear-gradient(135deg,#28a745,#218838); color:white; border:none; padding:12px 30px; border-radius:25px; font-weight:bold; cursor:pointer; font-size:14px; width:100%;">
+                    🔐 Enable Two-Factor Authentication
+                </button>
+            {% endif %}
+            {% endwith %}
+        </form>
+
+    </div>
+</div>
+
         <a href="{% url 'edit_profile' %}" class="btn-edit mt-4" data-i18n="Edit Profile">Edit Profile</a>
         <a href="{% url 'add_success_story' %}" class="btn-edit mt-3" style="background:#1e88ff;" data-i18n="Share Success Story">Share Success Story</a>
 

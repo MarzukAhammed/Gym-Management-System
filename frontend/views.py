@@ -2053,3 +2053,109 @@ def delete_diet_plan_ai(request):
             })
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@login_required
+def toggle_2fa(request):
+    if request.method == "POST":
+        from frontend.models import UserTwoFactor
+        two_fa, created = UserTwoFactor.objects.get_or_create(user=request.user)
+        two_fa.is_enabled = not two_fa.is_enabled
+        two_fa.save()
+        status = "enabled" if two_fa.is_enabled else "disabled"
+        messages.success(request, f"Two-Factor Authentication {status} successfully.")
+    return redirect('profile')
+
+
+def login_view(request):
+    from django.contrib.auth import authenticate, login as auth_login
+    from django.contrib.auth.models import User
+    from frontend.models import UserTwoFactor, LoginOTP
+    from django.core.mail import send_mail
+    from django.conf import settings
+    import random
+
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == "POST":
+
+        # Step 2 — OTP submitted
+        if 'otp' in request.POST:
+            user_id = request.session.get('otp_user_id')
+            otp_input = request.POST.get('otp')
+            if not user_id:
+                messages.error(request, "Session expired. Please login again.")
+                return render(request, 'login.html', {'show_otp': False})
+            try:
+                user = User.objects.get(id=user_id)
+                otp_obj = LoginOTP.objects.get(user=user)
+                if otp_obj.is_valid() and otp_obj.code == otp_input:
+                    otp_obj.delete()
+                    del request.session['otp_user_id']
+                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    return redirect('home')
+                else:
+                    return render(request, 'login.html', {
+                        'show_otp': True,
+                        'error': 'Invalid or expired OTP. Try again.'
+                    })
+            except Exception:
+                messages.error(request, "Something went wrong. Please login again.")
+                return render(request, 'login.html', {'show_otp': False})
+
+        # Step 1 — Email + password submitted
+        username_or_email = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        # Try username first, then email
+        user = authenticate(request, username=username_or_email, password=password)
+        if user is None:
+            user_obj = User.objects.filter(email__iexact=username_or_email).first()
+            if user_obj:
+                user = authenticate(request, username=user_obj.username, password=password)
+
+        if user is None:
+            return render(request, 'login.html', {'error': 'Invalid email/username or password.'})
+
+        if not user.is_active:
+            return render(request, 'login.html', {'error': 'Please verify your email before logging in.'})
+
+        # Check if 2FA is enabled for this user
+        try:
+            two_fa = UserTwoFactor.objects.get(user=user)
+            tfa_enabled = two_fa.is_enabled
+        except UserTwoFactor.DoesNotExist:
+            tfa_enabled = False
+
+        if tfa_enabled:
+            # Generate and send OTP
+            code = str(random.randint(100000, 999999))
+            LoginOTP.objects.update_or_create(user=user, defaults={'code': code})
+            send_mail(
+                '🔐 Your Login Code - M-Power Fitness',
+                f'''Hello {user.username},
+
+Your login verification code is:
+
+{code}
+
+This code expires in 5 minutes.
+
+If you did not attempt to login, please change your password immediately.
+
+— M-Power Fitness Security Team''',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+            )
+            request.session['otp_user_id'] = user.id
+            return render(request, 'login.html', {
+                'show_otp': True,
+                'email': user.email
+            })
+
+        # No 2FA — log in directly
+        auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        return redirect('home')
+
+    return render(request, 'login.html')

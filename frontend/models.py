@@ -418,3 +418,23 @@ class EmailVerificationToken(models.Model):
 
     def __str__(self):
         return f"Token for {self.user.email}"
+
+class UserTwoFactor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_enabled = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"2FA for {self.user.username}"
+
+class LoginOTP(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def is_valid(self):
+        from django.utils import timezone
+        expiry = self.created_at + timezone.timedelta(minutes=5)
+        return timezone.now() < expiry
+
+    def __str__(self):
+        return f"OTP for {self.user.email}"
