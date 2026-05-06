@@ -2086,7 +2086,8 @@ def login_view(request):
             otp_input = request.POST.get('otp')
             if not user_id:
                 messages.error(request, "Session expired. Please login again.")
-                return render(request, 'login.html', {'show_otp': False})
+                from django.contrib.auth.forms import AuthenticationForm
+                return render(request, 'login.html', {'show_otp': False, 'form': AuthenticationForm()})
             try:
                 user = User.objects.get(id=user_id)
                 otp_obj = LoginOTP.objects.get(user=user)
@@ -2102,7 +2103,8 @@ def login_view(request):
                     })
             except Exception:
                 messages.error(request, "Something went wrong. Please login again.")
-                return render(request, 'login.html', {'show_otp': False})
+                from django.contrib.auth.forms import AuthenticationForm
+                return render(request, 'login.html', {'show_otp': False, 'form': AuthenticationForm()})
 
         # Step 1 — Email + password submitted
         username_or_email = request.POST.get('username', '').strip()
@@ -2158,4 +2160,6 @@ If you did not attempt to login, please change your password immediately.
         auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         return redirect('home')
 
-    return render(request, 'login.html')
+    from django.contrib.auth.forms import AuthenticationForm
+    form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
