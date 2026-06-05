@@ -81,6 +81,28 @@
     {% include "navbar.html" %}
 
     <div class="container-fluid main-content">
+        <div id="ai-planner-panel" style="background:linear-gradient(135deg,#0d1f12,#141414);border:1px solid #28a745;border-radius:24px;padding:28px;margin-bottom:40px;position:relative;">
+    <div style="font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:800;color:#28a745;margin-bottom:4px;">
+        <i class="fas fa-robot mr-2"></i> AI Workout Planner
+    </div>
+    <div style="color:#888;font-size:0.85rem;margin-bottom:20px;">Chat with Elina — she will ask you questions and build a custom workout plan</div>
+
+    <div id="ai-chat-box" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:16px;padding-right:5px;"></div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" id="ai-planner-input" placeholder='Try: "Make me a workout plan"'
+            style="flex:1;min-width:200px;background:#0e0e0e;color:white;border:1px solid #333;border-radius:12px;padding:12px 18px;font-size:0.95rem;outline:none;"
+            onkeydown="if(event.key==='Enter') sendPlannerMessage()"/>
+        <button onclick="sendPlannerMessage()" id="ai-planner-btn"
+            style="background:#28a745;color:white;border:none;border-radius:12px;padding:12px 24px;font-weight:700;font-size:1rem;cursor:pointer;white-space:nowrap;">
+            <i class="fas fa-paper-plane mr-1"></i> Send
+        </button>
+    </div>
+    <div id="ai-planner-status" style="display:none;margin-top:12px;color:#28a745;font-size:0.9rem;">
+        <span style="display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:#28a745;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle;"></span>
+        Elina is thinking…
+    </div>
+</div>
         
         <div class="container text-center mb-5">
             <h1 class="display-4" style="font-weight: 800;" data-i18n="WELCOME, ...!">
@@ -383,9 +405,292 @@
         }, 1000);
     }
 
+// ── AI PLANNER ────────────────────────────────────────────────────────────────
+let plannerHistory = [];
+let plannerConversation = [];
+
+function getCookie(name) {
+    let v = null;
+    document.cookie.split(';').forEach(c => {
+        c = c.trim();
+        if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+    });
+    return v;
+}
+const CSRF = getCookie('csrftoken');
+
+function addBubble(role, text) {
+    const box = document.getElementById('ai-chat-box');
+    if (!box) return;
+    const div = document.createElement('div');
+    div.style.cssText = `max-width:85%;padding:10px 14px;border-radius:14px;font-size:0.88rem;line-height:1.5;word-break:break-word;` +
+        (role === 'user'
+            ? 'align-self:flex-end;background:#1a3a22;border:1px solid #28a745;color:#eee;border-bottom-right-radius:3px;'
+            : 'align-self:flex-start;background:#1c1c1c;border:1px solid #2a2a2a;color:#ccc;border-bottom-left-radius:3px;');
+    if (role === 'elina') {
+        div.innerHTML = '<span style="color:#28a745;font-weight:700;font-size:0.75rem;display:block;margin-bottom:3px;">⚡ ELINA</span>' + text.replace(/\n/g, '<br>');
+    } else {
+        div.textContent = text;
+    }
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+// Show welcome message on load
+document.addEventListener('DOMContentLoaded', function() {
+    addBubble('elina', "Hmph. You want a custom workout plan? Fine. Just tell me what you want — like \"make me a chest workout\" — and I will ask you what I need.");
+});
+
+async function sendPlannerMessage() {
+    const input = document.getElementById('ai-planner-input');
+    const btn   = document.getElementById('ai-planner-btn');
+    const status = document.getElementById('ai-planner-status');
+    if (!input) return;
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    addBubble('user', msg);
+    btn.disabled = true;
+    status.style.display = 'block';
+
+    plannerConversation.push('User: ' + msg);
+
+    try {
+        const formData = new FormData();
+        formData.append('text', msg); // Just send the user's message
+        formData.append('is_planner', 'true'); // Flag for the view
+        formData.append('csrfmiddlewaretoken', CSRF);
+
+        const res  = await fetch("{% url 'chat_with_ai' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+            body: formData,
+        });
+        const data = await res.json();
+        const reply = (data.reply || 'Hmph. Something broke.').trim();
+
+        plannerConversation.push('Elina: ' + reply);
+        console.log("AI Reply Received:", reply);
+
+        // More aggressive detection: if it looks like a plan, try to inject it
+        const looksLikePlan = reply.includes('Exercise 1') || reply.includes('WORKOUT PLAN') || reply.includes('PLAN_COMPLETE');
+        
+        if (looksLikePlan) {
+            console.log("Plan detected in reply, attempting injection...");
+            const cleanReply = reply.replace('PLAN_COMPLETE', '').trim();
+            addBubble('elina', cleanReply);
+            injectAIPlan(cleanReply);
+        } else {
+            console.log("No plan detected in reply.");
+            addBubble('elina', reply);
+        }
+    } catch(err) {
+        addBubble('elina', 'Tch. Network error. Try again.');
+    } finally {
+        btn.disabled = false;
+        status.style.display = 'none';
+    }
+}
+
+function parsePlanToRoutine(planText) {
+    const exercises = [];
+    const lines = planText.split('\n');
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        // Look for "Exercise X:" anywhere in the line, even with markdown or bullets
+        const exMatch = line.match(/(?:^|[*\-\s\d.])Exercise\s*\d+\s*[:\-]\s*([^*#\n]+)/i);
+        if (!exMatch) continue;
+
+        const name = exMatch[1].trim().replace(/\*\*$/, '').replace(/^[:\-]\s*/, '');
+        let detail = '3 sets of 12 reps';
+        let target = 'Full Body';
+        let type   = 'reps';
+        let seconds = 30;
+        let calories = 50;
+
+        // Scan the next few lines for details
+        for (let j = i + 1; j < Math.min(i + 10, lines.length); j++) {
+            const l = lines[j].trim();
+            if (/(?:^|[*\s\d.])Exercise\s*\d+\s*[:\-]/i.test(l)) break;
+
+            const setsMatch = l.match(/(?:Sets|Set):\s*(\d+)\s*(?:\||x)\s*(?:Reps|Rep):\s*([^|]+)(?:\s*\||(?:\s*Rest:|$))/i);
+            if (setsMatch) {
+                const restMatch = l.match(/Rest:\s*([^\n|]+)/i);
+                const rest = restMatch ? restMatch[1].trim() : '60s';
+                detail = `${setsMatch[1]} sets of ${setsMatch[2].trim()} | Rest: ${rest}`;
+            }
+
+            const targetMatch = l.match(/Target:\s*([^*#\n]+)/i);
+            if (targetMatch) target = targetMatch[1].trim().replace(/\*\*$/, '');
+
+            const typeMatch = l.match(/Type:\s*(reps|timer)/i);
+            if (typeMatch) type = typeMatch[1].toLowerCase();
+
+            const secMatch = l.match(/Seconds?:\s*(\d+)/i);
+            if (secMatch) seconds = parseInt(secMatch[1]);
+
+            const calMatch = l.match(/Calories?:\s*~?(\d+)/i);
+            if (calMatch) calories = parseInt(calMatch[1]);
+        }
+
+        exercises.push({ name, detail, target, type, seconds, calories, video: null });
+    }
+    return exercises;
+}
+
+async function fetchYouTubeForExercise(exerciseName) {
+    try {
+        const res = await fetch("{% url 'ai_exercise_video_search' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify({ exercise_name: exerciseName + ' exercise tutorial', exercise_id: null }),
+        });
+        const data = await res.json();
+        if (data.status === 'success') return data.youtube_embed_url;
+    } catch(e) {}
+    return null;
+}
+
+async function injectAIPlan(planText) {
+    console.log("injectAIPlan called with text:", planText);
+    // Parse plan text into exercise objects
+    const exercises = parsePlanToRoutine(planText);
+    console.log("Parsed exercises:", exercises);
+
+    if (!exercises.length) {
+        console.error("No exercises parsed from plan text.");
+        addBubble('elina', 'Hmph. I tried to build a plan but it looks like a mess. Ask me again more clearly.');
+        return;
+    }
+
+    addBubble('elina', `Finding tutorial videos for ${exercises.length} exercises... stay put.`);
+
+    // Fetch YouTube video for each exercise
+    for (const ex of exercises) {
+        console.log(`Searching video for: ${ex.name}`);
+        const ytUrl = await fetchYouTubeForExercise(ex.name);
+        ex.video = ytUrl || '';
+        ex.isYouTube = !!ytUrl;
+    }
+
+    // Detect muscle and difficulty from plan title or conversation
+    const titleMatch = planText.match(/(?:^|[*\s])WORKOUT PLAN\s*:\s*([^*#\n]+)/i);
+    const planTitle  = titleMatch ? titleMatch[1].trim().replace(/\*\*$/, '') : 'AI Workout Plan';
+    console.log("Detected plan title:", planTitle);
+
+    // Try to detect muscle group and difficulty from plan title
+    const muscleMap = { chest: 'chest', back: 'back', leg: 'legs', arm: 'arms', core: 'core', full: 'full-body' };
+    const diffMap   = { beginner: 'beginner', intermediate: 'intermediate', expert: 'expert' };
+
+    let detectedMuscle = 'chest';
+    let detectedDiff   = 'intermediate';
+
+    const titleLower = planTitle.toLowerCase();
+    for (const [k, v] of Object.entries(muscleMap)) { if (titleLower.includes(k)) { detectedMuscle = v; break; } }
+    for (const [k, v] of Object.entries(diffMap))   { if (titleLower.includes(k)) { detectedDiff   = v; break; } }
+
+    // Also scan conversation for muscle/difficulty clues
+    const convo = plannerConversation.join(' ').toLowerCase();
+    for (const [k, v] of Object.entries(muscleMap)) { if (convo.includes(k)) { detectedMuscle = v; break; } }
+    for (const [k, v] of Object.entries(diffMap))   { if (convo.includes(k)) { detectedDiff   = v; break; } }
+
+    const routineKey = 'ai-custom-' + Date.now(); // Unique key to avoid collisions
+    console.log("Using routine key:", routineKey);
+
+    // Inject into routineData
+    routineData[routineKey] = exercises.map(ex => ({
+        name:    ex.name,
+        detail:  ex.detail,
+        target:  ex.target,
+        type:    ex.type,
+        seconds: ex.seconds || 30,
+        calories: ex.calories || 50,
+        video:   ex.video || '',
+        isYouTube: ex.isYouTube || false,
+    }));
+
+    // Show the routine slider with the new plan
+    showAIRoutine(routineKey, planTitle);
+
+    addBubble('elina', `Done. "${planTitle}" is ready below. ${exercises.filter(e=>e.isYouTube).length} videos found. Hmph — now go train.`);
+}
+
+function showAIRoutine(key, title) {
+    const slider = document.getElementById('routine-slider');
+    const list   = document.getElementById('exercise-list');
+    const titleEl = document.getElementById('routine-title');
+
+    const exercises = routineData[key];
+    if (!exercises || !exercises.length) return;
+
+    titleEl.innerText = title || key.toUpperCase();
+    list.innerHTML = '';
+    slider.setAttribute('data-active-key', key);
+
+    exercises.forEach((ex, index) => {
+        const timerHtml = ex.type === 'timer'
+            ? `<div class="mt-2"><span class="badge badge-success p-2" id="set-timer-ai-${index}">${ex.seconds}s</span> <button class="btn btn-sm btn-dark ml-2" onclick="startRoutineTimer('set-timer-ai-${index}', ${ex.seconds})">Start Timer</button></div>`
+            : '';
+
+        // Video: YouTube embed thumbnail or local mp4
+        let videoHtml = '';
+        if (ex.isYouTube && ex.video) {
+            const vidId = (ex.video.match(/embed\/([a-zA-Z0-9_-]{11})/) || [])[1] || '';
+            videoHtml = `
+                <div style="position:relative;width:70px;height:70px;border-radius:10px;overflow:hidden;border:1px solid #28a745;margin-right:15px;cursor:pointer;flex-shrink:0;"
+                     onclick="this.innerHTML='<iframe src=\\'${ex.video}&autoplay=1\\' allow=\\'autoplay\\' referrerpolicy=\\'strict-origin-when-cross-origin\\' style=\\'width:100%;height:100%;border:none;\\'></iframe>'">
+                    <img src="https://img.youtube.com/vi/${vidId}/default.jpg" style="width:100%;height:100%;object-fit:cover;">
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                        <div style="width:24px;height:18px;background:red;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                            <div style="border-left:10px solid white;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:2px;"></div>
+                        </div>
+                    </div>
+                </div>`;
+        } else if (ex.video) {
+            videoHtml = `<video autoplay loop muted playsinline class="routine-preview-vid"><source src="${ex.video}" type="video/mp4"></video>`;
+        } else {
+            videoHtml = `<div style="width:70px;height:70px;border-radius:10px;border:1px solid #333;background:#111;display:flex;align-items:center;justify-content:center;margin-right:15px;flex-shrink:0;color:#444;"><i class="fas fa-dumbbell"></i></div>`;
+        }
+
+        list.innerHTML += `
+            <div class="list-group-item bg-transparent text-white border-secondary py-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div class="d-flex align-items-center">
+                        ${videoHtml}
+                        <div>
+                            <h5 class="text-success mb-0">${ex.name}</h5>
+                            <small class="text-muted">${ex.target}</small>
+                        </div>
+                    </div>
+                    <div class="text-right mt-2 mt-md-0">
+                        <span class="font-weight-bold" style="font-size:1.1rem;">${ex.detail}</span>
+                        ${timerHtml}
+                    </div>
+                </div>
+            </div>`;
+    });
+
+    slider.style.display = 'block';
+    slider.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+// ── END AI PLANNER ────────────────────────────────────────────────────────────
+
     window.onload = applyFilters;
 
     function startTrainingSession() {
+        const slider = document.getElementById('routine-slider');
+        const titleEl = document.getElementById('routine-title');
+        
+        // If the AI routine is currently displayed, use that
+        const activeRoutineKey = slider.getAttribute('data-active-key');
+        if (activeRoutineKey && routineData[activeRoutineKey]) {
+            localStorage.setItem('activeRoutine', JSON.stringify(routineData[activeRoutineKey]));
+            localStorage.setItem('routineTitle', titleEl.innerText);
+            window.location.href = "{% url 'training_session' %}";
+            return;
+        }
+
         const activeMuscle = document.querySelector('.muscle-btn.active').getAttribute('data-filter');
         const activeIntensity = document.querySelector('.intensity-btn.active').getAttribute('data-intensity');
         const key = `${activeMuscle}-${activeIntensity}`;

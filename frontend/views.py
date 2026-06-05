@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from .models import HealthMemory, MemberMemory, Exercise, UserProgress
 from .ai_engine import SmartCoach, detect_language_mode
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-import json, datetime
+import json, datetime, os, requests
 import re
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -1326,6 +1326,65 @@ def chat_with_ai(request):
         return JsonResponse({'reply': diet_reply})
 
     # 3. Call Groq
+    is_planner = request.POST.get('is_planner', '').lower() == 'true'
+    max_tokens = 800 if is_planner else 260
+    
+    user_content_override = None
+    if is_planner:
+        user_content_override = f"""The user is asking for a custom workout plan on the Exercise Library page.
+Your GOAL: Generate the plan IMMEDIATELY. Do not stall, do not tease, and do not ask "are you ready?".
+
+- If the user mentions a muscle (e.g. "chest", "back", "legs"), generate the plan NOW.
+- Put the plan INSIDE the "reply" field of your JSON.
+- Use the EXACT format below.
+
+EXAMPLE OF A PERFECT RESPONSE:
+User: "chest workout"
+Reply: "Hmph. Fine, human. Here is your chest plan. Don't cry.
+WORKOUT PLAN: Chest Blast
+---
+Exercise 1: Standard Push-ups
+Sets: 3 | Reps: 12 | Rest: 60s
+Target: Overall Chest
+Calories: ~50 kcal
+Type: reps
+
+Exercise 2: Diamond Push-ups
+Sets: 3 | Reps: 10 | Rest: 60s
+Target: Inner Chest
+Calories: ~60 kcal
+Type: reps
+---
+Total Calories: ~110 kcal
+Duration: ~15 minutes
+PLAN_COMPLETE"
+
+Format for the "reply" field:
+WORKOUT PLAN: [Title]
+---
+Exercise 1: [Name]
+Sets: [X] | Reps: [X] | Rest: [X]s
+Target: [muscle]
+Calories: ~[X] kcal
+Type: reps
+
+Exercise 2: [Name]
+Sets: [X] | Reps: [X] | Rest: [X]s
+Target: [muscle]
+Calories: ~[X] kcal
+Type: reps
+---
+Total Calories: ~[X] kcal
+Duration: ~[X] minutes
+PLAN_COMPLETE
+
+Rules:
+- Keep Elina's grumpy cat persona in the intro/outro.
+- No markdown bolding (**) in the plan section.
+- Generate 3-5 exercises.
+
+User message: {user_msg}"""
+
     response_data = coach.generate_response(
         user_msg,
         mem.ai_facts,
@@ -1334,7 +1393,9 @@ def chat_with_ai(request):
         language_mode=language_mode,
         auth_line=auth_line,
         profile_context=profile_context,
+        user_content_override=user_content_override,
         rapport_level=prior_turns,
+        max_tokens=max_tokens,
     )
 
     try:
@@ -1525,6 +1586,63 @@ def chat_with_ai(request):
     except Exception as e:
         print(f"Error: {e}")
         return JsonResponse({'reply': response_data if response_data else "Tch. Something broke. Try again before I nap."})
+
+
+@csrf_exempt
+def ai_exercise_video_search(request):
+    """
+    Finds a YouTube embed URL for a given exercise name using Serper.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Post only'})
+    
+    try:
+        data = json.loads(request.body)
+        exercise_name = data.get('exercise_name', '')
+        if not exercise_name:
+            return JsonResponse({'status': 'error', 'message': 'No exercise name provided'})
+
+        # Use Serper to search for YouTube video
+        api_key = os.getenv('SERPER_API_KEY')
+        if not api_key:
+            # Fallback for debugging if key is missing
+            return JsonResponse({
+                'status': 'error', 
+                'message': 'Serper API key not configured'
+            })
+
+        url = "https://google.serper.dev/search"
+        payload = json.dumps({"q": f"{exercise_name} youtube"})
+        headers = {
+            'X-API-KEY': api_key,
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.post(url, headers=headers, data=payload)
+        search_results = response.json()
+        
+        # Look for youtube.com links in organic results
+        youtube_url = None
+        for result in search_results.get('organic', []):
+            link = result.get('link', '')
+            if 'youtube.com/watch?v=' in link:
+                video_id = link.split('v=')[1].split('&')[0]
+                youtube_url = f"https://www.youtube-nocookie.com/embed/{video_id}"
+                break
+            elif 'youtu.be/' in link:
+                video_id = link.split('youtu.be/')[1].split('?')[0]
+                youtube_url = f"https://www.youtube-nocookie.com/embed/{video_id}"
+                break
+        
+        if youtube_url:
+            # Add parameters to ensure better embedding compatibility
+            final_url = f"{youtube_url}?autoplay=1&mute=1&enablejsapi=1&origin={request.build_absolute_uri('/')}"
+            return JsonResponse({'status': 'success', 'youtube_embed_url': final_url})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No YouTube video found'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 @login_required

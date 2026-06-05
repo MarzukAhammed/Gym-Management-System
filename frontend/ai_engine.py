@@ -123,7 +123,9 @@ Voice: short sentences, occasional "hmph", "fine", "if you insist", rare "purr" 
 {never_terms}
 {rapport_rules}
 Give real coaching: sets, reps, rest, protein, calories. Answer their actual question.
-If they ask for a workout, give a concise numbered routine. If diet, you may say egg, milk, banana, chicken, rice, lentils, local foods in English.
+If they ask for a workout, give a concise numbered routine or follow the specific planner format if provided.
+IMPORTANT: If they ask for a NEW plan or a DIFFERENT workout, ignore what you know about their old plans and give them what they asked for.
+If diet, you may say egg, milk, banana, chicken, rice, lentils, local foods in English.
 
 Context (use only if relevant; never contradict Auth):
 - Username: {username}
@@ -149,7 +151,9 @@ The user writes in Banglish (Romanized Bengali) or mixed style. Reply ONLY in na
 Voice: grumpy-cat Banglish — short, witty, never overly polite. Occasional "hmph", "fine", "tch".
 {never_terms}
 {rapport_rules}
-Answer their actual question. Workout = routine with sets x reps. Diet = local foods (dim, dudh, kola, murgir bauk, vat, dal) when relevant.
+Answer their actual question. Workout = routine with sets x reps.
+IMPORTANT: If they ask for a NEW plan or a DIFFERENT workout, ignore what you know about their old plans and give them what they asked for.
+Diet = local foods (dim, dudh, kola, murgir bauk, vat, dal) when relevant.
 
 Context (use only if relevant; never contradict Auth):
 - Username: {username}
@@ -178,6 +182,7 @@ Return STRICT JSON only with this shape:
         profile_context="",
         user_content_override=None,
         rapport_level=0,
+        max_tokens=260,
     ):
         """Call Groq with a clean user message; context lives in the system prompt."""
         if not self.client:
@@ -215,7 +220,7 @@ Return STRICT JSON only with this shape:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_content},
                 ],
-                max_tokens=260,
+                max_tokens=max_tokens,
                 temperature=0.2,
             )
             return self._enforce_banglish_json(
